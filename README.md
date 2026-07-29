@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shop Africana / Pride of Scotland
 
-## Getting Started
+Independent Next.js website repository for the combined Dundee food businesses:
 
-First, run the development server:
+- **Shop Africana**: Afro-Caribbean grocery shop in Dundee.
+- **Pride of Scotland**: African and Asian restaurant in Dundee.
+
+This repository is completely independent from MaiRuwa. Do not inspect, copy from,
+modify, connect to, or deploy anything related to MaiRuwa from this project.
+
+## Local Setup
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the local development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run quality checks:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+On Windows PowerShell, use `npm.cmd` if script execution policy blocks the npm
+shim:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm.cmd run lint
+npm.cmd run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture Summary
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/`: Next.js App Router routes, root layout, global CSS, and metadata.
+- `components/layout/`: Shared layout scaffolding such as top bar, header,
+  mobile bottom navigation, and footer.
+- `components/ui/`: Reusable UI primitives.
+- `components/commerce/`: Grocery-commerce interface shells.
+- `components/restaurant/`: Restaurant interface shells.
+- `data/`: Static local demo data used by the temporary foundation page.
+- `lib/`: Shared utilities.
+- `types/`: Shared TypeScript types.
+- `public/images/`: Local image asset destination. Remote stock-image URLs are
+  intentionally not used.
 
-## Deploy on Vercel
+## Current Completed Batch
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Batch 1 foundation-only frontend work is approved and locked:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Audited the generated Next.js, TypeScript, Tailwind, and ESLint setup.
+- Preserved the App Router architecture.
+- Added the initial scalable folder structure.
+- Added global CSS custom properties for the locked Shop Africana and Pride of
+  Scotland design direction.
+- Configured Poppins through `next/font/google`.
+- Replaced the generated starter page with a temporary internal
+  **Foundation Ready** page.
+- Added initial UI, layout, commerce, and restaurant shell components.
+- Added sensible combined-business metadata.
+
+Batch 2 homepage structure work:
+
+- Replaced the temporary internal foundation page with a production homepage
+  structure waiting for approved content.
+- Added premium placeholder sections for hero, categories, grocery products,
+  restaurant specials, features, restaurant showcase, testimonials, visit
+  details, newsletter, and footer.
+- Kept all content frontend-only with professional placeholders, no stock
+  imagery, no AI artwork, no invented products or meals, and no service
+  integrations.
+
+Batch 3 multi-brand route architecture work:
+
+- Added separated Shop Africana and Pride of Scotland browsing routes using the
+  App Router.
+- Added route-aware section navigation with active states for grocery and
+  restaurant journeys.
+- Added a shared homepage brand gateway linking users into `/shop` and
+  `/restaurant`.
+- Added frontend-only placeholder routes for shared basket, account, checkout,
+  and contact entry points.
+- Kept all route content static and placeholder-only.
+
+Batch 4 real brand asset integration work:
+
+- Stores production logo copies in `public/images/brand/`.
+- Stores approved design references in ignored internal `design-references/`.
+- Uses local `next/image` logo lockups across shared and section-specific
+  headers, homepage gateway, and footer.
+- Keeps Shop Africana logo routing to `/shop` and Pride of Scotland logo routing
+  to `/restaurant`.
+
+Out of scope for this batch: final homepage, grocery catalogue, restaurant menu,
+authentication, backend calls, payments, production service integrations,
+environment variables, GitHub push, and Vercel deployment.
