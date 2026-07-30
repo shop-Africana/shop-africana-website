@@ -1,19 +1,22 @@
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { MealCardShell } from "@/components/restaurant/MealCardShell";
-import { Button } from "@/components/ui/Button";
+import { AddToBasketPanel } from "@/components/basket/AddToBasketPanel";
 import { Container } from "@/components/ui/Container";
-import { Input } from "@/components/ui/Input";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
-import { QuantitySelector } from "@/components/ui/QuantitySelector";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { restaurantSpecials } from "@/data/homepage";
+import { getCatalogItemBySlug, getCatalogItems } from "@/lib/catalog";
+import { formatMoney } from "@/lib/money";
 
 export default async function MealDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  await params;
+  const { slug } = await params;
+  const [meal, relatedMeals] = await Promise.all([
+    getCatalogItemBySlug(slug, "restaurant"),
+    getCatalogItems("restaurant"),
+  ]);
 
   return (
     <section className="py-12 sm:py-16">
@@ -36,18 +39,16 @@ export default async function MealDetailPage({
               Meal detail
             </p>
             <h1 className="mt-3 text-4xl font-extrabold text-[var(--color-pride-800)]">
-              Menu details will be published soon
+              {meal?.name ?? "Menu details will be published soon"}
             </h1>
             <p className="mt-4 text-base leading-7 text-[var(--color-muted)]">
-              Restaurant menu information is being prepared for publication.
+              {meal?.description ??
+                "Restaurant menu information is being prepared for publication."}
             </p>
             <p className="mt-4 text-2xl font-bold text-[var(--color-pride-800)]">
-              Details coming soon
+              {meal ? formatMoney(meal.price) : "Details coming soon"}
             </p>
             <div className="mt-6">
-              <QuantitySelector />
-            </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4">
                 <h2 className="font-bold text-[var(--color-pride-800)]">
                   Optional extras
@@ -56,23 +57,14 @@ export default async function MealDetailPage({
                   Extras information will be published with the menu.
                 </p>
               </div>
-              <div>
-                <label
-                  htmlFor="special-instructions"
-                  className="text-sm font-bold text-[var(--color-foreground-strong)]"
-                >
-                  Special instructions
-                </label>
-                <Input
-                  id="special-instructions"
-                  placeholder="Add a note"
-                  className="mt-2"
-                />
-              </div>
             </div>
-            <Button variant="restaurant" className="mt-6 w-full sm:w-auto">
-              View Ordering Information
-            </Button>
+            {meal ? (
+              <AddToBasketPanel
+                item={meal}
+                variant="restaurant"
+                showInstructions
+              />
+            ) : null}
           </div>
         </div>
 
@@ -81,8 +73,8 @@ export default async function MealDetailPage({
             Menu details will be published soon.
           </SectionHeading>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {restaurantSpecials.slice(0, 3).map((meal) => (
-              <MealCardShell key={meal.title} meal={meal} />
+            {relatedMeals.slice(0, 3).map((meal) => (
+              <MealCardShell key={meal.id} meal={meal} />
             ))}
           </div>
         </div>

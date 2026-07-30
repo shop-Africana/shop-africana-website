@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Home, MapPin, ShoppingBasket, Utensils } from "lucide-react";
+import { Home, ShoppingBasket, Utensils } from "lucide-react";
 
 const items = [
   { label: "Home", href: "/", icon: Home },
   { label: "Shop", href: "/shop", icon: ShoppingBasket },
   { label: "Meals", href: "/restaurant/menu", icon: Utensils },
-  { label: "Visit", href: "/contact", icon: MapPin },
+  { label: "Basket", href: "/basket", icon: ShoppingBasket },
 ];
 
 export function MobileBottomNavigation() {

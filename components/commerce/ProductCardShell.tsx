@@ -1,12 +1,13 @@
-import type { CardShell } from "@/types";
-import { ShoppingBasket } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { AddToBasketButton } from "@/components/basket/AddToBasketButton";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
+import { formatMoney } from "@/lib/money";
+import type { CatalogItem } from "@/types";
 
 type ProductCardShellProps = {
-  product: CardShell;
+  product: CatalogItem;
 };
 
 export function ProductCardShell({ product }: ProductCardShellProps) {
@@ -14,7 +15,7 @@ export function ProductCardShell({ product }: ProductCardShellProps) {
     <article className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-soft)]">
       <div className="relative p-4 pb-0">
         <Badge tone="shop" className="absolute left-7 top-7 z-10">
-          {product.badge}
+          {product.isDemo ? "Demo item" : "Available"}
         </Badge>
         <PlaceholderFrame
           label="Product imagery will be added soon"
@@ -25,26 +26,24 @@ export function ProductCardShell({ product }: ProductCardShellProps) {
       <div className="flex flex-1 flex-col space-y-4 pt-5">
         <div className="px-4">
           <p className="text-xs font-semibold uppercase text-[var(--color-shop-700)]">
-            {product.meta}
+            {product.isDemo ? "Demo grocery item" : "Grocery item"}
           </p>
-          <h3 className="mt-1 text-base font-bold text-[var(--color-foreground-strong)]">
-            {product.title}
-          </h3>
+          <Link
+            href={`/shop/products/${product.slug}`}
+            className="mt-1 block text-base font-bold text-[var(--color-foreground-strong)] hover:text-[var(--color-shop-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+          >
+            {product.name}
+          </Link>
         </div>
         <p className="px-4 text-sm leading-6 text-[var(--color-muted)]">
           {product.description}
         </p>
         <div className="mt-auto space-y-4 border-t border-[var(--color-border)] p-4">
           <p className="text-lg font-bold text-[var(--color-shop-800)]">
-            {product.price}
+            {formatMoney(product.price)}
           </p>
           <QuantitySelector />
-          <Button
-            className="w-full"
-            icon={<ShoppingBasket aria-hidden="true" size={16} />}
-          >
-            Browse Soon
-          </Button>
+          <AddToBasketButton item={product} className="w-full" />
         </div>
       </div>
     </article>

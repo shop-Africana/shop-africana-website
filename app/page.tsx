@@ -21,12 +21,8 @@ import { FeatureCard } from "@/components/ui/FeatureCard";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { TestimonialCard } from "@/components/ui/TestimonialCard";
-import {
-  categories,
-  featuredProducts,
-  restaurantSpecials,
-  testimonials,
-} from "@/data/homepage";
+import { categories, testimonials } from "@/data/homepage";
+import { getCatalogItems } from "@/lib/catalog";
 
 const trustFeatures = [
   {
@@ -45,7 +41,12 @@ const trustFeatures = [
 
 const trustIcons = [Truck, ShieldCheck, Headphones];
 
-export default function Home() {
+export default async function Home() {
+  const [featuredProducts, restaurantSpecials] = await Promise.all([
+    getCatalogItems("grocery"),
+    getCatalogItems("restaurant"),
+  ]);
+
   return (
     <>
       <TopBar />
@@ -103,7 +104,7 @@ export default function Home() {
               </div>
               <div className="mt-8 grid gap-5 md:grid-cols-3">
                 {restaurantSpecials.slice(0, 3).map((meal) => (
-                  <MealCardShell key={meal.title} meal={meal} />
+                  <MealCardShell key={meal.id} meal={meal} />
                 ))}
               </div>
             </div>
@@ -123,14 +124,14 @@ export default function Home() {
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {featuredProducts.slice(0, 4).map((product) => (
                 <article
-                  key={product.title}
+                  key={product.id}
                   className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-card)]"
                 >
                   <div className="flex size-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-shop-50)] text-[var(--color-shop-700)]">
                     <ShoppingBasket aria-hidden="true" size={22} />
                   </div>
                   <h3 className="mt-5 text-lg font-bold text-[var(--color-shop-900)]">
-                    {product.title}
+                    {product.name}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
                     {product.description}

@@ -13,7 +13,7 @@ import { Container } from "@/components/ui/Container";
 import { FeatureCard } from "@/components/ui/FeatureCard";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { restaurantSpecials } from "@/data/homepage";
+import { getCatalogItems } from "@/lib/catalog";
 
 const restaurantFeatures = [
   {
@@ -34,7 +34,9 @@ const menuChips = [
   "Drinks",
 ];
 
-export default function RestaurantPage() {
+export default async function RestaurantPage() {
+  const restaurantSpecials = await getCatalogItems("restaurant");
+
   return (
     <>
       <section className="overflow-hidden bg-[linear-gradient(110deg,var(--color-pride-50),#fff_48%,var(--color-surface-warm))] py-10 sm:py-14 lg:py-16">
@@ -143,7 +145,7 @@ export default function RestaurantPage() {
             </div>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {restaurantSpecials.map((meal, index) => (
-                <div key={meal.title} className="relative">
+                <div key={meal.id} className="relative">
                   <Badge
                     tone={index === 5 ? "destructive" : "success"}
                     className="absolute left-3 top-3 z-10"

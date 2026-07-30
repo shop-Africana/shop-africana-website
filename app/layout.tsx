@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { BasketProvider } from "@/components/basket/BasketProvider";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -31,7 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${poppins.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+      <body className="flex min-h-full flex-col font-sans">
+        <BasketProvider>{children}</BasketProvider>
+      </body>
     </html>
   );
 }

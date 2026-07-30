@@ -1,13 +1,10 @@
 import { SharedPageShell } from "@/components/layout/SharedPageShell";
-import { PlaceholderPage } from "@/components/ui/PlaceholderPage";
+import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 
 export default function CheckoutPage() {
   return (
     <SharedPageShell>
-      <PlaceholderPage
-        title="Checkout Information"
-        description="Checkout and payment details will be confirmed before online ordering goes live."
-      />
+      <CheckoutForm />
     </SharedPageShell>
   );
 }

@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { restaurantSpecials } from "@/data/homepage";
+import { getCatalogItems } from "@/lib/catalog";
 
 const menuChips = ["Menu categories", "Details coming soon", "Sold-out state"];
 
-export default function RestaurantMenuPage() {
+export default async function RestaurantMenuPage() {
+  const restaurantSpecials = await getCatalogItems("restaurant");
+
   return (
     <section className="py-12 sm:py-16">
       <Container>
@@ -45,7 +47,7 @@ export default function RestaurantMenuPage() {
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {restaurantSpecials.map((meal) => (
-            <MealCardShell key={meal.title} meal={meal} />
+            <MealCardShell key={meal.id} meal={meal} />
           ))}
         </div>
       </Container>

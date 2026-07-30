@@ -15,7 +15,7 @@ import { Container } from "@/components/ui/Container";
 import { FeatureCard } from "@/components/ui/FeatureCard";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { categories, featuredProducts } from "@/data/homepage";
+import { getCatalogItems, getCategories } from "@/lib/catalog";
 
 const benefits = [
   {
@@ -36,7 +36,12 @@ const filterItems = [
   "Sorting options",
 ];
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const [categories, featuredProducts] = await Promise.all([
+    getCategories("grocery"),
+    getCatalogItems("grocery"),
+  ]);
+
   return (
     <>
       <section className="bg-[linear-gradient(180deg,var(--color-shop-50),#fff)] py-10 sm:py-14 lg:py-16">
@@ -48,10 +53,10 @@ export default function ShopPage() {
             <div className="space-y-2 p-4">
               {categories.map((category) => (
                 <div
-                  key={category.title}
+                  key={category.id}
                   className="flex items-center justify-between rounded-[var(--radius-md)] px-3 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-shop-50)] hover:text-[var(--color-shop-800)]"
                 >
-                  <span>{category.title}</span>
+                  <span>{category.name}</span>
                   <ChevronRight aria-hidden="true" size={16} />
                 </div>
               ))}
@@ -162,7 +167,7 @@ export default function ShopPage() {
           </SectionHeading>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => (
-              <CategoryCard key={category.title} category={category} />
+              <CategoryCard key={category.id} category={category} />
             ))}
           </div>
         </Container>
@@ -191,7 +196,7 @@ export default function ShopPage() {
             </div>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {featuredProducts.slice(0, 4).map((product) => (
-                <ProductCardShell key={product.title} product={product} />
+                <ProductCardShell key={product.id} product={product} />
               ))}
             </div>
           </div>

@@ -2,9 +2,11 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CategoryCard } from "@/components/commerce/CategoryCard";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { categories } from "@/data/homepage";
+import { getCategories } from "@/lib/catalog";
 
-export default function ShopCategoriesPage() {
+export default async function ShopCategoriesPage() {
+  const categories = await getCategories("grocery");
+
   return (
     <section className="py-12 sm:py-16">
       <Container>
@@ -21,7 +23,7 @@ export default function ShopCategoriesPage() {
         </div>
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
-            <CategoryCard key={category.title} category={category} />
+            <CategoryCard key={category.id} category={category} />
           ))}
         </div>
       </Container>

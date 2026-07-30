@@ -1,18 +1,22 @@
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ProductCardShell } from "@/components/commerce/ProductCardShell";
-import { Button } from "@/components/ui/Button";
+import { AddToBasketPanel } from "@/components/basket/AddToBasketPanel";
 import { Container } from "@/components/ui/Container";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
-import { QuantitySelector } from "@/components/ui/QuantitySelector";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { featuredProducts } from "@/data/homepage";
+import { getCatalogItemBySlug, getCatalogItems } from "@/lib/catalog";
+import { formatMoney } from "@/lib/money";
 
 export default async function ProductDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  await params;
+  const { slug } = await params;
+  const [product, relatedProducts] = await Promise.all([
+    getCatalogItemBySlug(slug, "grocery"),
+    getCatalogItems("grocery"),
+  ]);
 
   return (
     <section className="py-12 sm:py-16">
@@ -35,15 +39,15 @@ export default async function ProductDetailPage({
               Product detail
             </p>
             <h1 className="mt-3 text-4xl font-extrabold text-[var(--color-shop-900)]">
-              Product selection will be available soon
+              {product?.name ?? "Product selection will be available soon"}
             </h1>
-            <p className="mt-4 text-2xl font-bold text-[var(--color-shop-800)]">
-              Details coming soon
+            <p className="mt-4 max-w-xl text-base leading-7 text-[var(--color-muted)]">
+              {product?.description ?? "Product details will be published soon."}
             </p>
-            <div className="mt-6">
-              <QuantitySelector />
-            </div>
-            <Button className="mt-6 w-full sm:w-auto">Browse Soon</Button>
+            <p className="mt-4 text-2xl font-bold text-[var(--color-shop-800)]">
+              {product ? formatMoney(product.price) : "Details coming soon"}
+            </p>
+            {product ? <AddToBasketPanel item={product} /> : null}
           </div>
         </div>
 
@@ -66,8 +70,8 @@ export default async function ProductDetailPage({
             Product selection will be available soon.
           </SectionHeading>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredProducts.slice(0, 4).map((product) => (
-              <ProductCardShell key={product.title} product={product} />
+            {relatedProducts.slice(0, 4).map((product) => (
+              <ProductCardShell key={product.id} product={product} />
             ))}
           </div>
         </div>

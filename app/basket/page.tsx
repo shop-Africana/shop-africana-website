@@ -1,13 +1,10 @@
 import { SharedPageShell } from "@/components/layout/SharedPageShell";
-import { PlaceholderPage } from "@/components/ui/PlaceholderPage";
+import { BasketPageContent } from "@/components/basket/BasketPageContent";
 
 export default function BasketPage() {
   return (
     <SharedPageShell>
-      <PlaceholderPage
-        title="Basket"
-        description="Basket details will appear here when online ordering is available."
-      />
+      <BasketPageContent />
     </SharedPageShell>
   );
 }

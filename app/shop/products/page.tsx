@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { featuredProducts } from "@/data/homepage";
+import { getCatalogItems } from "@/lib/catalog";
 
-export default function ShopProductsPage() {
+export default async function ShopProductsPage() {
+  const featuredProducts = await getCatalogItems("grocery");
+
   return (
     <section className="py-12 sm:py-16">
       <Container>
@@ -47,7 +49,7 @@ export default function ShopProductsPage() {
             </div>
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {featuredProducts.map((product) => (
-                <ProductCardShell key={product.title} product={product} />
+                <ProductCardShell key={product.id} product={product} />
               ))}
             </div>
           </div>
