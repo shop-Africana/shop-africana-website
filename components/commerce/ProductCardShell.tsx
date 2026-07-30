@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
 import { AddToBasketButton } from "@/components/basket/AddToBasketButton";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
@@ -15,18 +16,30 @@ export function ProductCardShell({ product }: ProductCardShellProps) {
     <article className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-soft)]">
       <div className="relative p-4 pb-0">
         <Badge tone="shop" className="absolute left-7 top-7 z-10">
-          {product.isDemo ? "Demo item" : "Available"}
+          {product.isAvailable ? (product.isFeatured ? "Featured" : "Available") : "Unavailable"}
         </Badge>
-        <PlaceholderFrame
-          label="Product imagery will be added soon"
-          tone="shop"
-          className="aspect-[4/3] min-h-0 bg-[var(--color-shop-50)]"
-        />
+        {product.imageUrl ? (
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-shop-50)] shadow-[var(--shadow-input)]">
+            <Image
+              src={product.imageUrl}
+              alt={`${product.name} product image`}
+              fill
+              sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <PlaceholderFrame
+            label="Product imagery will be added soon"
+            tone="shop"
+            className="aspect-[4/3] min-h-0 bg-[var(--color-shop-50)]"
+          />
+        )}
       </div>
       <div className="flex flex-1 flex-col space-y-4 pt-5">
         <div className="px-4">
           <p className="text-xs font-semibold uppercase text-[var(--color-shop-700)]">
-            {product.isDemo ? "Demo grocery item" : "Grocery item"}
+            {product.unitLabel ?? "Grocery item"}
           </p>
           <Link
             href={`/shop/products/${product.slug}`}
@@ -43,7 +56,11 @@ export function ProductCardShell({ product }: ProductCardShellProps) {
             {formatMoney(product.price)}
           </p>
           <QuantitySelector />
-          <AddToBasketButton item={product} className="w-full" />
+          <AddToBasketButton
+            item={product}
+            className="w-full"
+            disabled={!product.isAvailable}
+          />
         </div>
       </div>
     </article>

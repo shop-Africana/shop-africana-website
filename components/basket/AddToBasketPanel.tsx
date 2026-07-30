@@ -9,12 +9,16 @@ type AddToBasketPanelProps = {
   item: CatalogItem;
   variant?: "primary" | "restaurant";
   showInstructions?: boolean;
+  disabled?: boolean;
+  disabledLabel?: string;
 };
 
 export function AddToBasketPanel({
   item,
   variant = "primary",
   showInstructions = false,
+  disabled = false,
+  disabledLabel,
 }: AddToBasketPanelProps) {
   const [quantity, setQuantity] = useState(1);
   const [instructions, setInstructions] = useState("");
@@ -40,6 +44,8 @@ export function AddToBasketPanel({
         instructions={instructions}
         variant={variant}
         className="w-full sm:w-auto"
+        disabled={disabled}
+        disabledLabel={disabledLabel}
       />
     </div>
   );

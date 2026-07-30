@@ -1,11 +1,19 @@
+import Image from "next/image";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { MealCardShell } from "@/components/restaurant/MealCardShell";
 import { AddToBasketPanel } from "@/components/basket/AddToBasketPanel";
+import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getCatalogItemBySlug, getCatalogItems } from "@/lib/catalog";
+import { getCatalogItemBySlug } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
+import {
+  getTodayRestaurantMenu,
+  getTodayRestaurantMenuItemBySlug,
+} from "@/lib/restaurant-menu";
+
+export const dynamic = "force-dynamic";
 
 export default async function MealDetailPage({
   params,
@@ -13,10 +21,14 @@ export default async function MealDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [meal, relatedMeals] = await Promise.all([
+  const [todayMeal, fallbackMeal, todayMenu] = await Promise.all([
+    getTodayRestaurantMenuItemBySlug(slug),
     getCatalogItemBySlug(slug, "restaurant"),
-    getCatalogItems("restaurant"),
+    getTodayRestaurantMenu(),
   ]);
+  const meal = todayMeal ?? fallbackMeal;
+  const relatedMeals = todayMenu.groups.flatMap((group) => group.items);
+  const isOrderable = Boolean(todayMeal && todayMeal.menuStatus === "available");
 
   return (
     <section className="py-12 sm:py-16">
@@ -29,11 +41,23 @@ export default async function MealDetailPage({
           ]}
         />
         <div className="mt-8 grid gap-10 lg:grid-cols-[0.95fr_1fr]">
-          <PlaceholderFrame
-            label="Menu imagery will be added soon"
-            tone="restaurant"
-            className="min-h-[26rem] rounded-[var(--radius-xl)] shadow-[var(--shadow-card)]"
-          />
+          {meal?.imageUrl ? (
+            <Image
+              src={meal.imageUrl}
+              alt={meal.name}
+              width={900}
+              height={700}
+              sizes="(min-width: 1024px) 48vw, 100vw"
+              unoptimized
+              className="min-h-[26rem] w-full rounded-[var(--radius-xl)] object-cover shadow-[var(--shadow-card)]"
+            />
+          ) : (
+            <PlaceholderFrame
+              label="Menu imagery will be added soon"
+              tone="restaurant"
+              className="min-h-[26rem] rounded-[var(--radius-xl)] shadow-[var(--shadow-card)]"
+            />
+          )}
           <div>
             <p className="text-sm font-semibold uppercase text-[var(--color-pride-700)]">
               Meal detail
@@ -48,6 +72,11 @@ export default async function MealDetailPage({
             <p className="mt-4 text-2xl font-bold text-[var(--color-pride-800)]">
               {meal ? formatMoney(meal.price) : "Details coming soon"}
             </p>
+            {!isOrderable && meal ? (
+              <Badge tone="warning" className="mt-4">
+                Not available for ordering today
+              </Badge>
+            ) : null}
             <div className="mt-6">
               <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4">
                 <h2 className="font-bold text-[var(--color-pride-800)]">
@@ -63,6 +92,12 @@ export default async function MealDetailPage({
                 item={meal}
                 variant="restaurant"
                 showInstructions
+                disabled={!isOrderable}
+                disabledLabel={
+                  todayMeal?.menuStatus === "finished"
+                    ? "Finished Today"
+                    : "Not Scheduled Today"
+                }
               />
             ) : null}
           </div>
@@ -74,7 +109,11 @@ export default async function MealDetailPage({
           </SectionHeading>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {relatedMeals.slice(0, 3).map((meal) => (
-              <MealCardShell key={meal.id} meal={meal} />
+              <MealCardShell
+                key={meal.id}
+                meal={meal}
+                menuStatus={meal.menuStatus}
+              />
             ))}
           </div>
         </div>

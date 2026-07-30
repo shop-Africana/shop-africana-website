@@ -52,6 +52,7 @@ npm.cmd run build
 - `types/`: Shared TypeScript types.
 - `public/images/`: Local image asset destination. Remote stock-image URLs are
   intentionally not used.
+- `supabase/`: Manual SQL migrations, seed files, and owner setup notes.
 
 ## Current Completed Batch
 
@@ -103,3 +104,24 @@ Batch 4 real brand asset integration work:
 Out of scope for this batch: final homepage, grocery catalogue, restaurant menu,
 authentication, backend calls, payments, production service integrations,
 environment variables, GitHub push, and Vercel deployment.
+
+Batch 7 customer ordering flow:
+
+- Added Supabase-backed grocery and restaurant catalogue reads.
+- Added a shared localStorage basket for grocery and restaurant items.
+- Added checkout and server-side order creation through the
+  `create_customer_order()` RPC.
+- Added order confirmation routing.
+- Kept all new order payment and order statuses pending.
+
+Batch 8 owner restaurant menu management:
+
+- Adds Supabase Auth based owner access for single-owner menu management.
+- Adds owner routes for login, dashboard, menu management, add meal and edit
+  meal.
+- Adds reusable weekly restaurant scheduling and per-day overrides.
+- Adds dynamic public Pride of Scotland Today's Menu behaviour using the
+  Europe/London service date.
+- Adds Supabase Storage setup for approved restaurant meal images.
+- Requires manual application of `supabase/migrations/0002_batch8_owner_menu_management.sql`
+  and manual first-owner setup using `supabase/batch8-owner-setup.sql`.

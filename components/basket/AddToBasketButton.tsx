@@ -12,6 +12,8 @@ type AddToBasketButtonProps = {
   instructions?: string;
   variant?: ButtonVariant;
   className?: string;
+  disabled?: boolean;
+  disabledLabel?: string;
 };
 
 export function AddToBasketButton({
@@ -20,6 +22,8 @@ export function AddToBasketButton({
   instructions = "",
   variant = item.businessType === "restaurant" ? "restaurant" : "primary",
   className,
+  disabled = false,
+  disabledLabel = "Unavailable",
 }: AddToBasketButtonProps) {
   const { addItem } = useBasket();
   const [added, setAdded] = useState(false);
@@ -28,14 +32,16 @@ export function AddToBasketButton({
     <Button
       className={className}
       variant={variant}
+      disabled={disabled}
       icon={<ShoppingBasket aria-hidden="true" size={16} />}
       onClick={() => {
+        if (disabled) return;
         addItem(item, quantity, instructions);
         setAdded(true);
         window.setTimeout(() => setAdded(false), 1600);
       }}
     >
-      {added ? "Added" : "Add to Basket"}
+      {disabled ? disabledLabel : added ? "Added" : "Add to Basket"}
     </Button>
   );
 }

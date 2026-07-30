@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ProductCardShell } from "@/components/commerce/ProductCardShell";
 import { AddToBasketPanel } from "@/components/basket/AddToBasketPanel";
@@ -18,6 +20,8 @@ export default async function ProductDetailPage({
     getCatalogItems("grocery"),
   ]);
 
+  if (!product) notFound();
+
   return (
     <section className="py-12 sm:py-16">
       <Container>
@@ -29,25 +33,38 @@ export default async function ProductDetailPage({
           ]}
         />
         <div className="mt-8 grid gap-10 lg:grid-cols-[0.95fr_1fr]">
-          <PlaceholderFrame
-            label="Product imagery will be added soon"
-            tone="shop"
-            className="min-h-[26rem] rounded-[var(--radius-xl)] shadow-[var(--shadow-card)]"
-          />
+          {product.imageUrl ? (
+            <div className="relative min-h-[26rem] overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-shop-50)] shadow-[var(--shadow-card)]">
+              <Image
+                src={product.imageUrl}
+                alt={`${product.name} product image`}
+                fill
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                className="object-cover"
+                priority
+              />
+            </div>
+          ) : (
+            <PlaceholderFrame
+              label="Product imagery will be added soon"
+              tone="shop"
+              className="min-h-[26rem] rounded-[var(--radius-xl)] shadow-[var(--shadow-card)]"
+            />
+          )}
           <div>
             <p className="text-sm font-semibold uppercase text-[var(--color-shop-700)]">
-              Product detail
+              {product.unitLabel ?? "Product detail"}
             </p>
             <h1 className="mt-3 text-4xl font-extrabold text-[var(--color-shop-900)]">
-              {product?.name ?? "Product selection will be available soon"}
+              {product.name}
             </h1>
             <p className="mt-4 max-w-xl text-base leading-7 text-[var(--color-muted)]">
-              {product?.description ?? "Product details will be published soon."}
+              {product.description ?? "Product details will be published soon."}
             </p>
             <p className="mt-4 text-2xl font-bold text-[var(--color-shop-800)]">
-              {product ? formatMoney(product.price) : "Details coming soon"}
+              {formatMoney(product.price)}
             </p>
-            {product ? <AddToBasketPanel item={product} /> : null}
+            <AddToBasketPanel item={product} disabled={!product.isAvailable} />
           </div>
         </div>
 

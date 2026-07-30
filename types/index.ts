@@ -52,6 +52,7 @@ export type CatalogCategory = {
   description: string | null;
   imageUrl: string | null;
   sortOrder: number;
+  isActive: boolean;
 };
 
 export type CatalogItem = {
@@ -120,4 +121,43 @@ export type OrderResult = {
   total: number;
   payment_status: "pending";
   order_status: "pending";
+};
+
+export type MenuWeekday =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
+export type DailyOverrideStatus = "available" | "finished" | "hidden";
+
+export type RestaurantMenuPeriod = {
+  id: string;
+  name: string;
+  slug: string;
+  displayOrder: number;
+  isActive: boolean;
+};
+
+export type RestaurantMenuStatus = "available" | "finished";
+
+export type RestaurantMenuItem = CatalogItem & {
+  menuPeriod: RestaurantMenuPeriod;
+  menuStatus: RestaurantMenuStatus;
+  effectivePrice: number;
+  scheduleDisplayOrder: number;
+};
+
+export type RestaurantMenuGroup = {
+  period: RestaurantMenuPeriod;
+  items: RestaurantMenuItem[];
+};
+
+export type RestaurantTodayMenu = {
+  serviceDate: string;
+  weekday: MenuWeekday;
+  groups: RestaurantMenuGroup[];
 };

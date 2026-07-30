@@ -1,13 +1,21 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getTodayRestaurantMenuItem } from "@/lib/restaurant-menu";
 import type { OrderRequestPayload, OrderResult } from "@/types";
 
 type CatalogLookupRow = {
   id: string;
   slug: string;
+  business_type: "grocery" | "restaurant";
 };
 
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+type ResolvedOrderItem = {
+  catalog_item_id: string;
+  quantity: number;
+  instructions: string;
+};
 
 export function validateOrderPayload(payload: OrderRequestPayload) {
   const errors: string[] = [];
@@ -52,7 +60,7 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
   if (itemIds.length > 0) {
     const { data, error } = await supabase
       .from("catalog_items")
-      .select("id,slug")
+      .select("id,slug,business_type")
       .in("id", itemIds)
       .eq("is_available", true);
 
@@ -66,7 +74,7 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
   if (itemSlugs.length > 0) {
     const { data, error } = await supabase
       .from("catalog_items")
-      .select("id,slug")
+      .select("id,slug,business_type")
       .in("slug", itemSlugs)
       .eq("is_available", true);
 
@@ -79,17 +87,34 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
 
   const lookupById = new Map(lookupRows.map((row) => [row.id, row]));
   const lookupBySlug = new Map(lookupRows.map((row) => [row.slug, row]));
-  const resolvedItems = payload.items.map((item) => {
+  const resolvedItems = await Promise.all(payload.items.map(async (item) => {
     const row =
       lookupById.get(item.catalogItemId) ??
       (item.slug ? lookupBySlug.get(item.slug) : undefined);
+    const catalogItemId = row?.id ?? item.catalogItemId;
+
+    if (row?.business_type === "restaurant") {
+      const todayItem = await getTodayRestaurantMenuItem(catalogItemId);
+
+      if (!todayItem || todayItem.menuStatus !== "available") {
+        return null;
+      }
+    }
 
     return {
-      catalog_item_id: row?.id ?? item.catalogItemId,
+      catalog_item_id: catalogItemId,
       quantity: item.quantity,
       instructions: item.instructions ?? "",
     };
-  });
+  }));
+
+  if (resolvedItems.some((item) => item === null)) {
+    return {
+      ok: false as const,
+      errors: ["One or more restaurant items are not available today."],
+    };
+  }
+  const rpcItems = resolvedItems as ResolvedOrderItem[];
 
   const { data, error } = await supabase.rpc("create_customer_order", {
     p_customer: {
@@ -102,7 +127,7 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
     p_order_instructions: payload.instructions ?? "",
     p_payment_method: payload.paymentMethod,
     p_source: "website",
-    p_items: resolvedItems,
+    p_items: rpcItems,
   });
 
   if (error) {

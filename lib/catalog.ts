@@ -10,6 +10,7 @@ export const demoCategories: CatalogCategory[] = [
     description: "Everyday staples, pantry essentials and familiar flavours.",
     imageUrl: null,
     sortOrder: 10,
+    isActive: true,
   },
   {
     id: "00000000-0000-4000-8000-000000000102",
@@ -19,6 +20,7 @@ export const demoCategories: CatalogCategory[] = [
     description: "Caribbean-inspired food ranges for local browsing.",
     imageUrl: null,
     sortOrder: 20,
+    isActive: true,
   },
   {
     id: "00000000-0000-4000-8000-000000000103",
@@ -28,6 +30,7 @@ export const demoCategories: CatalogCategory[] = [
     description: "Drinks and store favourites.",
     imageUrl: null,
     sortOrder: 30,
+    isActive: true,
   },
   {
     id: "00000000-0000-4000-8000-000000000201",
@@ -37,6 +40,7 @@ export const demoCategories: CatalogCategory[] = [
     description: "African restaurant menu selection.",
     imageUrl: null,
     sortOrder: 10,
+    isActive: true,
   },
   {
     id: "00000000-0000-4000-8000-000000000202",
@@ -46,6 +50,7 @@ export const demoCategories: CatalogCategory[] = [
     description: "Asian restaurant menu selection.",
     imageUrl: null,
     sortOrder: 20,
+    isActive: true,
   },
   {
     id: "00000000-0000-4000-8000-000000000203",
@@ -55,6 +60,7 @@ export const demoCategories: CatalogCategory[] = [
     description: "Soups and stews menu selection.",
     imageUrl: null,
     sortOrder: 30,
+    isActive: true,
   },
 ];
 
@@ -159,6 +165,7 @@ type CategoryRow = {
   description: string | null;
   image_url: string | null;
   sort_order: number;
+  is_active: boolean;
 };
 
 type CatalogItemRow = {
@@ -190,6 +197,7 @@ function mapCategory(row: CategoryRow): CatalogCategory {
     description: row.description,
     imageUrl: row.image_url,
     sortOrder: row.sort_order,
+    isActive: row.is_active,
   };
 }
 
@@ -226,7 +234,7 @@ export async function getCategories(businessType?: BusinessType) {
 
   let query = supabase
     .from("categories")
-    .select("id,name,slug,business_type,description,image_url,sort_order")
+    .select("id,name,slug,business_type,description,image_url,sort_order,is_active")
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
 
@@ -278,6 +286,40 @@ export async function getCatalogItems(businessType?: BusinessType) {
 }
 
 export async function getCatalogItemBySlug(slug: string, businessType?: BusinessType) {
-  const items = await getCatalogItems(businessType);
-  return items.find((item) => item.slug === slug) ?? items[0] ?? null;
+  const supabase = createSupabaseServerClient();
+
+  if (!supabase) {
+    return (
+      demoCatalogItems.find(
+        (item) =>
+          item.slug === slug && (!businessType || item.businessType === businessType),
+      ) ?? null
+    );
+  }
+
+  let query = supabase
+    .from("catalog_items")
+    .select(
+      "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,spice_level,dietary_labels,preparation_time,allergen_information",
+    )
+    .eq("slug", slug)
+    .eq("is_available", true)
+    .limit(1);
+
+  if (businessType) {
+    query = query.eq("business_type", businessType);
+  }
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    return (
+      demoCatalogItems.find(
+        (item) =>
+          item.slug === slug && (!businessType || item.businessType === businessType),
+      ) ?? null
+    );
+  }
+
+  return data ? mapItem(data as CatalogItemRow) : null;
 }

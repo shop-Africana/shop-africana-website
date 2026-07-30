@@ -1,26 +1,48 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
 import { AddToBasketButton } from "@/components/basket/AddToBasketButton";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
 import { formatMoney } from "@/lib/money";
-import type { CatalogItem } from "@/types";
+import type { CatalogItem, RestaurantMenuStatus } from "@/types";
 
 type MealCardShellProps = {
   meal: CatalogItem;
+  menuStatus?: RestaurantMenuStatus;
 };
 
-export function MealCardShell({ meal }: MealCardShellProps) {
+export function MealCardShell({
+  meal,
+  menuStatus = "available",
+}: MealCardShellProps) {
+  const isFinished = menuStatus === "finished" || !meal.isAvailable;
+
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-soft)]">
       <div className="relative p-4 pb-0">
-        <Badge tone="restaurant" className="absolute left-7 top-7 z-10">
-          {meal.isDemo ? "Demo item" : "Available"}
+        <Badge
+          tone={isFinished ? "destructive" : "restaurant"}
+          className="absolute left-7 top-7 z-10"
+        >
+          {isFinished ? "Finished today" : meal.isDemo ? "Demo item" : "Available"}
         </Badge>
-        <PlaceholderFrame
-          label="Menu imagery will be added soon"
-          tone="restaurant"
-          className="aspect-[4/3] min-h-0 bg-[var(--color-pride-50)]"
-        />
+        {meal.imageUrl ? (
+          <Image
+            src={meal.imageUrl}
+            alt={meal.name}
+            width={640}
+            height={480}
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            unoptimized
+            className="aspect-[4/3] w-full rounded-[var(--radius-lg)] object-cover"
+          />
+        ) : (
+          <PlaceholderFrame
+            label="Menu imagery will be added soon"
+            tone="restaurant"
+            className="aspect-[4/3] min-h-0 bg-[var(--color-pride-50)]"
+          />
+        )}
       </div>
       <div className="flex flex-1 flex-col space-y-4 pt-5">
         <div className="px-4">
@@ -41,7 +63,12 @@ export function MealCardShell({ meal }: MealCardShellProps) {
           <p className="text-lg font-bold text-[var(--color-pride-800)]">
             {formatMoney(meal.price)}
           </p>
-          <AddToBasketButton item={meal} variant="restaurant" />
+          <AddToBasketButton
+            item={meal}
+            variant="restaurant"
+            disabled={isFinished}
+            disabledLabel="Finished Today"
+          />
         </div>
       </div>
     </article>

@@ -13,7 +13,9 @@ import { Container } from "@/components/ui/Container";
 import { FeatureCard } from "@/components/ui/FeatureCard";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getCatalogItems } from "@/lib/catalog";
+import { getTodayRestaurantMenu } from "@/lib/restaurant-menu";
+
+export const dynamic = "force-dynamic";
 
 const restaurantFeatures = [
   {
@@ -26,16 +28,9 @@ const restaurantFeatures = [
 ];
 
 const featureIcons = [ChefHat, PackageCheck, Truck, MessageCircle];
-const menuChips = [
-  "All dishes",
-  "African dishes",
-  "Asian dishes",
-  "Soups & stews",
-  "Drinks",
-];
-
 export default async function RestaurantPage() {
-  const restaurantSpecials = await getCatalogItems("restaurant");
+  const todayMenu = await getTodayRestaurantMenu();
+  const todayItems = todayMenu.groups.flatMap((group) => group.items);
 
   return (
     <>
@@ -95,8 +90,8 @@ export default async function RestaurantPage() {
               confirmed.
             </p>
             <div className="mt-5 grid gap-3">
-              <Badge tone="success">Menu details soon</Badge>
-              <Badge tone="destructive">Sold-out state</Badge>
+              <Badge tone="success">Today&apos;s scheduled menu</Badge>
+              <Badge tone="destructive">Finished state</Badge>
               <Badge tone="warning">Opening hours will be published soon</Badge>
             </div>
             <LinkButton
@@ -133,28 +128,32 @@ export default async function RestaurantPage() {
           <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-card)]">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <SectionHeading title="Today's menu">
-                Menu details will be published soon.
+                Scheduled for {todayMenu.serviceDate} in the UK service day.
               </SectionHeading>
               <div className="flex flex-wrap gap-2">
-                {menuChips.map((chip) => (
-                  <Badge key={chip} tone="restaurant">
-                    {chip}
+                {todayMenu.groups.map((group) => (
+                  <Badge key={group.period.id} tone="restaurant">
+                    {group.period.name}
                   </Badge>
                 ))}
               </div>
             </div>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {restaurantSpecials.map((meal, index) => (
-                <div key={meal.id} className="relative">
-                  <Badge
-                    tone={index === 5 ? "destructive" : "success"}
-                    className="absolute left-3 top-3 z-10"
-                  >
-                    {index === 5 ? "Sold-out state" : "Menu soon"}
-                  </Badge>
-                  <MealCardShell meal={meal} />
-                </div>
-              ))}
+              {todayItems.length > 0 ? (
+                todayItems
+                  .slice(0, 6)
+                  .map((meal) => (
+                    <MealCardShell
+                      key={meal.id}
+                      meal={meal}
+                      menuStatus={meal.menuStatus}
+                    />
+                  ))
+              ) : (
+                <p className="text-sm text-[var(--color-muted)]">
+                  Today&apos;s menu will be published soon.
+                </p>
+              )}
             </div>
           </div>
         </Container>
