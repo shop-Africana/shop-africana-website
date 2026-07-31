@@ -7,6 +7,7 @@ import { BasketSummary } from "@/components/basket/BasketSummary";
 import { useBasket } from "@/components/basket/BasketProvider";
 import { Container } from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/LinkButton";
+import type { BusinessSettings } from "@/lib/business-settings";
 
 function BasketGroup({
   title,
@@ -31,7 +32,7 @@ function BasketGroup({
   );
 }
 
-export function BasketPageContent() {
+export function BasketPageContent({ settings }: { settings: BusinessSettings }) {
   const { items, groceryItems, restaurantItems, totalQuantity } = useBasket();
 
   return (
@@ -104,7 +105,7 @@ export function BasketPageContent() {
                 .
               </p>
             </div>
-            <BasketSummary />
+            <BasketSummary whatsappNumber={settings.whatsappNumber} />
           </div>
         )}
       </Container>

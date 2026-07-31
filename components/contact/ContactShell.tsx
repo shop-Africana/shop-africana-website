@@ -1,8 +1,8 @@
 import { Clock, Headphones, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
 import { ServiceStrip } from "@/components/home/ServiceStrip";
+import { formatAddress, type BusinessSettings } from "@/lib/business-settings";
+import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const contactCards = [
   { title: "Friendly Support", text: "Contact channels will be added soon.", icon: Headphones },
@@ -10,14 +10,19 @@ const contactCards = [
   { title: "Local Service", text: "Serving grocery and restaurant customers in Dundee.", icon: MessageCircle },
 ];
 
-const contactDetails = [
-  { title: "Phone", value: "Contact number to be added", icon: Phone },
-  { title: "WhatsApp", value: "WhatsApp details to be added", icon: MessageCircle },
-  { title: "Email", value: "Email address to be added", icon: Mail },
-  { title: "Address", value: "Business address to be confirmed", icon: MapPin },
-];
+export function ContactShell({ settings }: { settings: BusinessSettings }) {
+  const address = formatAddress(settings);
+  const whatsappHref = getWhatsAppHref(
+    settings.whatsappNumber,
+    `Hello, I would like to contact ${settings.shopBusinessName} and ${settings.restaurantBusinessName}.`,
+  );
+  const contactDetails = [
+    { title: "Phone", value: settings.contactNumber ?? "Contact number to be added", icon: Phone },
+    { title: "WhatsApp", value: whatsappHref ? "WhatsApp available" : "WhatsApp details to be added", icon: MessageCircle },
+    { title: "Email", value: settings.publicEmail ?? "Email address to be added", icon: Mail },
+    { title: "Address", value: address || "Business address to be confirmed", icon: MapPin },
+  ];
 
-export function ContactShell() {
   return (
     <>
       <section className="overflow-hidden bg-[linear-gradient(110deg,#fff,var(--color-surface-warm))] py-12 sm:py-16">
@@ -67,7 +72,7 @@ export function ContactShell() {
                   Visit information
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
-                  Business address to be confirmed.
+                  {address || "Business address to be confirmed."}
                 </p>
               </div>
               <div className="rounded-[var(--radius-lg)] bg-[var(--color-pride-50)] p-5">
@@ -80,7 +85,9 @@ export function ContactShell() {
                   Contact channels
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
-                  Contact number and direct messaging details to be added.
+                  {settings.contactNumber || whatsappHref
+                    ? "Use the confirmed contact channels shown below."
+                    : "Contact number and direct messaging details to be added."}
                 </p>
               </div>
             </div>
@@ -90,22 +97,47 @@ export function ContactShell() {
 
       <section className="py-12 sm:py-16">
         <Container className="grid gap-6 lg:grid-cols-[1fr_0.8fr_0.8fr]">
-          <form className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-card)]">
+          <section className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-card)]">
             <h2 className="text-xl font-bold text-[var(--color-shop-900)]">
               Send us a message
             </h2>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <Input placeholder="Full name" />
-              <Input type="email" placeholder="Email address" />
-              <Input placeholder="Phone number" />
-              <Input placeholder="Subject" />
+            <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
+              The contact form is not active until email sending is configured.
+              Please use any confirmed phone, email or WhatsApp channel listed
+              on this page.
+            </p>
+            <div className="mt-6 grid gap-3">
+              {settings.publicEmail ? (
+                <a
+                  href={`mailto:${settings.publicEmail}`}
+                  className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-3 text-sm font-bold text-[var(--color-shop-800)]"
+                >
+                  Email {settings.publicEmail}
+                </a>
+              ) : null}
+              {settings.contactNumber ? (
+                <a
+                  href={`tel:${settings.contactNumber}`}
+                  className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-3 text-sm font-bold text-[var(--color-shop-800)]"
+                >
+                  Call {settings.contactNumber}
+                </a>
+              ) : null}
+              {whatsappHref ? (
+                <a
+                  href={whatsappHref}
+                  className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-3 text-sm font-bold text-[var(--color-shop-800)]"
+                >
+                  Message on WhatsApp
+                </a>
+              ) : null}
+              {!settings.publicEmail && !settings.contactNumber && !whatsappHref ? (
+                <p className="rounded-[var(--radius-md)] bg-[var(--color-shop-50)] px-4 py-3 text-sm font-bold text-[var(--color-shop-900)]">
+                  Contact channels will be published once confirmed.
+                </p>
+              ) : null}
             </div>
-            <textarea
-              className="mt-4 min-h-32 w-full rounded-[var(--radius-md)] border border-[var(--color-border-strong)] bg-white px-4 py-3 text-sm text-[var(--color-foreground)] shadow-[var(--shadow-input)] transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-shop-500)] focus:outline-none focus:ring-4 focus:ring-[var(--color-focus-soft)]"
-              placeholder="Type your message"
-            />
-            <Button className="mt-4 w-full">Send Message</Button>
-          </form>
+          </section>
 
           <article className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-card)]">
             <h2 className="text-xl font-bold text-[var(--color-shop-900)]">
@@ -148,12 +180,12 @@ export function ContactShell() {
                   className="mx-auto text-[var(--color-shop-700)]"
                 />
                 <p className="mt-4 text-sm font-semibold text-[var(--color-shop-900)]">
-                  Business address to be confirmed
+                  {address || "Business address to be confirmed"}
                 </p>
               </div>
             </div>
             <p className="mt-5 text-sm leading-6 text-[var(--color-muted)]">
-              Social and direct contact links will be added once confirmed.
+              Map and social links will be added once confirmed.
             </p>
           </article>
         </Container>

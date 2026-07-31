@@ -3,18 +3,21 @@ import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigati
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { TopBar } from "@/components/layout/TopBar";
+import { getBusinessSettings } from "@/lib/business-settings";
 
 type SharedPageShellProps = {
   children: ReactNode;
 };
 
-export function SharedPageShell({ children }: SharedPageShellProps) {
+export async function SharedPageShell({ children }: SharedPageShellProps) {
+  const settings = await getBusinessSettings();
+
   return (
     <>
-      <TopBar />
-      <SiteHeader />
+      <TopBar settings={settings} />
+      <SiteHeader settings={settings} />
       <main className="flex-1 bg-[var(--color-background)]">{children}</main>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
       <MobileBottomNavigation />
     </>
   );

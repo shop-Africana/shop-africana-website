@@ -13,24 +13,39 @@ import { Container } from "@/components/ui/Container";
 import { FeatureCard } from "@/components/ui/FeatureCard";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { getBusinessSettings } from "@/lib/business-settings";
 import { getTodayRestaurantMenu } from "@/lib/restaurant-menu";
 
 export const dynamic = "force-dynamic";
 
-const restaurantFeatures = [
-  {
-    title: "African & Asian Focus",
-    description: "Menu details will be published soon.",
-  },
-  { title: "Collection Information", description: "Collection details will be confirmed." },
-  { title: "Delivery Information", description: "Delivery details will be published soon." },
-  { title: "Direct Ordering", description: "Contact number to be added." },
-];
-
 const featureIcons = [ChefHat, PackageCheck, Truck, MessageCircle];
 export default async function RestaurantPage() {
-  const todayMenu = await getTodayRestaurantMenu();
+  const [settings, todayMenu] = await Promise.all([
+    getBusinessSettings(),
+    getTodayRestaurantMenu(),
+  ]);
   const todayItems = todayMenu.groups.flatMap((group) => group.items);
+  const restaurantFeatures = [
+    {
+      title: "African & Asian Focus",
+      description: "Menu details will be published soon.",
+    },
+    {
+      title: "Collection Information",
+      description: settings.collectionEnabled
+        ? "Collection is available for restaurant orders."
+        : "Collection details will be confirmed.",
+    },
+    {
+      title: "Delivery Information",
+      description:
+        "Delivery charge will be confirmed according to your order and location.",
+    },
+    {
+      title: "Direct Ordering",
+      description: settings.contactNumber ?? "Contact number to be added.",
+    },
+  ];
 
   return (
     <>
@@ -86,13 +101,15 @@ export default async function RestaurantPage() {
               Order your meal
             </h2>
             <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-              Delivery and collection information will be published once
-              confirmed.
+              Delivery and collection are available. Delivery charge will be
+              confirmed according to your order and location.
             </p>
             <div className="mt-5 grid gap-3">
               <Badge tone="success">Today&apos;s scheduled menu</Badge>
               <Badge tone="destructive">Finished state</Badge>
-              <Badge tone="warning">Opening hours will be published soon</Badge>
+              <Badge tone="warning">
+                {settings.openingHoursText ?? "Opening hours will be published soon"}
+              </Badge>
             </div>
             <LinkButton
               href="/restaurant/menu"
@@ -179,7 +196,7 @@ export default async function RestaurantPage() {
             <div className="flex items-center gap-3 text-[var(--color-pride-800)]">
               <Clock aria-hidden="true" size={22} />
               <p className="font-bold">
-                Opening hours will be published soon
+                {settings.openingHoursText ?? "Opening hours will be published soon"}
               </p>
             </div>
           </div>

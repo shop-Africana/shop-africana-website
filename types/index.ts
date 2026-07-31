@@ -89,6 +89,13 @@ export type BasketItem = {
 
 export type FulfilmentType = "delivery" | "collection";
 export type PaymentMethod = "pending" | "paypal" | "whatsapp";
+export type OrderStatus =
+  | "pending"
+  | "accepted"
+  | "preparing"
+  | "ready"
+  | "completed"
+  | "cancelled";
 
 export type OrderRequestPayload = {
   customer: {

@@ -6,10 +6,14 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { getBusinessSettings } from "@/lib/business-settings";
 import { getCatalogItems } from "@/lib/catalog";
 
 export default async function ShopProductsPage() {
-  const featuredProducts = await getCatalogItems("grocery");
+  const [settings, featuredProducts] = await Promise.all([
+    getBusinessSettings(),
+    getCatalogItems("grocery"),
+  ]);
 
   return (
     <section className="py-12 sm:py-16">
@@ -22,7 +26,7 @@ export default async function ShopProductsPage() {
         />
         <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <SectionHeading title="Product Ranges">
-            Product selection will be available soon.
+            {settings.serviceAreaText}
           </SectionHeading>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Input type="search" placeholder="Search grocery ranges" />
@@ -39,7 +43,7 @@ export default async function ShopProductsPage() {
             </h2>
             <div className="mt-4 flex flex-wrap gap-2 lg:flex-col">
               <Badge tone="neutral">Categories</Badge>
-              <Badge tone="neutral">Availability details soon</Badge>
+              <Badge tone="neutral">Delivery charge confirmed manually</Badge>
               <Badge tone="neutral">Sort options</Badge>
             </div>
           </aside>

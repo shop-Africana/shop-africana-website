@@ -1,13 +1,14 @@
 import Link from "next/link";
+import { requestOwnerPasswordReset } from "@/app/owner/actions";
 import { BrandLockup } from "@/components/brand/BrandLockup";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
 
-export default async function OwnerLoginPage({
+export default async function OwnerForgotPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; reset?: string }>;
+  searchParams: Promise<{ sent?: string }>;
 }) {
   const params = await searchParams;
 
@@ -17,43 +18,28 @@ export default async function OwnerLoginPage({
         <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-card)]">
           <BrandLockup brand="restaurant" size="lg" />
           <h1 className="mt-8 text-3xl font-extrabold text-[var(--color-pride-800)]">
-            Owner Login
+            Reset Owner Password
           </h1>
           <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-            Sign in with the Supabase Auth owner account approved for menu
-            management.
+            Enter the owner email address. If it can receive recovery mail, a reset
+            link will be sent.
           </p>
-          {params.error ? (
-            <div className="mt-5 rounded-[var(--radius-lg)] border border-[var(--color-destructive-border)] bg-[var(--color-destructive-soft)] p-4 text-sm font-bold text-[var(--color-destructive)]">
-              Sign-in failed. Check your email and password.
-            </div>
-          ) : null}
-          {params.reset ? (
+          {params.sent ? (
             <div className="mt-5 rounded-[var(--radius-lg)] border border-[var(--color-success-border)] bg-[var(--color-success-soft)] p-4 text-sm font-bold text-[var(--color-success)]">
-              Password updated. Sign in with the new password.
+              Check the owner inbox for the password reset link.
             </div>
           ) : null}
-          <form
-            action="/api/owner-login"
-            method="post"
-            className="mt-8 grid gap-4"
-          >
+          <form action={requestOwnerPasswordReset} className="mt-8 grid gap-4">
             <Input name="email" type="email" placeholder="Owner email" required />
-            <Input
-              name="password"
-              type="password"
-              placeholder="Password"
-              required
-            />
             <Button type="submit" variant="restaurant" className="w-full">
-              Sign In
+              Send Reset Link
             </Button>
           </form>
           <Link
-            href="/owner/forgot-password"
+            href="/owner/login"
             className="mt-5 inline-block text-sm font-bold text-[var(--color-pride-800)] underline-offset-4 hover:underline"
           >
-            Forgot password?
+            Back to login
           </Link>
         </div>
       </Container>

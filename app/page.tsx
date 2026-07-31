@@ -22,12 +22,13 @@ import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { TestimonialCard } from "@/components/ui/TestimonialCard";
 import { categories, testimonials } from "@/data/homepage";
+import { getBusinessSettings } from "@/lib/business-settings";
 import { getCatalogItems } from "@/lib/catalog";
 
 const trustFeatures = [
   {
     title: "Fast & Reliable",
-    description: "Service information for Dundee will be published as confirmed.",
+    description: "Delivery available across Dundee and nearby areas.",
   },
   {
     title: "Fresh Quality",
@@ -35,22 +36,23 @@ const trustFeatures = [
   },
   {
     title: "Local Support",
-    description: "Contact details will be added for customer questions.",
+    description: "Contact the business directly for customer questions.",
   },
 ];
 
 const trustIcons = [Truck, ShieldCheck, Headphones];
 
 export default async function Home() {
-  const [featuredProducts, restaurantSpecials] = await Promise.all([
+  const [settings, featuredProducts, restaurantSpecials] = await Promise.all([
+    getBusinessSettings(),
     getCatalogItems("grocery"),
     getCatalogItems("restaurant"),
   ]);
 
   return (
     <>
-      <TopBar />
-      <SiteHeader />
+      <TopBar settings={settings} />
+      <SiteHeader settings={settings} />
       <main className="flex-1 bg-[var(--color-background)]">
         <SharedHero />
 
@@ -204,9 +206,9 @@ export default async function Home() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 "Located in Dundee",
-                "Opening hours will be published soon",
-                "Contact number to be added",
-                "Payment information will be confirmed",
+                settings.openingHoursText ?? "Opening hours will be published soon",
+                settings.contactNumber ?? "Contact number to be added",
+                "Delivery charge confirmed manually",
               ].map((item) => (
                 <div
                   key={item}
@@ -225,8 +227,8 @@ export default async function Home() {
                     Visit and contact details
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
-                    Business address, opening hours and direct contact channels
-                    will be published once confirmed.
+                    Use the confirmed public details for visit, opening hours
+                    and direct customer contact.
                   </p>
                 </div>
                 <LinkButton href="/contact" variant="secondary">
@@ -237,7 +239,7 @@ export default async function Home() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
       <MobileBottomNavigation />
     </>
   );

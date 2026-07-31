@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
 import { LinkButton } from "@/components/ui/LinkButton";
+import type { BusinessSettings } from "@/lib/business-settings";
+import { getWhatsAppHref, buildBasketWhatsAppMessage } from "@/lib/whatsapp";
 import type { FulfilmentType, PaymentMethod } from "@/types";
 
-export function CheckoutForm() {
+export function CheckoutForm({ settings }: { settings: BusinessSettings }) {
   const router = useRouter();
   const { items, clearBasket } = useBasket();
   const [fulfilmentType, setFulfilmentType] =
@@ -27,6 +29,17 @@ export function CheckoutForm() {
       restaurant: items.filter((item) => item.businessType === "restaurant"),
     }),
     [items],
+  );
+  const whatsappHref = getWhatsAppHref(
+    settings.whatsappNumber,
+    buildBasketWhatsAppMessage({
+      fulfilmentType,
+      total: items.reduce(
+        (total, item) => total + item.unitPrice * item.quantity,
+        0,
+      ),
+      items,
+    }),
   );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -127,8 +140,8 @@ export function CheckoutForm() {
             Checkout
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
-            Enter customer details and choose delivery or collection. Final
-            totals are calculated securely when the order is submitted.
+            Enter customer details and choose delivery or collection. Delivery
+            charge will be confirmed according to your order and location.
           </p>
         </div>
 
@@ -223,8 +236,8 @@ export function CheckoutForm() {
                 {[
                   {
                     value: "pending" as PaymentMethod,
-                    title: "Payment details being configured",
-                    text: "The order will be created with payment status pending.",
+                    title: "Payment arranged directly",
+                    text: "The order will be created with payment status pending until the business confirms receipt.",
                   },
                   {
                     value: "paypal" as PaymentMethod,
@@ -233,8 +246,12 @@ export function CheckoutForm() {
                   },
                   {
                     value: "whatsapp" as PaymentMethod,
-                    title: "WhatsApp fallback not active yet",
-                    text: "A direct WhatsApp link will be enabled when the number is confirmed.",
+                    title: whatsappHref
+                      ? "Bank transfer arranged through WhatsApp"
+                      : "WhatsApp not active yet",
+                    text: whatsappHref
+                      ? "Submit the order, then arrange direct bank transfer with the business. No bank details are stored or displayed here."
+                      : "A direct WhatsApp link will be enabled when the number is confirmed.",
                   },
                 ].map((method) => (
                   <label
@@ -267,6 +284,11 @@ export function CheckoutForm() {
 
           <div className="space-y-5">
             <BasketSummary showCheckoutButton={false} />
+            {whatsappHref ? (
+              <LinkButton href={whatsappHref} variant="outline" className="w-full">
+                Message on WhatsApp
+              </LinkButton>
+            ) : null}
             {error ? (
               <div className="rounded-[var(--radius-lg)] border border-[var(--color-destructive-border)] bg-[var(--color-destructive-soft)] p-4 text-sm font-semibold text-[var(--color-destructive)]">
                 {error}

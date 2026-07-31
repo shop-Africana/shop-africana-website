@@ -15,17 +15,8 @@ import { Container } from "@/components/ui/Container";
 import { FeatureCard } from "@/components/ui/FeatureCard";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { getBusinessSettings } from "@/lib/business-settings";
 import { getCatalogItems, getCategories } from "@/lib/catalog";
-
-const benefits = [
-  {
-    title: "Local Grocery Access",
-    description: "Service information for Dundee will be published as confirmed.",
-  },
-  { title: "Product Ranges", description: "Product selection will be available soon." },
-  { title: "Payment Information", description: "Payment options will be confirmed before launch." },
-  { title: "Direct Contact", description: "Contact number to be added." },
-];
 
 const benefitIcons = [Truck, PackageCheck, LockKeyhole, MessageCircle];
 
@@ -37,10 +28,30 @@ const filterItems = [
 ];
 
 export default async function ShopPage() {
-  const [categories, featuredProducts] = await Promise.all([
+  const [settings, categories, featuredProducts] = await Promise.all([
+    getBusinessSettings(),
     getCategories("grocery"),
     getCatalogItems("grocery"),
   ]);
+  const benefits = [
+    {
+      title: "Local Grocery Access",
+      description: settings.serviceAreaText,
+    },
+    {
+      title: "Product Ranges",
+      description: "Product selection will be available soon.",
+    },
+    {
+      title: "Delivery & Collection",
+      description:
+        "Delivery charge will be confirmed according to your order and location.",
+    },
+    {
+      title: "Direct Contact",
+      description: settings.contactNumber ?? "Contact number to be added.",
+    },
+  ];
 
   return (
     <>
@@ -137,8 +148,11 @@ export default async function ShopPage() {
               />
             </div>
             <div className="mt-5 space-y-4">
-              {["Grocery basket details", "Product quantities", "Order summary"].map(
-                (item) => (
+              {[
+                "Grocery basket details",
+                "Product quantities",
+                "Delivery charge confirmed manually",
+              ].map((item) => (
                   <div
                     key={item}
                     className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3"
@@ -147,11 +161,12 @@ export default async function ShopPage() {
                       {item}
                     </p>
                     <p className="mt-1 text-sm text-[var(--color-muted)]">
-                      Details coming soon
+                      {item === "Delivery charge confirmed manually"
+                        ? "Delivery cost will be confirmed according to the order and location."
+                        : "Details coming soon"}
                     </p>
                   </div>
-                ),
-              )}
+                ))}
             </div>
             <LinkButton href="/checkout" variant="secondary" className="mt-5 w-full">
               Checkout Information

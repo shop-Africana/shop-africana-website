@@ -6,6 +6,7 @@ import { AddToBasketPanel } from "@/components/basket/AddToBasketPanel";
 import { Container } from "@/components/ui/Container";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { getBusinessSettings } from "@/lib/business-settings";
 import { getCatalogItemBySlug, getCatalogItems } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
 
@@ -15,7 +16,8 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [product, relatedProducts] = await Promise.all([
+  const [settings, product, relatedProducts] = await Promise.all([
+    getBusinessSettings(),
     getCatalogItemBySlug(slug, "grocery"),
     getCatalogItems("grocery"),
   ]);
@@ -65,6 +67,10 @@ export default async function ProductDetailPage({
               {formatMoney(product.price)}
             </p>
             <AddToBasketPanel item={product} disabled={!product.isAvailable} />
+            <p className="mt-4 rounded-[var(--radius-lg)] border border-[var(--color-shop-200)] bg-[var(--color-shop-50)] p-4 text-sm leading-6 text-[var(--color-shop-900)]">
+              {settings.serviceAreaText} Delivery charge will be confirmed
+              according to your order and location.
+            </p>
           </div>
         </div>
 

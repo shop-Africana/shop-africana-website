@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Circle, Mail, MapPin, Phone } from "lucide-react";
+import { Circle, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { BrandLockup } from "@/components/brand/BrandLockup";
-import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { Input } from "@/components/ui/Input";
+import { formatAddress, type BusinessSettings } from "@/lib/business-settings";
+import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -32,7 +32,13 @@ const restaurantLinks = [
   { label: "About Pride of Scotland", href: "/restaurant/about" },
 ];
 
-export function SiteFooter() {
+export function SiteFooter({ settings }: { settings: BusinessSettings }) {
+  const address = formatAddress(settings);
+  const whatsappHref = getWhatsAppHref(
+    settings.whatsappNumber,
+    "Hello, I would like help with an order.",
+  );
+
   return (
     <footer className="border-t border-[var(--color-border)] bg-[linear-gradient(135deg,var(--color-shop-900),#06381b)] pb-24 pt-12 text-white md:pb-12">
       <Container className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.2fr_0.75fr_0.8fr_0.85fr_1.05fr]">
@@ -42,8 +48,9 @@ export function SiteFooter() {
             <BrandLockup brand="restaurant" size="sm" className="bg-white" />
           </div>
           <p className="mt-5 max-w-sm text-sm leading-6 text-white/75">
-            Shop Africana is an Afro-Caribbean grocery business and Pride of
-            Scotland is an African and Asian restaurant serving Dundee.
+            {settings.shopBusinessName} is an Afro-Caribbean grocery business
+            and {settings.restaurantBusinessName} is an African and Asian
+            restaurant serving Dundee.
           </p>
           <div className="mt-5 flex gap-3">
             {[1, 2, 3, 4].map((item) => (
@@ -64,44 +71,36 @@ export function SiteFooter() {
 
         <div>
           <FooterNav title="Pride of Scotland" links={restaurantLinks} />
-          <form className="mt-8">
-            <label
-              htmlFor="footer-newsletter"
-              className="text-sm font-bold text-white"
-            >
-              Newsletter
-            </label>
-            <p className="mt-2 text-xs leading-5 text-white/70">
-              Email updates will be available when subscriptions open.
-            </p>
-            <div className="mt-3 flex gap-2">
-              <Input
-                id="footer-newsletter"
-                type="email"
-                placeholder="Email address"
-                className="min-w-0 border-white/20"
-              />
-              <Button variant="secondary">Subscribe</Button>
-            </div>
+          <div className="mt-8">
+            <h2 className="text-sm font-bold text-white">Contact</h2>
             <div className="mt-6 space-y-3 text-sm text-white/75">
               <p className="flex items-start gap-2">
                 <MapPin aria-hidden="true" size={16} className="mt-0.5" />
-                Business address to be confirmed
+                {address || "Business address to be confirmed"}
               </p>
               <p className="flex items-start gap-2">
                 <Phone aria-hidden="true" size={16} className="mt-0.5" />
-                Contact number to be added
+                {settings.contactNumber ?? "Contact number to be added"}
               </p>
               <p className="flex items-start gap-2">
                 <Mail aria-hidden="true" size={16} className="mt-0.5" />
-                Email address to be added
+                {settings.publicEmail ?? "Email address to be added"}
               </p>
+              {whatsappHref ? (
+                <Link
+                  href={whatsappHref}
+                  className="flex items-start gap-2 text-white underline-offset-4 hover:underline"
+                >
+                  <MessageCircle aria-hidden="true" size={16} className="mt-0.5" />
+                  WhatsApp
+                </Link>
+              ) : null}
               <p className="rounded-[var(--radius-md)] border border-white/15 bg-white/10 p-3 text-xs leading-5">
-                Payment options will be confirmed before online ordering goes
-                live.
+                PayPal and email notifications are not active until credentials
+                are configured.
               </p>
             </div>
-          </form>
+          </div>
         </div>
       </Container>
     </footer>

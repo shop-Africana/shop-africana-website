@@ -2,6 +2,9 @@ import { CheckCircle2 } from "lucide-react";
 import { SharedPageShell } from "@/components/layout/SharedPageShell";
 import { Container } from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/LinkButton";
+import { getBusinessSettings } from "@/lib/business-settings";
+import { getOrderConfirmationDetails } from "@/lib/order-confirmation";
+import { buildBasketWhatsAppMessage, getWhatsAppHref } from "@/lib/whatsapp";
 
 export default async function OrderConfirmationPage({
   params,
@@ -9,6 +12,23 @@ export default async function OrderConfirmationPage({
   params: Promise<{ reference: string }>;
 }) {
   const { reference } = await params;
+  const [settings, order] = await Promise.all([
+    getBusinessSettings(),
+    getOrderConfirmationDetails(reference),
+  ]);
+  const whatsappHref =
+    order && settings.whatsappNumber
+      ? getWhatsAppHref(
+          settings.whatsappNumber,
+          buildBasketWhatsAppMessage({
+            customerName: order.customerName,
+            orderReference: order.reference,
+            fulfilmentType: order.fulfilmentType,
+            total: order.total,
+            items: order.items,
+          }),
+        )
+      : null;
 
   return (
     <SharedPageShell>
@@ -25,7 +45,9 @@ export default async function OrderConfirmationPage({
             </h1>
             <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
               Your order has been created with payment status pending. Please
-              keep this reference for follow-up.
+              keep this reference for follow-up. Delivery charge, where
+              applicable, will be confirmed according to your order and
+              location.
             </p>
             <p className="mt-6 rounded-[var(--radius-lg)] bg-[var(--color-shop-50)] px-4 py-3 text-lg font-extrabold text-[var(--color-shop-900)]">
               {reference}
@@ -35,6 +57,11 @@ export default async function OrderConfirmationPage({
               <LinkButton href="/restaurant/menu" variant="restaurant">
                 View Menu
               </LinkButton>
+              {whatsappHref ? (
+                <LinkButton href={whatsappHref} variant="outline">
+                  Confirm on WhatsApp
+                </LinkButton>
+              ) : null}
             </div>
           </div>
         </Container>

@@ -1,10 +1,13 @@
 import { SharedPageShell } from "@/components/layout/SharedPageShell";
 import { ContactShell } from "@/components/contact/ContactShell";
+import { getBusinessSettings } from "@/lib/business-settings";
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await getBusinessSettings();
+
   return (
     <SharedPageShell>
-      <ContactShell />
+      <ContactShell settings={settings} />
     </SharedPageShell>
   );
 }

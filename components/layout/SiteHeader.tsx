@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { ShoppingBasket, UserRound, Utensils } from "lucide-react";
+import { MessageCircle, ShoppingBasket, UserRound, Utensils } from "lucide-react";
 import { BrandSwitcher } from "@/components/layout/BrandSwitcher";
 import { Container } from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/LinkButton";
+import type { BusinessSettings } from "@/lib/business-settings";
+import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -11,7 +13,12 @@ const navItems = [
   { label: "Contact", href: "/contact" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ settings }: { settings: BusinessSettings }) {
+  const whatsappHref = getWhatsAppHref(
+    settings.whatsappNumber,
+    `Hello, I would like information about ${settings.shopBusinessName} and ${settings.restaurantBusinessName}.`,
+  );
+
   return (
     <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-white/95 backdrop-blur">
       <Container className="flex min-h-20 items-center justify-between gap-4">
@@ -30,6 +37,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          {whatsappHref ? (
+            <Link
+              href={whatsappHref}
+              className="flex size-11 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--color-border-strong)] text-[var(--color-shop-800)] transition hover:bg-[var(--color-shop-50)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+              aria-label="Contact on WhatsApp"
+            >
+              <MessageCircle aria-hidden="true" size={18} />
+            </Link>
+          ) : null}
           <Link
             href="/account"
             className="flex size-11 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--color-border-strong)] text-[var(--color-foreground-strong)] transition hover:bg-[var(--color-muted-surface)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"

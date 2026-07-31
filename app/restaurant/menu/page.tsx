@@ -6,12 +6,16 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { getBusinessSettings } from "@/lib/business-settings";
 import { getTodayRestaurantMenu } from "@/lib/restaurant-menu";
 
 export const dynamic = "force-dynamic";
 
 export default async function RestaurantMenuPage() {
-  const todayMenu = await getTodayRestaurantMenu();
+  const [settings, todayMenu] = await Promise.all([
+    getBusinessSettings(),
+    getTodayRestaurantMenu(),
+  ]);
 
   return (
     <section className="py-12 sm:py-16">
@@ -25,6 +29,10 @@ export default async function RestaurantMenuPage() {
         <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <SectionHeading title="Today's Restaurant Menu">
             Scheduled for {todayMenu.serviceDate} in the UK service day.
+            {settings.openingHoursText
+              ? ` ${settings.openingHoursText}.`
+              : " Opening hours will be published soon."}{" "}
+            Delivery charge will be confirmed according to your order and location.
           </SectionHeading>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Input type="search" placeholder="Search menu details" />

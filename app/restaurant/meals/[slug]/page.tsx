@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { getBusinessSettings } from "@/lib/business-settings";
 import { getCatalogItemBySlug } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
 import {
@@ -21,7 +22,8 @@ export default async function MealDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [todayMeal, fallbackMeal, todayMenu] = await Promise.all([
+  const [settings, todayMeal, fallbackMeal, todayMenu] = await Promise.all([
+    getBusinessSettings(),
     getTodayRestaurantMenuItemBySlug(slug),
     getCatalogItemBySlug(slug, "restaurant"),
     getTodayRestaurantMenu(),
@@ -100,6 +102,11 @@ export default async function MealDetailPage({
                 }
               />
             ) : null}
+            <p className="mt-4 rounded-[var(--radius-lg)] border border-[var(--color-pride-200)] bg-[var(--color-pride-50)] p-4 text-sm leading-6 text-[var(--color-pride-800)]">
+              {settings.openingHoursText ?? "Opening hours will be published soon"}.
+              Delivery charge will be confirmed according to your order and
+              location.
+            </p>
           </div>
         </div>
 

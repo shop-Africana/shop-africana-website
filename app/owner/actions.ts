@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabaseAuthClient } from "@/lib/supabase/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -11,10 +12,18 @@ import {
 } from "@/lib/owner-menu";
 import { slugifyProductName } from "@/lib/owner-products";
 import { getUkServiceDateParts } from "@/lib/restaurant-menu";
-import type { DailyOverrideStatus, MenuWeekday } from "@/types";
+import type { DailyOverrideStatus, MenuWeekday, OrderStatus } from "@/types";
 
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxImageSize = 5 * 1024 * 1024;
+const orderStatuses = new Set<OrderStatus>([
+  "pending",
+  "accepted",
+  "preparing",
+  "ready",
+  "completed",
+  "cancelled",
+]);
 
 function parseInteger(value: FormDataEntryValue | null, fallback = 0) {
   const parsed = Number.parseInt(String(value ?? ""), 10);
@@ -75,6 +84,44 @@ export async function logoutOwner() {
   const authClient = await createSupabaseAuthClient();
   await authClient.auth.signOut();
   redirect("/owner/login");
+}
+
+export async function requestOwnerPasswordReset(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim();
+  const authClient = await createSupabaseAuthClient();
+  const requestHeaders = await headers();
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    requestHeaders.get("origin") ??
+    "http://localhost:3000";
+
+  if (email) {
+    await authClient.auth.resetPasswordForEmail(email, {
+      redirectTo: `${origin}/owner/reset-password`,
+    });
+  }
+
+  redirect("/owner/forgot-password?sent=1");
+}
+
+export async function updateOrderStatus(formData: FormData) {
+  await requireOwner();
+  const admin = createSupabaseAdminClient();
+  const orderId = String(formData.get("orderId") ?? "");
+  const status = String(formData.get("status") ?? "") as OrderStatus;
+
+  if (!orderId || !orderStatuses.has(status)) return;
+
+  const { error } = await admin
+    .from("orders")
+    .update({ order_status: status, updated_at: new Date().toISOString() })
+    .eq("id", orderId);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/owner");
+  revalidatePath("/owner/orders");
+  revalidatePath(`/owner/orders/${orderId}`);
 }
 
 export async function saveMeal(formData: FormData) {

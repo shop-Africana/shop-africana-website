@@ -1,16 +1,18 @@
-import { Package, PackagePlus, Plus, Utensils } from "lucide-react";
+import { ClipboardList, Package, PackagePlus, Plus, Utensils } from "lucide-react";
 import { OwnerShell } from "@/components/owner/OwnerShell";
 import { Container } from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { requireOwner } from "@/lib/owner-auth";
 import { getOwnerMenuData } from "@/lib/owner-menu";
+import { getOwnerOrderCount } from "@/lib/owner-orders";
 import { getOwnerProductData } from "@/lib/owner-products";
 
 export default async function OwnerDashboardPage() {
   const owner = await requireOwner();
-  const [menuData, productData] = await Promise.all([
+  const [menuData, productData, orderCount] = await Promise.all([
     getOwnerMenuData(),
     getOwnerProductData(),
+    getOwnerOrderCount(),
   ]);
   const activeProducts = productData.products.filter(
     (product) => product.isAvailable,
@@ -31,7 +33,36 @@ export default async function OwnerDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+          <section className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-card)]">
+            <div className="flex items-start gap-4">
+              <span className="rounded-[var(--radius-lg)] bg-[var(--color-amber-100)] p-3 text-[var(--color-warning)]">
+                <ClipboardList aria-hidden="true" size={24} />
+              </span>
+              <div>
+                <h2 className="text-2xl font-extrabold text-[var(--color-shop-900)]">
+                  Orders
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                  View customer orders and update fulfilment status.
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 rounded-[var(--radius-lg)] bg-[var(--color-amber-100)] p-4">
+              <p className="text-sm font-bold text-[var(--color-muted)]">
+                Total orders
+              </p>
+              <p className="mt-2 text-3xl font-extrabold text-[var(--color-shop-900)]">
+                {orderCount}
+              </p>
+            </div>
+            <div className="mt-6">
+              <LinkButton href="/owner/orders" variant="secondary">
+                Manage Orders
+              </LinkButton>
+            </div>
+          </section>
+
           <section className="rounded-[var(--radius-xl)] border border-[var(--color-shop-200)] bg-white p-6 shadow-[var(--shadow-card)]">
             <div className="flex items-start gap-4">
               <span className="rounded-[var(--radius-lg)] bg-[var(--color-shop-50)] p-3 text-[var(--color-shop-800)]">

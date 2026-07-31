@@ -9,6 +9,7 @@ import {
 } from "@/components/layout/SectionNavigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { getBusinessSettings } from "@/lib/business-settings";
 
 type SectionShellProps = {
   children: ReactNode;
@@ -19,16 +20,18 @@ type SectionShellProps = {
   navItems: SectionNavItem[];
 };
 
-export function SectionShell({
+export async function SectionShell({
   children,
   brand,
   descriptor,
   tone,
   navItems,
 }: SectionShellProps) {
+  const settings = await getBusinessSettings();
+
   return (
     <>
-      <TopBar />
+      <TopBar settings={settings} />
       <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-white/95 backdrop-blur">
         <Container>
           <div className="flex min-h-20 items-center justify-between gap-4">
@@ -65,7 +68,7 @@ export function SectionShell({
         </Container>
       </header>
       <main className="flex-1 bg-[var(--color-background)]">{children}</main>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </>
   );
 }
