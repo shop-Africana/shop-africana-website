@@ -69,6 +69,11 @@ export function OwnerProductList({ products }: OwnerProductListProps) {
                   {product.name}
                 </h3>
                 <p className="mt-1 text-sm text-[var(--color-muted)]">{product.slug}</p>
+                {product.originRegion ? (
+                  <p className="mt-1 text-xs font-semibold text-[var(--color-shop-700)]">
+                    Origin: {product.originRegion}
+                  </p>
+                ) : null}
               </div>
               <p className="text-sm font-semibold text-[var(--color-muted)]">
                 {product.categoryName ?? "No category"}

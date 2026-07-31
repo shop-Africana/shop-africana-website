@@ -69,6 +69,7 @@ export type CatalogItem = {
   isFeatured: boolean;
   isDemo: boolean;
   sortOrder: number;
+  originRegion?: string | null;
   spiceLevel?: string | null;
   dietaryLabels?: string[] | null;
   preparationTime?: string | null;

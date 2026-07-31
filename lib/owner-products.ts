@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isLegacyGroceryOriginCategory } from "@/lib/catalog";
 import type { CatalogCategory, CatalogItem } from "@/types";
 
 type CategoryRow = {
@@ -26,6 +27,7 @@ type ItemRow = {
   is_featured: boolean;
   is_demo: boolean;
   sort_order: number;
+  origin_region: string | null;
 };
 
 export type OwnerProduct = CatalogItem & {
@@ -63,6 +65,7 @@ function mapProduct(row: ItemRow, categories: CatalogCategory[]): OwnerProduct {
     isFeatured: row.is_featured,
     isDemo: row.is_demo,
     sortOrder: row.sort_order,
+    originRegion: row.origin_region,
   };
 }
 
@@ -81,13 +84,13 @@ export async function getOwnerProductData() {
   const [categoriesResult, productsResult] = await Promise.all([
     admin
       .from("categories")
-      .select("id,name,slug,business_type,description,image_url,sort_order,is_active")
+        .select("id,name,slug,business_type,description,image_url,sort_order,is_active")
       .eq("business_type", "grocery")
       .order("sort_order", { ascending: true }),
     admin
       .from("catalog_items")
       .select(
-        "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order",
+        "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,origin_region",
       )
       .eq("business_type", "grocery")
       .order("sort_order", { ascending: true }),
@@ -101,7 +104,11 @@ export async function getOwnerProductData() {
     mapProduct(row, categories),
   );
 
-  return { categories, products };
+  const ownerSelectableCategories = categories.filter(
+    (category) => !isLegacyGroceryOriginCategory(category),
+  );
+
+  return { categories, ownerSelectableCategories, products };
 }
 
 export async function getOwnerProduct(id: string) {

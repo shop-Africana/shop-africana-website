@@ -236,6 +236,7 @@ export async function saveProduct(formData: FormData) {
     price: parseInteger(formData.get("price"), 0),
     image_url: String(formData.get("existingImageUrl") ?? "") || null,
     unit_label: String(formData.get("unitLabel") ?? "") || null,
+    origin_region: String(formData.get("originRegion") ?? "") || null,
     is_available: formData.get("isAvailable") === "on",
     is_featured: formData.get("isFeatured") === "on",
     is_demo: false,

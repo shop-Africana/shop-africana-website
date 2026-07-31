@@ -24,7 +24,7 @@ export default async function NewOwnerProductPage({
         </p>
         <div className="mt-8">
           <OwnerProductForm
-            categories={productData.categories}
+            categories={productData.ownerSelectableCategories}
             error={params.error}
           />
         </div>

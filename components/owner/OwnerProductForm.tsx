@@ -15,6 +15,17 @@ const formErrors: Record<string, string> = {
   name: "Add a product name before saving.",
 };
 
+const originRegionOptions = [
+  "African",
+  "Caribbean",
+  "Asian",
+  "Middle Eastern",
+  "European",
+  "Latin American",
+  "Global",
+  "Other",
+];
+
 export function OwnerProductForm({
   product,
   categories,
@@ -71,6 +82,21 @@ export function OwnerProductForm({
               <option key={category.id} value={category.id}>
                 {category.name}
                 {category.isActive ? "" : " (inactive)"}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-2 text-sm font-bold text-[var(--color-foreground-strong)]">
+          Origin / region
+          <select
+            name="originRegion"
+            defaultValue={product?.originRegion ?? ""}
+            className="min-h-11 rounded-[var(--radius-md)] border border-[var(--color-border-strong)] bg-white px-4 text-sm shadow-[var(--shadow-input)] focus:border-[var(--color-shop-500)] focus:outline-none focus:ring-4 focus:ring-[var(--color-focus-soft)]"
+          >
+            <option value="">No origin selected</option>
+            {originRegionOptions.map((origin) => (
+              <option key={origin} value={origin}>
+                {origin}
               </option>
             ))}
           </select>

@@ -31,7 +31,16 @@ export default async function EditOwnerProductPage({
         <div className="mt-8">
           <OwnerProductForm
             product={productData.product}
-            categories={productData.categories}
+            categories={[
+              ...productData.ownerSelectableCategories,
+              ...productData.categories.filter(
+                (category) =>
+                  category.id === productData.product?.categoryId &&
+                  !productData.ownerSelectableCategories.some(
+                    (item) => item.id === category.id,
+                  ),
+              ),
+            ]}
             error={query.error}
           />
         </div>

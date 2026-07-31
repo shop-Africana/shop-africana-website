@@ -63,6 +63,11 @@ export default async function ProductDetailPage({
             <p className="mt-4 max-w-xl text-base leading-7 text-[var(--color-muted)]">
               {product.description ?? "Product details will be published soon."}
             </p>
+            {product.originRegion ? (
+              <p className="mt-4 inline-flex rounded-[var(--radius-pill)] bg-[var(--color-orange-50)] px-3 py-1 text-sm font-bold text-[var(--color-orange-700)]">
+                Origin: {product.originRegion}
+              </p>
+            ) : null}
             <p className="mt-4 text-2xl font-bold text-[var(--color-shop-800)]">
               {formatMoney(product.price)}
             </p>

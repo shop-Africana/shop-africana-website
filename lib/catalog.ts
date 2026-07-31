@@ -4,20 +4,20 @@ import type { BusinessType, CatalogCategory, CatalogItem } from "@/types";
 export const demoCategories: CatalogCategory[] = [
   {
     id: "00000000-0000-4000-8000-000000000101",
-    name: "African Groceries",
-    slug: "african-groceries",
+    name: "Rice & Grains",
+    slug: "rice-grains",
     businessType: "grocery",
-    description: "Everyday staples, pantry essentials and familiar flavours.",
+    description: "Rice, grains and staple cereal products.",
     imageUrl: null,
     sortOrder: 10,
     isActive: true,
   },
   {
     id: "00000000-0000-4000-8000-000000000102",
-    name: "Caribbean Foods",
-    slug: "caribbean-foods",
+    name: "Herbs, Spices & Seasonings",
+    slug: "herbs-spices-seasonings",
     businessType: "grocery",
-    description: "Caribbean-inspired food ranges for local browsing.",
+    description: "Herbs, spices, seasoning blends and stock products.",
     imageUrl: null,
     sortOrder: 20,
     isActive: true,
@@ -182,6 +182,7 @@ type CatalogItemRow = {
   is_featured: boolean;
   is_demo: boolean;
   sort_order: number;
+  origin_region?: string | null;
   spice_level?: string | null;
   dietary_labels?: string[] | null;
   preparation_time?: string | null;
@@ -216,6 +217,7 @@ function mapItem(row: CatalogItemRow): CatalogItem {
     isFeatured: row.is_featured,
     isDemo: row.is_demo,
     sortOrder: row.sort_order,
+    originRegion: row.origin_region ?? null,
     spiceLevel: row.spice_level,
     dietaryLabels: row.dietary_labels,
     preparationTime: row.preparation_time,
@@ -223,12 +225,35 @@ function mapItem(row: CatalogItemRow): CatalogItem {
   };
 }
 
+export const legacyGroceryOriginCategorySlugs = new Set([
+  "african",
+  "asian",
+  "caribbean",
+  "african-groceries",
+  "asian-groceries",
+  "caribbean-groceries",
+  "caribbean-foods",
+]);
+
+export function isLegacyGroceryOriginCategory(category: CatalogCategory) {
+  return (
+    category.businessType === "grocery" &&
+    legacyGroceryOriginCategorySlugs.has(category.slug)
+  );
+}
+
+function filterPublicCategories(categories: CatalogCategory[]) {
+  return categories.filter((category) => !isLegacyGroceryOriginCategory(category));
+}
+
 export async function getCategories(businessType?: BusinessType) {
   const supabase = createSupabaseServerClient();
 
   if (!supabase) {
-    return demoCategories.filter(
-      (category) => !businessType || category.businessType === businessType,
+    return filterPublicCategories(
+      demoCategories.filter(
+        (category) => !businessType || category.businessType === businessType,
+      ),
     );
   }
 
@@ -245,12 +270,14 @@ export async function getCategories(businessType?: BusinessType) {
   const { data, error } = await query;
 
   if (error || !data) {
-    return demoCategories.filter(
-      (category) => !businessType || category.businessType === businessType,
+    return filterPublicCategories(
+      demoCategories.filter(
+        (category) => !businessType || category.businessType === businessType,
+      ),
     );
   }
 
-  return data.map((row) => mapCategory(row as CategoryRow));
+  return filterPublicCategories(data.map((row) => mapCategory(row as CategoryRow)));
 }
 
 export async function getCatalogItems(businessType?: BusinessType) {
@@ -265,7 +292,7 @@ export async function getCatalogItems(businessType?: BusinessType) {
   let query = supabase
     .from("catalog_items")
     .select(
-      "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,spice_level,dietary_labels,preparation_time,allergen_information",
+      "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,origin_region,spice_level,dietary_labels,preparation_time,allergen_information",
     )
     .eq("is_available", true)
     .order("sort_order", { ascending: true });
@@ -300,7 +327,7 @@ export async function getCatalogItemBySlug(slug: string, businessType?: Business
   let query = supabase
     .from("catalog_items")
     .select(
-      "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,spice_level,dietary_labels,preparation_time,allergen_information",
+      "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,origin_region,spice_level,dietary_labels,preparation_time,allergen_information",
     )
     .eq("slug", slug)
     .eq("is_available", true)

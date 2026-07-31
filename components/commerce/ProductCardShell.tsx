@@ -41,6 +41,11 @@ export function ProductCardShell({ product }: ProductCardShellProps) {
           <p className="text-xs font-semibold uppercase text-[var(--color-shop-700)]">
             {product.unitLabel ?? "Grocery item"}
           </p>
+          {product.originRegion ? (
+            <p className="mt-1 text-xs font-semibold text-[var(--color-orange-600)]">
+              {product.originRegion}
+            </p>
+          ) : null}
           <Link
             href={`/shop/products/${product.slug}`}
             className="mt-1 block text-base font-bold text-[var(--color-foreground-strong)] hover:text-[var(--color-shop-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
