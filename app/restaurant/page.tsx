@@ -11,8 +11,10 @@ import { MealCardShell } from "@/components/restaurant/MealCardShell";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { FeatureCard } from "@/components/ui/FeatureCard";
+import { HeroCarousel } from "@/components/ui/HeroCarousel";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { restaurantHeroArtwork } from "@/lib/artwork";
 import { getBusinessSettings } from "@/lib/business-settings";
 import { getTodayRestaurantMenu } from "@/lib/restaurant-menu";
 
@@ -49,8 +51,12 @@ export default async function RestaurantPage() {
 
   return (
     <>
-      <section className="overflow-hidden bg-[linear-gradient(110deg,var(--color-pride-50),#fff_48%,var(--color-surface-warm))] py-10 sm:py-14 lg:py-16">
-        <Container className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
+      <HeroCarousel
+        slides={restaurantHeroArtwork}
+        ariaLabel="Pride of Scotland hero carousel"
+        className="min-h-[46rem] bg-[var(--color-pride-50)] py-10 sm:min-h-[44rem] sm:py-14 lg:min-h-[34rem] lg:py-16"
+      >
+        <Container className="relative z-10 grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
           <div>
             <BrandLockup brand="restaurant" size="lg" priority />
             <p className="mt-6 text-sm font-bold uppercase text-[var(--color-orange-600)]">
@@ -87,7 +93,7 @@ export default async function RestaurantPage() {
                 (item) => (
                   <div
                     key={item}
-                    className="rounded-[var(--radius-lg)] border border-[var(--color-pride-200)] bg-white p-4 text-sm font-bold text-[var(--color-pride-800)] shadow-[var(--shadow-input)]"
+                    className="rounded-[var(--radius-lg)] border border-[var(--color-pride-200)] bg-white/90 p-4 text-sm font-bold text-[var(--color-pride-800)] shadow-[var(--shadow-input)] backdrop-blur"
                   >
                     {item}
                   </div>
@@ -96,7 +102,7 @@ export default async function RestaurantPage() {
             </div>
           </div>
 
-          <aside className="rounded-[var(--radius-xl)] border border-[var(--color-pride-200)] bg-white p-5 shadow-[var(--shadow-card)]">
+          <aside className="rounded-[var(--radius-xl)] border border-[var(--color-pride-200)] bg-white/90 p-5 shadow-[var(--shadow-card)] backdrop-blur">
             <h2 className="text-lg font-bold text-[var(--color-pride-800)]">
               Order your meal
             </h2>
@@ -120,25 +126,7 @@ export default async function RestaurantPage() {
             </LinkButton>
           </aside>
         </Container>
-        <Container className="mt-8">
-          <div className="relative overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-pride-200)] bg-[var(--color-pride-900)] p-6 text-white shadow-[var(--shadow-card)] lg:p-8">
-            <div className="grid gap-4 sm:grid-cols-4">
-              {["Rice dishes", "Soups", "Stews", "Sides"].map((item) => (
-                <div
-                  key={item}
-                  className="min-h-32 rounded-[var(--radius-lg)] border border-white/15 bg-white/10 p-4"
-                >
-                  <Utensils aria-hidden="true" size={24} />
-                  <p className="mt-6 text-lg font-bold">{item}</p>
-                  <p className="mt-2 text-sm text-white/70">
-                    Details coming soon
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
+      </HeroCarousel>
 
       <section className="py-14 sm:py-18">
         <Container>

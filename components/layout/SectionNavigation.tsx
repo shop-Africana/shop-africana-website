@@ -26,7 +26,10 @@ export function SectionNavigation({ items, tone }: SectionNavigationProps) {
       : "hover:bg-[var(--color-pride-50)] hover:text-[var(--color-pride-800)]";
 
   return (
-    <nav aria-label={`${tone} navigation`} className="overflow-x-auto">
+    <nav
+      aria-label={`${tone} navigation`}
+      className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       <ul className="flex min-w-max gap-2 py-3">
         {items.map((item) => {
           const isActive =

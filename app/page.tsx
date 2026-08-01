@@ -21,9 +21,9 @@ import { FeatureCard } from "@/components/ui/FeatureCard";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { TestimonialCard } from "@/components/ui/TestimonialCard";
-import { categories, testimonials } from "@/data/homepage";
+import { testimonials } from "@/data/homepage";
 import { getBusinessSettings } from "@/lib/business-settings";
-import { getCatalogItems } from "@/lib/catalog";
+import { getCatalogItems, getCategories } from "@/lib/catalog";
 
 const trustFeatures = [
   {
@@ -43,10 +43,12 @@ const trustFeatures = [
 const trustIcons = [Truck, ShieldCheck, Headphones];
 
 export default async function Home() {
-  const [settings, featuredProducts, restaurantSpecials] = await Promise.all([
+  const [settings, featuredProducts, restaurantSpecials, groceryCategories] =
+    await Promise.all([
     getBusinessSettings(),
     getCatalogItems("grocery"),
     getCatalogItems("restaurant"),
+    getCategories("grocery"),
   ]);
 
   return (
@@ -70,8 +72,8 @@ export default async function Home() {
               Browse the grocery ranges being prepared for Shop Africana.
             </SectionHeading>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-              {categories.map((category) => (
-                <CategoryCard key={category.title} category={category} />
+              {groceryCategories.slice(0, 6).map((category) => (
+                <CategoryCard key={category.id} category={category} />
               ))}
             </div>
           </Container>
