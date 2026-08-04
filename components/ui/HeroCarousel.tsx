@@ -78,7 +78,6 @@ export function HeroCarousel({
             )}
           />
         ))}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.66)_42%,rgba(255,255,255,0.12)_72%)]" />
       </div>
       {children}
       {slideCount > 1 ? (

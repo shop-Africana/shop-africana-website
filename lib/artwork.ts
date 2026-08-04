@@ -64,8 +64,7 @@ export const groceryCategoryArtwork: Record<string, string> = {
   "fresh-fruits": "/images/categories/fresh-fruits.webp",
   "fresh-vegetables": "/images/categories/fresh-vegetables.webp",
   "frozen-foods": "/images/categories/frozen-foods.webp",
-  "health-foods-specialist-diets":
-    "/images/categories/health-foods-specialist-diets.webp",
+  "health-foods-specialist-diets": "/images/categories/health-foods-special-diets.webp",
   "herbs-spices-seasonings":
     "/images/categories/herbs-spices-seasonings.webp",
   "household-kitchen-essentials":
@@ -82,6 +81,114 @@ export const groceryCategoryArtwork: Record<string, string> = {
   "soft-drinks-juices": "/images/categories/soft-drinks-juices.webp",
   "tea-coffee": "/images/categories/tea-coffee.webp",
 };
+
+export const groceryCategoryArtworkDetails: Record<
+  string,
+  { name: string; description: string }
+> = {
+  "baby-foods-family-essentials": {
+    name: "Baby Foods & Family Essentials",
+    description: "Baby foods and family essentials.",
+  },
+  "beans-lentils-pulses": {
+    name: "Beans, Lentils & Pulses",
+    description: "Beans, lentils, peas and other pulses.",
+  },
+  "bread-pastries": {
+    name: "Bread, Pastries & Baked Goods",
+    description: "Bread, pastries and baked goods.",
+  },
+  "breakfast-cereals-porridge": {
+    name: "Breakfast Cereals & Porridge",
+    description: "Breakfast cereals, oats and porridge ranges.",
+  },
+  "canned-tinned-jarred": {
+    name: "Canned, Tinned & Jarred Foods",
+    description: "Canned, tinned and jarred grocery products.",
+  },
+  "cooking-oils": {
+    name: "Cooking Oils & Fats",
+    description: "Cooking oils, fats and related products.",
+  },
+  "dairy-eggs-chilled": {
+    name: "Dairy, Eggs & Chilled Foods",
+    description: "Dairy, eggs and chilled grocery products.",
+  },
+  "drinks-selection": {
+    name: "Drinks Selection",
+    description: "Drinks and store favourites.",
+  },
+  "fish-seafood": {
+    name: "Fish & Seafood",
+    description: "Fish, seafood and related products.",
+  },
+  "flour-baking": {
+    name: "Flour, Baking & Cooking Ingredients",
+    description: "Flour, baking products and cooking ingredients.",
+  },
+  "fresh-fruits": {
+    name: "Fresh Fruits",
+    description: "Fresh fruit ranges.",
+  },
+  "fresh-vegetables": {
+    name: "Fresh Vegetables",
+    description: "Fresh vegetable ranges.",
+  },
+  "frozen-foods": {
+    name: "Frozen Foods",
+    description: "Frozen grocery products.",
+  },
+  "health-foods-specialist-diets": {
+    name: "Health Foods & Specialist Diets",
+    description: "Health foods and specialist diet ranges.",
+  },
+  "herbs-spices-seasonings": {
+    name: "Herbs, Spices & Seasonings",
+    description: "Herbs, spices, seasoning blends and stock products.",
+  },
+  "household-kitchen-essentials": {
+    name: "Household & Kitchen Essentials",
+    description: "Household, kitchen and cleaning essentials.",
+  },
+  "meat-poultry": {
+    name: "Meat & Poultry",
+    description: "Meat and poultry products.",
+  },
+  "other-groceries": {
+    name: "Other Groceries",
+    description: "Other grocery products.",
+  },
+  "pasta-noodles": {
+    name: "Pasta, Noodles & Couscous",
+    description: "Pasta, noodles, couscous and similar staples.",
+  },
+  "ready-meals-convenience": {
+    name: "Ready Meals & Convenience Foods",
+    description: "Ready meals and convenience foods.",
+  },
+  "rice-grains": {
+    name: "Rice & Grains",
+    description: "Rice, grains and staple cereal products.",
+  },
+  "sauces-pastes-condiments": {
+    name: "Sauces, Pastes & Condiments",
+    description: "Sauces, pastes, condiments and table accompaniments.",
+  },
+  "snacks-biscuits-confectionery": {
+    name: "Snacks, Biscuits & Confectionery",
+    description: "Snacks, biscuits, sweets and confectionery.",
+  },
+  "soft-drinks-juices": {
+    name: "Soft Drinks, Juices & Malt Drinks",
+    description: "Soft drinks, juices, malt drinks and refreshments.",
+  },
+  "tea-coffee": {
+    name: "Tea, Coffee & Hot Drinks",
+    description: "Tea, coffee and hot drink products.",
+  },
+};
+
+export const groceryCategoryArtworkSlugs = Object.keys(groceryCategoryArtwork);
 
 export function getGroceryCategoryArtwork(slug: string | null | undefined) {
   return slug ? groceryCategoryArtwork[slug] ?? null : null;

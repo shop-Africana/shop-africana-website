@@ -57,18 +57,18 @@ export default async function RestaurantPage() {
         className="min-h-[46rem] bg-[var(--color-pride-50)] py-10 sm:min-h-[44rem] sm:py-14 lg:min-h-[34rem] lg:py-16"
       >
         <Container className="relative z-10 grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
-          <div>
+          <div className="rounded-[var(--radius-xl)] bg-[rgba(255,255,255,0.78)] p-5 shadow-[var(--shadow-card)] backdrop-blur-[2px] sm:p-7 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0">
             <BrandLockup brand="restaurant" size="lg" priority />
             <p className="mt-6 text-sm font-bold uppercase text-[var(--color-orange-600)]">
               Welcome to
             </p>
-            <h1 className="mt-2 text-4xl font-extrabold text-[var(--color-pride-800)] sm:text-5xl">
+            <h1 className="mt-2 text-4xl font-extrabold text-[var(--color-pride-800)] [text-shadow:0_2px_10px_rgba(255,255,255,0.88)] sm:text-5xl">
               Pride of Scotland
             </h1>
-            <p className="mt-3 text-2xl font-bold text-[var(--color-pride-700)]">
+            <p className="mt-3 text-2xl font-bold text-[var(--color-pride-700)] [text-shadow:0_1px_8px_rgba(255,255,255,0.92)]">
               African & Asian Restaurant
             </p>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-muted)]">
+            <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-muted)] [text-shadow:0_1px_8px_rgba(255,255,255,0.92)]">
               Explore African and Asian restaurant information for Dundee, with
               menu details being prepared for publication.
             </p>

@@ -3,7 +3,6 @@ import {
   Headphones,
   MapPin,
   ShieldCheck,
-  ShoppingBasket,
   Truck,
   Utensils,
 } from "lucide-react";
@@ -15,6 +14,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { TopBar } from "@/components/layout/TopBar";
 import { CategoryCard } from "@/components/commerce/CategoryCard";
+import { ProductCardShell } from "@/components/commerce/ProductCardShell";
 import { MealCardShell } from "@/components/restaurant/MealCardShell";
 import { Container } from "@/components/ui/Container";
 import { FeatureCard } from "@/components/ui/FeatureCard";
@@ -45,11 +45,11 @@ const trustIcons = [Truck, ShieldCheck, Headphones];
 export default async function Home() {
   const [settings, featuredProducts, restaurantSpecials, groceryCategories] =
     await Promise.all([
-    getBusinessSettings(),
-    getCatalogItems("grocery"),
-    getCatalogItems("restaurant"),
-    getCategories("grocery"),
-  ]);
+      getBusinessSettings(),
+      getCatalogItems("grocery"),
+      getCatalogItems("restaurant"),
+      getCategories("grocery"),
+    ]);
 
   return (
     <>
@@ -71,7 +71,7 @@ export default async function Home() {
             <SectionHeading title="Shop our top categories">
               Browse the grocery ranges being prepared for Shop Africana.
             </SectionHeading>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               {groceryCategories.slice(0, 6).map((category) => (
                 <CategoryCard key={category.id} category={category} />
               ))}
@@ -79,25 +79,26 @@ export default async function Home() {
           </Container>
         </section>
 
-        <section className="border-y border-[var(--color-border)] bg-[var(--color-muted-surface)] py-14 sm:py-18 lg:py-20">
-          <Container className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-            <div className="rounded-[var(--radius-xl)] border border-[var(--color-shop-200)] bg-[linear-gradient(145deg,#fff,var(--color-shop-50))] p-6 shadow-[var(--shadow-card)]">
-              <SectionHeading title="Why shop with us?">
-                A connected experience for groceries, restaurant discovery and
-                local food convenience.
-              </SectionHeading>
-              <div className="mt-8 grid gap-4">
-                {trustFeatures.map((feature, index) => (
-                  <FeatureCard
-                    key={feature.title}
-                    feature={feature}
-                    icon={trustIcons[index]}
-                  />
-                ))}
+        <section className="border-y border-[var(--color-border)] bg-[linear-gradient(180deg,var(--color-muted-surface),#fff)] py-14 sm:py-18 lg:py-20">
+          <Container>
+            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+              <div>
+                <SectionHeading title="Why shop with us?">
+                  A connected experience for groceries, restaurant discovery and
+                  local food convenience.
+                </SectionHeading>
+                <div className="mt-8 grid gap-4">
+                  {trustFeatures.map((feature, index) => (
+                    <FeatureCard
+                      key={feature.title}
+                      feature={feature}
+                      icon={trustIcons[index]}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="rounded-[var(--radius-xl)] border border-[var(--color-pride-200)] bg-[var(--color-surface-warm)] p-6 shadow-[var(--shadow-card)]">
+              <div>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <SectionHeading title="Menu highlights">
                   Pride of Scotland menu details will be published soon.
@@ -108,8 +109,9 @@ export default async function Home() {
               </div>
               <div className="mt-8 grid gap-5 md:grid-cols-3">
                 {restaurantSpecials.slice(0, 3).map((meal) => (
-                  <MealCardShell key={meal.id} meal={meal} />
+                  <MealCardShell key={meal.id} meal={meal} showImage={false} />
                 ))}
+              </div>
               </div>
             </div>
           </Container>
@@ -127,20 +129,7 @@ export default async function Home() {
             </div>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {featuredProducts.slice(0, 4).map((product) => (
-                <article
-                  key={product.id}
-                  className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-card)]"
-                >
-                  <div className="flex size-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-shop-50)] text-[var(--color-shop-700)]">
-                    <ShoppingBasket aria-hidden="true" size={22} />
-                  </div>
-                  <h3 className="mt-5 text-lg font-bold text-[var(--color-shop-900)]">
-                    {product.name}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-                    {product.description}
-                  </p>
-                </article>
+                <ProductCardShell key={product.id} product={product} />
               ))}
             </div>
           </Container>

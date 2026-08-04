@@ -1,4 +1,8 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  groceryCategoryArtworkDetails,
+  groceryCategoryArtworkSlugs,
+} from "@/lib/artwork";
 import type { BusinessType, CatalogCategory, CatalogItem } from "@/types";
 
 export const demoCategories: CatalogCategory[] = [
@@ -71,7 +75,7 @@ export const demoCatalogItems: CatalogItem[] = [
     businessType: "grocery",
     name: "Pantry Selection",
     slug: "pantry-selection",
-    description: "Product selection will be available soon.",
+    description: "Grocery range available for online ordering.",
     price: 249,
     imageUrl: null,
     unitLabel: "range",
@@ -246,15 +250,44 @@ function filterPublicCategories(categories: CatalogCategory[]) {
   return categories.filter((category) => !isLegacyGroceryOriginCategory(category));
 }
 
+function withCanonicalGroceryCategories(categories: CatalogCategory[]) {
+  const validCategories = filterPublicCategories(categories);
+  const bySlug = new Map(validCategories.map((category) => [category.slug, category]));
+
+  groceryCategoryArtworkSlugs.forEach((slug, index) => {
+    if (bySlug.has(slug)) return;
+
+    const details = groceryCategoryArtworkDetails[slug];
+    if (!details) return;
+
+    bySlug.set(slug, {
+      id: `taxonomy-${slug}`,
+      name: details.name,
+      slug,
+      businessType: "grocery",
+      description: details.description,
+      imageUrl: null,
+      sortOrder: 1000 + index,
+      isActive: true,
+    });
+  });
+
+  return Array.from(bySlug.values()).sort((a, b) => {
+    const sortDiff = a.sortOrder - b.sortOrder;
+    return sortDiff === 0 ? a.name.localeCompare(b.name) : sortDiff;
+  });
+}
+
 export async function getCategories(businessType?: BusinessType) {
   const supabase = createSupabaseServerClient();
 
   if (!supabase) {
-    return filterPublicCategories(
-      demoCategories.filter(
-        (category) => !businessType || category.businessType === businessType,
-      ),
+    const fallbackCategories = demoCategories.filter(
+      (category) => !businessType || category.businessType === businessType,
     );
+    return businessType === "grocery"
+      ? withCanonicalGroceryCategories(fallbackCategories)
+      : filterPublicCategories(fallbackCategories);
   }
 
   let query = supabase
@@ -270,14 +303,18 @@ export async function getCategories(businessType?: BusinessType) {
   const { data, error } = await query;
 
   if (error || !data) {
-    return filterPublicCategories(
-      demoCategories.filter(
-        (category) => !businessType || category.businessType === businessType,
-      ),
+    const fallbackCategories = demoCategories.filter(
+      (category) => !businessType || category.businessType === businessType,
     );
+    return businessType === "grocery"
+      ? withCanonicalGroceryCategories(fallbackCategories)
+      : filterPublicCategories(fallbackCategories);
   }
 
-  return filterPublicCategories(data.map((row) => mapCategory(row as CategoryRow)));
+  const categories = data.map((row) => mapCategory(row as CategoryRow));
+  return businessType === "grocery"
+    ? withCanonicalGroceryCategories(categories)
+    : filterPublicCategories(categories);
 }
 
 export async function getCatalogItems(businessType?: BusinessType) {

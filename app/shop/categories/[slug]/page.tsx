@@ -4,7 +4,10 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { ProductCardShell } from "@/components/commerce/ProductCardShell";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getGroceryCategoryArtwork } from "@/lib/artwork";
+import {
+  getGroceryCategoryArtwork,
+  groceryCategoryArtworkDetails,
+} from "@/lib/artwork";
 import { getCatalogItems, getCategories } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
@@ -19,14 +22,24 @@ export default async function ShopCategoryPage({
     getCategories("grocery"),
     getCatalogItems("grocery"),
   ]);
-  const category = categories.find((item) => item.slug === slug);
+  const category =
+    categories.find((item) => item.slug === slug) ??
+    (groceryCategoryArtworkDetails[slug]
+      ? {
+          id: null,
+          name: groceryCategoryArtworkDetails[slug].name,
+          slug,
+          description: groceryCategoryArtworkDetails[slug].description,
+          imageUrl: null,
+        }
+      : null);
 
   if (!category) notFound();
 
   const categoryImage =
     category.imageUrl ?? getGroceryCategoryArtwork(category.slug);
   const categoryProducts = products.filter(
-    (product) => product.categoryId === category.id,
+    (product) => category.id && product.categoryId === category.id,
   );
 
   return (
@@ -41,15 +54,14 @@ export default async function ShopCategoryPage({
         />
         <div className="mt-8 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-shop-200)] bg-white shadow-[var(--shadow-card)]">
           {categoryImage ? (
-            <div className="relative min-h-[18rem] bg-[var(--color-shop-50)] sm:min-h-[24rem]">
+            <div className="relative aspect-[3/2] bg-[linear-gradient(135deg,var(--color-shop-50),#fff)]">
               <Image
                 src={categoryImage}
                 alt={`${category.name} category artwork`}
                 fill
                 sizes="(min-width: 1024px) 80vw, 100vw"
-                className="object-cover"
+                className="object-contain p-2 sm:p-4"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.9),rgba(255,255,255,0.55)_48%,rgba(255,255,255,0.1))]" />
             </div>
           ) : null}
           <div className="p-6 sm:p-8">

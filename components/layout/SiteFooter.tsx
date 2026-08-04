@@ -74,18 +74,24 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
           <div className="mt-8">
             <h2 className="text-sm font-bold text-white">Contact</h2>
             <div className="mt-6 space-y-3 text-sm text-white/75">
-              <p className="flex items-start gap-2">
-                <MapPin aria-hidden="true" size={16} className="mt-0.5" />
-                {address || "Business address to be confirmed"}
-              </p>
-              <p className="flex items-start gap-2">
-                <Phone aria-hidden="true" size={16} className="mt-0.5" />
-                {settings.contactNumber ?? "Contact number to be added"}
-              </p>
-              <p className="flex items-start gap-2">
-                <Mail aria-hidden="true" size={16} className="mt-0.5" />
-                {settings.publicEmail ?? "Email address to be added"}
-              </p>
+              {address ? (
+                <p className="flex items-start gap-2">
+                  <MapPin aria-hidden="true" size={16} className="mt-0.5" />
+                  {address}
+                </p>
+              ) : null}
+              {settings.contactNumber ? (
+                <p className="flex items-start gap-2">
+                  <Phone aria-hidden="true" size={16} className="mt-0.5" />
+                  {settings.contactNumber}
+                </p>
+              ) : null}
+              {settings.publicEmail ? (
+                <p className="flex items-start gap-2">
+                  <Mail aria-hidden="true" size={16} className="mt-0.5" />
+                  {settings.publicEmail}
+                </p>
+              ) : null}
               {whatsappHref ? (
                 <Link
                   href={whatsappHref}

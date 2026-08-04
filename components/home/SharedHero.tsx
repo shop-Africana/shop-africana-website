@@ -1,5 +1,4 @@
 import { CheckCircle2, ShoppingBasket, Utensils } from "lucide-react";
-import { BrandSwitcher } from "@/components/layout/BrandSwitcher";
 import { Container } from "@/components/ui/Container";
 import { HeroCarousel } from "@/components/ui/HeroCarousel";
 import { LinkButton } from "@/components/ui/LinkButton";
@@ -13,15 +12,14 @@ export function SharedHero() {
       className="min-h-[42rem] py-12 sm:min-h-[44rem] sm:py-16 lg:min-h-[40rem] lg:py-20"
     >
       <Container>
-        <div className="max-w-3xl">
-          <BrandSwitcher compact />
-          <p className="mt-8 text-sm font-bold uppercase text-[var(--color-orange-600)]">
+        <div className="max-w-xl rounded-[var(--radius-xl)] bg-[rgba(255,255,255,0.76)] p-5 shadow-[var(--shadow-card)] backdrop-blur-[2px] sm:p-7 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0">
+          <p className="text-sm font-bold uppercase text-[var(--color-orange-600)]">
             Welcome to
           </p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-extrabold leading-tight text-[var(--color-shop-900)] sm:text-5xl lg:text-6xl">
+          <h1 className="mt-3 max-w-[16ch] text-4xl font-extrabold leading-tight text-[var(--color-shop-900)] [text-shadow:0_2px_10px_rgba(255,255,255,0.9)] sm:text-5xl">
             Shop Africana & Pride of Scotland
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-8 text-[var(--color-muted)]">
+          <p className="mt-5 max-w-xl text-lg leading-8 text-[var(--color-muted)] [text-shadow:0_1px_8px_rgba(255,255,255,0.92)]">
             One connected Dundee experience for Afro-Caribbean grocery browsing
             and African & Asian restaurant discovery.
           </p>

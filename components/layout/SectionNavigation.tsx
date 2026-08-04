@@ -30,7 +30,12 @@ export function SectionNavigation({ items, tone }: SectionNavigationProps) {
       aria-label={`${tone} navigation`}
       className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      <ul className="flex min-w-max gap-2 py-3">
+      <ul
+        className={cn(
+          "flex min-w-max gap-2",
+          tone === "shop" ? "py-1 lg:justify-center" : "py-3",
+        )}
+      >
         {items.map((item) => {
           const isActive =
             pathname === item.href ||

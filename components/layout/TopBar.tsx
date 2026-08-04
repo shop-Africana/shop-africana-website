@@ -15,14 +15,18 @@ export function TopBar({ settings }: TopBarProps) {
           {settings.serviceAreaText}
         </p>
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-white/85">
-          <span className="flex items-center gap-2">
-            <Clock aria-hidden="true" size={14} />
-            {settings.openingHoursText ?? "Opening hours will be published soon"}
-          </span>
-          <span className="flex items-center gap-2">
-            <Phone aria-hidden="true" size={14} />
-            {settings.contactNumber ?? "Contact number to be added"}
-          </span>
+          {settings.openingHoursText ? (
+            <span className="flex items-center gap-2">
+              <Clock aria-hidden="true" size={14} />
+              {settings.openingHoursText}
+            </span>
+          ) : null}
+          {settings.contactNumber ? (
+            <span className="flex items-center gap-2">
+              <Phone aria-hidden="true" size={14} />
+              {settings.contactNumber}
+            </span>
+          ) : null}
         </div>
       </Container>
     </div>
