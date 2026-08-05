@@ -1,78 +1,175 @@
 import {
   ChefHat,
-  Clock,
   MessageCircle,
   PackageCheck,
+  Sparkles,
   Truck,
   Utensils,
 } from "lucide-react";
-import { BrandLockup } from "@/components/brand/BrandLockup";
-import { MealCardShell } from "@/components/restaurant/MealCardShell";
-import { Badge } from "@/components/ui/Badge";
+import { CallNowControl } from "@/components/restaurant/CallNowControl";
+import { RestaurantMenuWorkspace } from "@/components/restaurant/RestaurantMenuWorkspace";
+import { BusinessFloatingActions } from "@/components/ui/BusinessFloatingActions";
 import { Container } from "@/components/ui/Container";
-import { FeatureCard } from "@/components/ui/FeatureCard";
 import { HeroCarousel } from "@/components/ui/HeroCarousel";
 import { LinkButton } from "@/components/ui/LinkButton";
-import { SectionHeading } from "@/components/ui/SectionHeading";
 import { restaurantHeroArtwork } from "@/lib/artwork";
 import { getBusinessSettings } from "@/lib/business-settings";
-import { getTodayRestaurantMenu } from "@/lib/restaurant-menu";
+import {
+  getRestaurantMenuForWeekday,
+  getTodayRestaurantMenu,
+} from "@/lib/restaurant-menu";
+import { getWhatsAppHref } from "@/lib/whatsapp";
+import type { MenuWeekday, RestaurantMenuItem, RestaurantTodayMenu } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-const featureIcons = [ChefHat, PackageCheck, Truck, MessageCircle];
+const weekdays: MenuWeekday[] = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+];
+
+const benefits = [
+  {
+    title: "Freshly Prepared Daily",
+    description: "Restaurant meals are prepared for the active service menu.",
+    icon: ChefHat,
+  },
+  {
+    title: "Authentic African & Asian Flavours",
+    description: "A focused Pride of Scotland menu for Dundee customers.",
+    icon: Sparkles,
+  },
+  {
+    title: "Collection and Local Delivery",
+    description: "Choose the fulfilment option that suits your order.",
+    icon: Truck,
+  },
+  {
+    title: "Order by WhatsApp",
+    description: "Use WhatsApp when the restaurant number is available.",
+    icon: MessageCircle,
+  },
+];
+
+const whyChooseUs = [
+  {
+    title: "Fresh Ingredients",
+    description: "Prepared with care for the published restaurant menu.",
+    icon: PackageCheck,
+  },
+  {
+    title: "Traditional Recipes",
+    description: "African and Asian cooking with a warm local focus.",
+    icon: ChefHat,
+  },
+  {
+    title: "Generous Portions",
+    description: "Comforting restaurant dishes for everyday ordering.",
+    icon: Utensils,
+  },
+  {
+    title: "Local Dundee Service",
+    description: "Serving customers from Pride of Scotland in Dundee.",
+    icon: Truck,
+  },
+];
+
+function normalizePhoneHref(number: string | null) {
+  const cleaned = number?.replace(/[^\d+]/g, "") ?? "";
+  if (!/^\+?[1-9]\d{7,14}$/.test(cleaned)) return null;
+  return `tel:${cleaned}`;
+}
+
+function cleanPublicMenuDescription(description: string | null) {
+  if (!description) return null;
+  const lower = description.toLowerCase();
+
+  if (
+    lower.includes("published soon") ||
+    lower.includes("will be added") ||
+    lower.includes("menu details") ||
+    lower.includes("confirmed details") ||
+    lower.includes("details soon")
+  ) {
+    return null;
+  }
+
+  return description;
+}
+
+function sanitizeMenu(menu: RestaurantTodayMenu): RestaurantTodayMenu {
+  return {
+    ...menu,
+    groups: menu.groups.map((group) => ({
+      ...group,
+      items: group.items.map(
+        (item): RestaurantMenuItem => ({
+          ...item,
+          description: cleanPublicMenuDescription(item.description),
+        }),
+      ),
+    })),
+  };
+}
+
 export default async function RestaurantPage() {
-  const [settings, todayMenu] = await Promise.all([
+  const [settings, todayMenu, ...weekdayMenus] = await Promise.all([
     getBusinessSettings(),
     getTodayRestaurantMenu(),
+    ...weekdays.map((weekday) => getRestaurantMenuForWeekday(weekday)),
   ]);
-  const todayItems = todayMenu.groups.flatMap((group) => group.items);
-  const restaurantFeatures = [
-    {
-      title: "African & Asian Focus",
-      description: "Menu details will be published soon.",
-    },
-    {
-      title: "Collection Information",
-      description: settings.collectionEnabled
-        ? "Collection is available for restaurant orders."
-        : "Collection details will be confirmed.",
-    },
-    {
-      title: "Delivery Information",
-      description:
-        "Delivery charge will be confirmed according to your order and location.",
-    },
-    {
-      title: "Direct Ordering",
-      description: settings.contactNumber ?? "Contact number to be added.",
-    },
-  ];
+  const cleanTodayMenu = sanitizeMenu(todayMenu);
+  const weeklyMenus = Object.fromEntries(
+    weekdays.map((weekday, index) => [
+      weekday,
+      sanitizeMenu(weekdayMenus[index] as RestaurantTodayMenu),
+    ]),
+  ) as Record<MenuWeekday, RestaurantTodayMenu>;
+  const whatsappHref = getWhatsAppHref(
+    settings.whatsappNumber,
+    "Hello Pride of Scotland, I would like to ask about today's menu.",
+  );
+  const publicPhoneNumber = settings.contactNumber ?? settings.whatsappNumber;
+  const telHref = normalizePhoneHref(publicPhoneNumber);
+  const hasCallControl = Boolean(publicPhoneNumber && telHref);
+  const bookingMealOptions = Array.from(
+    new Set(
+      cleanTodayMenu.groups
+        .flatMap((group) => group.items)
+        .filter((item) => item.isAvailable && item.menuStatus === "available")
+        .map((item) => item.name),
+    ),
+  );
 
   return (
     <>
       <HeroCarousel
         slides={restaurantHeroArtwork}
         ariaLabel="Pride of Scotland hero carousel"
-        className="min-h-[46rem] bg-[var(--color-pride-50)] py-10 sm:min-h-[44rem] sm:py-14 lg:min-h-[34rem] lg:py-16"
+        className="min-h-[28rem] border-b-0 bg-[var(--color-pride-900)] py-10 sm:min-h-[31rem] sm:py-12 md:min-h-[32rem] lg:min-h-[35rem] lg:py-24"
+        imageClassName="object-center"
       >
-        <Container className="relative z-10 grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
-          <div className="rounded-[var(--radius-xl)] bg-[rgba(255,255,255,0.78)] p-5 shadow-[var(--shadow-card)] backdrop-blur-[2px] sm:p-7 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0">
-            <BrandLockup brand="restaurant" size="lg" priority />
-            <p className="mt-6 text-sm font-bold uppercase text-[var(--color-orange-600)]">
+        <Container className="relative z-10">
+          <div className="max-w-3xl">
+            <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[var(--color-orange-600)]">
               Welcome to
             </p>
-            <h1 className="mt-2 text-4xl font-extrabold text-[var(--color-pride-800)] [text-shadow:0_2px_10px_rgba(255,255,255,0.88)] sm:text-5xl">
+            <h1 className="mt-3 text-4xl font-extrabold leading-tight text-white [text-shadow:0_2px_18px_rgba(83,13,42,0.42)] sm:text-5xl lg:mt-4 lg:text-7xl">
               Pride of Scotland
             </h1>
-            <p className="mt-3 text-2xl font-bold text-[var(--color-pride-700)] [text-shadow:0_1px_8px_rgba(255,255,255,0.92)]">
+            <p className="mt-2 text-xl font-extrabold text-[var(--color-amber-100)] [text-shadow:0_1px_12px_rgba(83,13,42,0.5)] sm:text-2xl lg:mt-3 lg:text-3xl">
               African & Asian Restaurant
             </p>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-muted)] [text-shadow:0_1px_8px_rgba(255,255,255,0.92)]">
-              Explore African and Asian restaurant information for Dundee, with
-              menu details being prepared for publication.
+            <p className="mt-4 max-w-[34rem] text-sm leading-7 text-[var(--color-surface-warm)] [text-shadow:0_1px_10px_rgba(83,13,42,0.62)] sm:text-base lg:mt-6 lg:max-w-2xl lg:text-lg lg:leading-8">
+              Explore the live Pride of Scotland menu for African and Asian
+              restaurant ordering in Dundee.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex max-w-full flex-col gap-3 sm:flex-row sm:flex-wrap lg:mt-8">
               <LinkButton
                 href="/restaurant/menu"
                 variant="restaurant"
@@ -80,113 +177,96 @@ export default async function RestaurantPage() {
               >
                 Today&apos;s Menu
               </LinkButton>
-              <LinkButton
-                href="/contact"
-                variant="outline"
-                icon={<MessageCircle aria-hidden="true" size={18} />}
-              >
-                Contact Details
-              </LinkButton>
-            </div>
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {["African dishes", "Asian dishes", "Menu details soon"].map(
-                (item) => (
-                  <div
-                    key={item}
-                    className="rounded-[var(--radius-lg)] border border-[var(--color-pride-200)] bg-white/90 p-4 text-sm font-bold text-[var(--color-pride-800)] shadow-[var(--shadow-input)] backdrop-blur"
-                  >
-                    {item}
-                  </div>
-                ),
-              )}
+              {whatsappHref ? (
+                <LinkButton
+                  href={whatsappHref}
+                  variant="secondary"
+                  icon={<MessageCircle aria-hidden="true" size={18} />}
+                >
+                  Order on WhatsApp
+                </LinkButton>
+              ) : null}
+              {hasCallControl ? (
+                <CallNowControl
+                  displayNumber={publicPhoneNumber as string}
+                  telHref={telHref as string}
+                />
+              ) : null}
             </div>
           </div>
-
-          <aside className="rounded-[var(--radius-xl)] border border-[var(--color-pride-200)] bg-white/90 p-5 shadow-[var(--shadow-card)] backdrop-blur">
-            <h2 className="text-lg font-bold text-[var(--color-pride-800)]">
-              Order your meal
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-              Delivery and collection are available. Delivery charge will be
-              confirmed according to your order and location.
-            </p>
-            <div className="mt-5 grid gap-3">
-              <Badge tone="success">Today&apos;s scheduled menu</Badge>
-              <Badge tone="destructive">Finished state</Badge>
-              <Badge tone="warning">
-                {settings.openingHoursText ?? "Opening hours will be published soon"}
-              </Badge>
-            </div>
-            <LinkButton
-              href="/restaurant/menu"
-              variant="secondary"
-              className="mt-6 w-full"
-            >
-              View Ordering Information
-            </LinkButton>
-          </aside>
         </Container>
       </HeroCarousel>
 
-      <section className="py-14 sm:py-18">
+      <RestaurantMenuWorkspace
+        todayMenu={cleanTodayMenu}
+        weeklyMenus={weeklyMenus}
+        settings={settings}
+      />
+      <BusinessFloatingActions
+        business="restaurant"
+        phoneNumber={publicPhoneNumber}
+        whatsappNumber={settings.whatsappNumber}
+        bookingMealOptions={bookingMealOptions}
+      />
+
+      <section className="border-y border-[rgba(128,20,61,0.12)] bg-[linear-gradient(180deg,#fff7ed,var(--color-surface-warm))] py-10 sm:py-12">
         <Container>
-          <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-card)]">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <SectionHeading title="Today's menu">
-                Scheduled for {todayMenu.serviceDate} in the UK service day.
-              </SectionHeading>
-              <div className="flex flex-wrap gap-2">
-                {todayMenu.groups.map((group) => (
-                  <Badge key={group.period.id} tone="restaurant">
-                    {group.period.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {todayItems.length > 0 ? (
-                todayItems
-                  .slice(0, 6)
-                  .map((meal) => (
-                    <MealCardShell
-                      key={meal.id}
-                      meal={meal}
-                      menuStatus={meal.menuStatus}
-                    />
-                  ))
-              ) : (
-                <p className="text-sm text-[var(--color-muted)]">
-                  Today&apos;s menu will be published soon.
-                </p>
-              )}
-            </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {benefits.map((benefit) => {
+              const Icon = benefit.icon;
+
+              return (
+                <article
+                  key={benefit.title}
+                  className="rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(135deg,#fffaf0,var(--color-pride-50))] p-5 shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+                >
+                  <div className="flex size-12 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-amber-100)] text-[var(--color-pride-700)]">
+                    <Icon aria-hidden="true" size={22} />
+                  </div>
+                  <h2 className="mt-4 text-base font-extrabold text-[var(--color-pride-900)]">
+                    {benefit.title}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                    {benefit.description}
+                  </p>
+                </article>
+              );
+            })}
           </div>
         </Container>
       </section>
 
-      <section className="border-y border-[var(--color-border)] bg-[var(--color-surface-warm)] py-14 sm:py-18">
+      <section className="bg-[var(--color-background)] py-12 sm:py-16">
         <Container>
-          <SectionHeading title="Why choose us">
-            A focused restaurant experience for African and Asian food in
-            Dundee.
-          </SectionHeading>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {restaurantFeatures.map((feature, index) => (
-              <FeatureCard
-                key={feature.title}
-                feature={feature}
-                icon={featureIcons[index]}
-                tone="restaurant"
-              />
-            ))}
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-[var(--color-orange-600)]">
+              Why Choose Us
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold text-[var(--color-pride-900)] sm:text-4xl">
+              Pride of Scotland restaurant service
+            </h2>
           </div>
-          <div className="mt-8 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-5">
-            <div className="flex items-center gap-3 text-[var(--color-pride-800)]">
-              <Clock aria-hidden="true" size={22} />
-              <p className="font-bold">
-                {settings.openingHoursText ?? "Opening hours will be published soon"}
-              </p>
-            </div>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {whyChooseUs.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <article
+                  key={item.title}
+                  className="flex h-full flex-col rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(180deg,#fff7ed,#fff)] p-5 shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:border-[var(--color-pride-200)] hover:shadow-[var(--shadow-card)]"
+                >
+                  <div className="flex size-12 items-center justify-center rounded-[var(--radius-lg)] bg-[rgba(128,20,61,0.1)] text-[var(--color-pride-700)]">
+                    <Icon aria-hidden="true" size={22} />
+                  </div>
+                  <h3 className="mt-4 text-lg font-extrabold text-[var(--color-pride-900)]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                    {item.description}
+                  </p>
+                </article>
+              );
+            })}
           </div>
         </Container>
       </section>

@@ -33,7 +33,7 @@ export async function SectionShell({
     <>
       <TopBar settings={settings} />
       <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-white/95 backdrop-blur">
-        <Container className={tone === "shop" ? "max-w-[90rem]" : undefined}>
+        <Container className="max-w-[90rem]">
           {tone === "shop" ? (
             <div className="flex min-h-24 flex-wrap items-center gap-x-6 gap-y-3 py-4 lg:flex-nowrap">
               <div className="min-w-0">
@@ -48,18 +48,18 @@ export async function SectionShell({
               <HeaderActions />
             </div>
           ) : (
-            <>
-              <div className="flex min-h-20 items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <BrandSwitcher primary={tone} compact />
-                  <p className="mt-1 hidden text-xs font-semibold text-[var(--color-muted)] sm:block">
-                    {brand} - {descriptor}
-                  </p>
-                </div>
-                <HeaderActions />
+            <div className="flex min-h-24 flex-wrap items-center gap-x-6 gap-y-3 py-4 lg:flex-nowrap">
+              <div className="min-w-0">
+                <BrandSwitcher primary={tone} />
+                <p className="sr-only">
+                  {brand} {descriptor}
+                </p>
               </div>
-              <SectionNavigation items={navItems} tone={tone} />
-            </>
+              <div className="order-3 w-full min-w-0 lg:order-none lg:flex-1">
+                <SectionNavigation items={navItems} tone={tone} />
+              </div>
+              <HeaderActions mainHomepageVisibility="desktop" />
+            </div>
           )}
         </Container>
       </header>
@@ -69,12 +69,21 @@ export async function SectionShell({
   );
 }
 
-function HeaderActions() {
+function HeaderActions({
+  mainHomepageVisibility = "tablet",
+}: {
+  mainHomepageVisibility?: "tablet" | "desktop";
+}) {
+  const homepageClass =
+    mainHomepageVisibility === "desktop"
+      ? "hidden text-sm font-semibold text-[var(--color-muted)] transition hover:text-[var(--color-shop-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-focus)] lg:inline"
+      : "hidden text-sm font-semibold text-[var(--color-muted)] transition hover:text-[var(--color-shop-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-focus)] sm:inline";
+
   return (
     <div className="flex shrink-0 items-center gap-2">
       <Link
         href="/"
-        className="hidden text-sm font-semibold text-[var(--color-muted)] transition hover:text-[var(--color-shop-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-focus)] sm:inline"
+        className={homepageClass}
       >
         Main homepage
       </Link>

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export type BusinessSettings = {
   shopBusinessName: string;
@@ -101,7 +102,7 @@ function mapSettings(row: BusinessSettingsRow | null): BusinessSettings {
 export async function getBusinessSettings() {
   const supabase = createSupabaseServerClient();
 
-  if (!supabase) return neutralBusinessSettings;
+  if (!supabase) return getBusinessSettingsWithAdminFallback();
 
   const { data, error } = await supabase
     .from("business_settings")
@@ -111,9 +112,28 @@ export async function getBusinessSettings() {
     .eq("singleton_key", "default")
     .maybeSingle();
 
-  if (error) return neutralBusinessSettings;
+  if (error || !data) return getBusinessSettingsWithAdminFallback();
 
   return mapSettings(data as BusinessSettingsRow | null);
+}
+
+async function getBusinessSettingsWithAdminFallback() {
+  try {
+    const admin = createSupabaseAdminClient();
+    const { data, error } = await admin
+      .from("business_settings")
+      .select(
+        "shop_business_name,restaurant_business_name,address_line_1,address_line_2,city,postcode,public_email,contact_number,whatsapp_number,opening_hours_text,service_area_text,order_cutoff_text,temporary_closure_message,delivery_enabled,collection_enabled,delivery_fee,free_delivery_threshold,ordering_enabled",
+      )
+      .eq("singleton_key", "default")
+      .maybeSingle();
+
+    if (error) return neutralBusinessSettings;
+
+    return mapSettings(data as BusinessSettingsRow | null);
+  } catch {
+    return neutralBusinessSettings;
+  }
 }
 
 export function formatAddress(settings: BusinessSettings) {

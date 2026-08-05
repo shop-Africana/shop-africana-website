@@ -34,6 +34,7 @@ import type { LucideIcon } from "lucide-react";
 import { ProductCardShell } from "@/components/commerce/ProductCardShell";
 import { ShopBasketSummary } from "@/components/commerce/ShopBasketSummary";
 import { Badge } from "@/components/ui/Badge";
+import { BusinessFloatingActions } from "@/components/ui/BusinessFloatingActions";
 import { Container } from "@/components/ui/Container";
 import { HeroCarousel } from "@/components/ui/HeroCarousel";
 import { LinkButton } from "@/components/ui/LinkButton";
@@ -765,6 +766,11 @@ export default async function ShopPage({
           </section>
         </Container>
       </section>
+      <BusinessFloatingActions
+        business="shop"
+        phoneNumber={settings.contactNumber}
+        whatsappNumber={settings.whatsappNumber}
+      />
     </>
   );
 }

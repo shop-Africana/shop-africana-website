@@ -1,12 +1,9 @@
 import type { BasketItem } from "@/types";
+import { normalizeUkWhatsAppNumber } from "@/lib/business-contacts";
 import { formatMoney } from "@/lib/money";
 
-const phonePattern = /^\+?[1-9]\d{7,14}$/;
-
 export function normalizeWhatsAppNumber(number: string | null | undefined) {
-  const cleaned = number?.replace(/[^\d+]/g, "") ?? "";
-  if (!phonePattern.test(cleaned)) return null;
-  return cleaned.replace(/^\+/, "");
+  return normalizeUkWhatsAppNumber(number);
 }
 
 export function getWhatsAppHref(
@@ -44,4 +41,56 @@ export function buildBasketWhatsAppMessage({
   ];
 
   return lines.filter(Boolean).join("\n");
+}
+
+export function buildGroceryWhatsAppOrderMessage({
+  items,
+  subtotal,
+  totalQuantity,
+}: {
+  items: Array<Pick<BasketItem, "name" | "quantity" | "unitPrice">>;
+  subtotal: number;
+  totalQuantity: number;
+}) {
+  return [
+    "Hello, I would like to enquire about this Shop Africana grocery basket:",
+    "",
+    ...items.map(
+      (item) =>
+        `${item.quantity} x ${item.name} - ${formatMoney(
+          item.unitPrice * item.quantity,
+        )}`,
+    ),
+    "",
+    `Subtotal: ${formatMoney(subtotal)}`,
+    `Total items: ${totalQuantity}`,
+    "",
+    "Please confirm availability and the next steps.",
+  ].join("\n");
+}
+
+export function buildRestaurantWhatsAppOrderMessage({
+  items,
+  subtotal,
+  totalQuantity,
+}: {
+  items: Array<Pick<BasketItem, "name" | "quantity" | "unitPrice">>;
+  subtotal: number;
+  totalQuantity: number;
+}) {
+  return [
+    "Hello, I would like to place this Pride of Scotland order:",
+    "",
+    ...items.map(
+      (item) =>
+        `${item.quantity} x ${item.name} - ${formatMoney(
+          item.unitPrice * item.quantity,
+        )}`,
+    ),
+    "",
+    `Subtotal: ${formatMoney(subtotal)}`,
+    `Total items: ${totalQuantity}`,
+    "",
+    "Please confirm availability and the next steps for collection or delivery.",
+  ].join("\n");
 }

@@ -28,11 +28,12 @@ export function SectionNavigation({ items, tone }: SectionNavigationProps) {
   return (
     <nav
       aria-label={`${tone} navigation`}
-      className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="w-full max-w-full min-w-0 overflow-hidden"
     >
+      <div className="w-full max-w-full min-w-0 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <ul
         className={cn(
-          "flex min-w-max gap-2",
+          "flex w-max min-w-full flex-nowrap gap-2",
           tone === "shop" ? "py-1 lg:justify-center" : "py-3",
         )}
       >
@@ -59,6 +60,7 @@ export function SectionNavigation({ items, tone }: SectionNavigationProps) {
           );
         })}
       </ul>
+      </div>
     </nav>
   );
 }

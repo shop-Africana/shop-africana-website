@@ -249,6 +249,94 @@ export async function getTodayRestaurantMenu(
   return { serviceDate, weekday, groups };
 }
 
+export async function getRestaurantMenuForWeekday(
+  weekday: MenuWeekday,
+): Promise<RestaurantTodayMenu> {
+  const admin = createSupabaseAdminClient();
+
+  const [periodsResult, schedulesResult] = await Promise.all([
+    admin
+      .from("restaurant_menu_periods")
+      .select("id,name,slug,display_order,is_active")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true }),
+    admin
+      .from("restaurant_weekly_schedule")
+      .select("catalog_item_id,menu_period_id,display_order")
+      .eq("weekday", weekday)
+      .eq("is_active", true)
+      .order("display_order", { ascending: true }),
+  ]);
+
+  if (
+    periodsResult.error ||
+    schedulesResult.error ||
+    !periodsResult.data ||
+    !schedulesResult.data
+  ) {
+    return fallbackTodayMenu();
+  }
+
+  const periods = (periodsResult.data as PeriodRow[]).map(mapPeriod);
+  const schedules = schedulesResult.data as ScheduleRow[];
+  const catalogIds = [...new Set(schedules.map((schedule) => schedule.catalog_item_id))];
+
+  if (catalogIds.length === 0) {
+    return {
+      serviceDate: weekday,
+      weekday,
+      groups: periods.map((period) => ({ period, items: [] })),
+    };
+  }
+
+  const { data, error } = await admin
+    .from("catalog_items")
+    .select(
+      "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,spice_level,dietary_labels,preparation_time,allergen_information",
+    )
+    .in("id", catalogIds)
+    .eq("business_type", "restaurant")
+    .eq("is_available", true);
+
+  if (error || !data) return fallbackTodayMenu();
+
+  const itemsById = new Map(
+    (data as CatalogItemRow[]).map((row) => [row.id, mapItem(row)]),
+  );
+  const periodsById = new Map(periods.map((period) => [period.id, period]));
+  const menuItems: RestaurantMenuItem[] = [];
+
+  schedules.forEach((schedule) => {
+    const item = itemsById.get(schedule.catalog_item_id);
+    const period = periodsById.get(schedule.menu_period_id);
+
+    if (!item || !period) return;
+
+    menuItems.push({
+      ...item,
+      menuPeriod: period,
+      menuStatus: "available",
+      effectivePrice: item.price,
+      scheduleDisplayOrder: schedule.display_order,
+    });
+  });
+
+  return {
+    serviceDate: weekday,
+    weekday,
+    groups: periods.map((period) => ({
+      period,
+      items: menuItems
+        .filter((item) => item.menuPeriod.id === period.id)
+        .sort(
+          (first, second) =>
+            first.scheduleDisplayOrder - second.scheduleDisplayOrder ||
+            first.sortOrder - second.sortOrder,
+        ),
+    })),
+  };
+}
+
 export async function getTodayRestaurantMenuItem(itemId: string) {
   const todayMenu = await getTodayRestaurantMenu();
 
