@@ -32,6 +32,8 @@ type BusinessFloatingActionsProps = {
   phoneNumber?: string | null;
   whatsappNumber?: string | null;
   bookingMealOptions?: string[];
+  showBasketAction?: boolean;
+  whatsappPlacement?: "left" | "right";
 };
 
 const guestOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
@@ -48,6 +50,8 @@ export function BusinessFloatingActions({
   phoneNumber,
   whatsappNumber,
   bookingMealOptions = [],
+  showBasketAction = true,
+  whatsappPlacement = "left",
 }: BusinessFloatingActionsProps) {
   const {
     getBusinessCount,
@@ -83,6 +87,9 @@ export function BusinessFloatingActions({
         }.`;
   const whatsappHref = getWhatsAppHref(contact.whatsappNumber, basketMessage);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const showLeftWhatsApp = whatsappPlacement === "left" && whatsappHref;
+  const showRightWhatsApp = whatsappPlacement === "right" && whatsappHref;
+  const showRightActions = showBasketAction || showRightWhatsApp || !isShop;
 
   return (
     <>
@@ -99,7 +106,7 @@ export function BusinessFloatingActions({
         >
           <Phone aria-hidden="true" size={21} />
         </a>
-        {whatsappHref ? (
+        {showLeftWhatsApp ? (
           <a
             href={whatsappHref}
             className="inline-flex size-12 items-center justify-center rounded-full border border-white/30 bg-[#25D366] text-white shadow-[0_16px_36px_rgba(4,120,87,0.28)] transition hover:-translate-y-0.5 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14"
@@ -112,39 +119,54 @@ export function BusinessFloatingActions({
         ) : null}
       </div>
 
-      <div className="fixed right-4 bottom-[calc(16px+env(safe-area-inset-bottom))] z-40 flex flex-col items-end gap-3 sm:right-6 sm:bottom-[calc(24px+env(safe-area-inset-bottom))] lg:right-8">
-        <Link
-          href="/basket"
-          className={cn(
-            "relative inline-flex size-12 items-center justify-center rounded-full border shadow-[0_16px_36px_rgba(4,54,26,0.28)] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14",
-            isShop
-              ? "border-[rgba(255,245,220,0.32)] bg-[var(--color-shop-800)] text-[var(--color-amber-100)] hover:bg-[var(--color-shop-900)]"
-              : "border-[rgba(255,245,220,0.3)] bg-[var(--color-pride-900)] text-[var(--color-amber-100)] hover:bg-[var(--color-pride-800)]",
-          )}
-          aria-label={`View ${
-            isShop ? "Shop Africana" : "Pride of Scotland"
-          } basket`}
-        >
-          <ShoppingBasket aria-hidden="true" size={22} />
-          {activeCount > 0 ? (
-            <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-[var(--color-orange-500)] px-1 text-[10px] font-extrabold leading-none text-[var(--color-foreground-strong)] ring-2 ring-white">
-              {activeCount > 99 ? "99+" : activeCount}
-            </span>
+      {showRightActions ? (
+        <div className="fixed right-4 bottom-[calc(16px+env(safe-area-inset-bottom))] z-40 flex flex-col items-end gap-3 sm:right-6 sm:bottom-[calc(24px+env(safe-area-inset-bottom))] lg:right-8">
+          {showBasketAction ? (
+            <Link
+              href="/basket"
+              className={cn(
+                "relative inline-flex size-12 items-center justify-center rounded-full border shadow-[0_16px_36px_rgba(4,54,26,0.28)] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14",
+                isShop
+                  ? "border-[rgba(255,245,220,0.32)] bg-[var(--color-shop-800)] text-[var(--color-amber-100)] hover:bg-[var(--color-shop-900)]"
+                  : "border-[rgba(255,245,220,0.3)] bg-[var(--color-pride-900)] text-[var(--color-amber-100)] hover:bg-[var(--color-pride-800)]",
+              )}
+              aria-label={`View ${
+                isShop ? "Shop Africana" : "Pride of Scotland"
+              } basket`}
+            >
+              <ShoppingBasket aria-hidden="true" size={22} />
+              {activeCount > 0 ? (
+                <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-[var(--color-orange-500)] px-1 text-[10px] font-extrabold leading-none text-[var(--color-foreground-strong)] ring-2 ring-white">
+                  {activeCount > 99 ? "99+" : activeCount}
+                </span>
+              ) : null}
+            </Link>
           ) : null}
-        </Link>
-        {!isShop ? (
-          <button
-            type="button"
-            onClick={() => setBookingOpen(true)}
-            className="inline-flex min-h-12 max-w-[calc(100vw-2rem)] items-center justify-center gap-2 rounded-full border border-[rgba(255,245,220,0.28)] bg-[var(--color-pride-700)] px-4 text-sm font-extrabold text-[var(--color-amber-100)] shadow-[0_16px_36px_rgba(83,13,42,0.24)] transition hover:-translate-y-0.5 hover:bg-[var(--color-pride-800)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:min-h-14 sm:px-5"
-            aria-label="Book a table at Pride of Scotland"
-          >
-            <CalendarDays aria-hidden="true" size={18} />
-            <span className="hidden min-[380px]:inline">Book a Table</span>
-            <span className="min-[380px]:hidden">Book Table</span>
-          </button>
-        ) : null}
-      </div>
+          {showRightWhatsApp ? (
+            <a
+              href={whatsappHref}
+              className="inline-flex size-12 items-center justify-center rounded-full border border-white/30 bg-[#25D366] text-white shadow-[0_16px_36px_rgba(4,120,87,0.28)] transition hover:-translate-y-0.5 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14"
+              aria-label={`Message ${
+                isShop ? "Shop Africana" : "Pride of Scotland"
+              } on WhatsApp`}
+            >
+              <MessageCircle aria-hidden="true" size={22} />
+            </a>
+          ) : null}
+          {!isShop ? (
+            <button
+              type="button"
+              onClick={() => setBookingOpen(true)}
+              className="inline-flex min-h-12 max-w-[calc(100vw-2rem)] items-center justify-center gap-2 rounded-full border border-[rgba(255,245,220,0.28)] bg-[var(--color-pride-700)] px-4 text-sm font-extrabold text-[var(--color-amber-100)] shadow-[0_16px_36px_rgba(83,13,42,0.24)] transition hover:-translate-y-0.5 hover:bg-[var(--color-pride-800)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:min-h-14 sm:px-5"
+              aria-label="Book a table at Pride of Scotland"
+            >
+              <CalendarDays aria-hidden="true" size={18} />
+              <span className="hidden min-[380px]:inline">Book a Table</span>
+              <span className="min-[380px]:hidden">Book Table</span>
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {!isShop ? (
         <BookingRequestDialog
