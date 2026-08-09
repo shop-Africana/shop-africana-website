@@ -6,6 +6,8 @@ type CatalogLookupRow = {
   id: string;
   slug: string;
   business_type: "grocery" | "restaurant";
+  is_available: boolean;
+  price: number;
 };
 
 const uuidPattern =
@@ -17,12 +19,28 @@ type ResolvedOrderItem = {
   instructions: string;
 };
 
+type ResolutionResult =
+  | { ok: true; item: ResolvedOrderItem }
+  | {
+      ok: false;
+      reason: "availability" | "price" | "restaurantAvailability" | "scope";
+    };
+
+function isResolvedOrderItem(
+  result: ResolutionResult,
+): result is { ok: true; item: ResolvedOrderItem } {
+  return result.ok;
+}
+
 export function validateOrderPayload(payload: OrderRequestPayload) {
   const errors: string[] = [];
 
   if (!payload.customer?.name?.trim()) errors.push("Full name is required.");
   if (!payload.customer?.email?.trim()) errors.push("Email address is required.");
   if (!payload.customer?.phone?.trim()) errors.push("Phone number is required.");
+  if (!["grocery", "restaurant"].includes(payload.businessType)) {
+    errors.push("Choose Shop Africana or Pride of Scotland checkout.");
+  }
   if (!["delivery", "collection"].includes(payload.fulfilmentType)) {
     errors.push("Choose delivery or collection.");
   }
@@ -49,6 +67,7 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
   }
 
   const supabase = createSupabaseAdminClient();
+  const businessType = payload.businessType;
   const itemIds = payload.items
     .map((item) => item.catalogItemId)
     .filter((id) => uuidPattern.test(id));
@@ -60,9 +79,8 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
   if (itemIds.length > 0) {
     const { data, error } = await supabase
       .from("catalog_items")
-      .select("id,slug,business_type")
-      .in("id", itemIds)
-      .eq("is_available", true);
+      .select("id,slug,business_type,is_available,price")
+      .in("id", itemIds);
 
     if (error) {
       return { ok: false as const, errors: [error.message] };
@@ -74,9 +92,8 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
   if (itemSlugs.length > 0) {
     const { data, error } = await supabase
       .from("catalog_items")
-      .select("id,slug,business_type")
-      .in("slug", itemSlugs)
-      .eq("is_available", true);
+      .select("id,slug,business_type,is_available,price")
+      .in("slug", itemSlugs);
 
     if (error) {
       return { ok: false as const, errors: [error.message] };
@@ -87,36 +104,92 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
 
   const lookupById = new Map(lookupRows.map((row) => [row.id, row]));
   const lookupBySlug = new Map(lookupRows.map((row) => [row.slug, row]));
-  const resolvedItems = await Promise.all(payload.items.map(async (item) => {
-    const row =
-      lookupById.get(item.catalogItemId) ??
-      (item.slug ? lookupBySlug.get(item.slug) : undefined);
-    const catalogItemId = row?.id ?? item.catalogItemId;
+  const resolvedItems: ResolutionResult[] = await Promise.all(
+    payload.items.map(async (item) => {
+      const row =
+        lookupById.get(item.catalogItemId) ??
+        (item.slug ? lookupBySlug.get(item.slug) : undefined);
 
-    if (row?.business_type === "restaurant") {
-      const todayItem = await getTodayRestaurantMenuItem(catalogItemId);
-
-      if (!todayItem || todayItem.menuStatus !== "available") {
-        return null;
+      if (!row || row.business_type !== businessType) {
+        return { ok: false as const, reason: "scope" };
       }
-    }
 
-    return {
-      catalog_item_id: catalogItemId,
-      quantity: item.quantity,
-      instructions: item.instructions ?? "",
-    };
-  }));
+      if (!row.is_available) {
+        return { ok: false as const, reason: "availability" };
+      }
 
-  if (resolvedItems.some((item) => item === null)) {
+      let authoritativePrice = row.price;
+
+      if (businessType === "restaurant") {
+        const todayItem = await getTodayRestaurantMenuItem(row.id);
+
+        if (!todayItem || todayItem.menuStatus !== "available") {
+          return { ok: false as const, reason: "restaurantAvailability" };
+        }
+
+        authoritativePrice = todayItem.effectivePrice;
+      }
+
+      if (
+        typeof item.unitPriceSnapshot === "number" &&
+        item.unitPriceSnapshot !== authoritativePrice
+      ) {
+        return { ok: false as const, reason: "price" };
+      }
+
+      return {
+        ok: true as const,
+        item: {
+          catalog_item_id: row.id,
+          quantity: item.quantity,
+          instructions: item.instructions ?? "",
+        },
+      };
+    }),
+  );
+
+  const failedResolution = resolvedItems.find((item) => !item.ok);
+
+  if (failedResolution?.reason === "scope") {
     return {
       ok: false as const,
-      errors: ["One or more restaurant items are not available today."],
+      errors: ["This checkout can only contain items from the selected business."],
     };
   }
-  const rpcItems = resolvedItems as ResolvedOrderItem[];
+
+  if (failedResolution?.reason === "availability") {
+    return {
+      ok: false as const,
+      errors: [
+        businessType === "grocery"
+          ? "One or more Shop Africana items are no longer available."
+          : "One or more Pride of Scotland meals are no longer available.",
+      ],
+    };
+  }
+
+  if (failedResolution?.reason === "restaurantAvailability") {
+    return {
+      ok: false as const,
+      errors: ["One or more Pride of Scotland meals are no longer available today."],
+    };
+  }
+
+  if (failedResolution?.reason === "price") {
+    return {
+      ok: false as const,
+      errors: [
+        businessType === "grocery"
+          ? "Some Shop Africana item prices have changed. Please review your basket and try again."
+          : "Some Pride of Scotland meal prices have changed. Please review your basket and try again.",
+      ],
+    };
+  }
+
+  const rpcItems = resolvedItems.filter(isResolvedOrderItem).map((result) => result.item);
 
   const { data, error } = await supabase.rpc("create_customer_order", {
+    p_business_type: businessType,
     p_customer: {
       name: payload.customer.name,
       email: payload.customer.email,

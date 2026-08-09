@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ArrowRight,
   ChefHat,
   Coffee,
   Moon,
@@ -14,6 +15,7 @@ import { useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { AddToBasketButton } from "@/components/basket/AddToBasketButton";
 import { RestaurantBasketSummary } from "@/components/restaurant/RestaurantBasketSummary";
 import { Badge } from "@/components/ui/Badge";
+import { getBusinessContact } from "@/lib/business-contacts";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
 import { getWhatsAppHref } from "@/lib/whatsapp";
@@ -129,6 +131,10 @@ export function RestaurantMenuWorkspace({
   const selectedCategory =
     categoryOptions.find((option) => option.slug === selectedPeriod) ??
     categoryOptions[1];
+  const contact = getBusinessContact("restaurant", {
+    contactNumber: settings.contactNumber,
+    whatsappNumber: settings.whatsappNumber,
+  });
 
   return (
     <section className="bg-[linear-gradient(180deg,#fff7ed,var(--color-pride-50))] py-6 sm:py-8 lg:py-12">
@@ -224,41 +230,6 @@ export function RestaurantMenuWorkspace({
               </div>
             </div>
 
-            <div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-1 lg:hidden [scrollbar-color:var(--color-pride-700)_var(--color-pride-50)] [scrollbar-width:thin]">
-              {categoryOptions.map((option) => {
-                const Icon = option.icon;
-                const isSelected = selectedPeriod === option.slug;
-
-                return (
-                  <button
-                    key={option.slug}
-                    type="button"
-                    onClick={() => setSelectedPeriod(option.slug)}
-                    className={cn(
-                      "inline-flex min-h-11 shrink-0 snap-start items-center gap-2 rounded-[var(--radius-pill)] border px-3 text-sm font-extrabold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]",
-                      isSelected
-                        ? "border-[var(--color-pride-600)] bg-[var(--color-pride-700)] text-white shadow-[var(--shadow-input)]"
-                        : "border-[var(--color-pride-100)] bg-white/80 text-[var(--color-pride-800)] hover:bg-[var(--color-pride-50)]",
-                    )}
-                    aria-pressed={isSelected}
-                  >
-                    <Icon aria-hidden={true} size={15} />
-                    {option.label}
-                    <span
-                      className={cn(
-                        "rounded-[var(--radius-pill)] px-2 py-0.5 text-xs",
-                        isSelected
-                          ? "bg-white/16 text-white"
-                          : "bg-[var(--color-pride-50)] text-[var(--color-pride-800)]",
-                      )}
-                    >
-                      {categoryCounts[option.slug] ?? 0}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
             {mode === "everyday" ? (
               <div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
                 {weekdays.map((weekday) => (
@@ -299,8 +270,34 @@ export function RestaurantMenuWorkspace({
                 </button>
               ))}
             </div>
+            <div className="mt-3 flex justify-center">
+              <Link
+                href="/restaurant/menu"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-pill)] bg-[var(--color-pride-700)] px-5 text-sm font-extrabold text-[var(--color-amber-100)] shadow-[var(--shadow-input)] transition hover:bg-[var(--color-pride-800)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+              >
+                Proceed to Main Menu
+                <ArrowRight aria-hidden="true" size={16} />
+              </Link>
+            </div>
           </div>
 
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-extrabold text-[var(--color-pride-900)]">
+                Menu Highlights
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+                Go to the main Menu to see all today&apos;s meals.
+              </p>
+            </div>
+            <Link
+              href="/restaurant/menu"
+              className="inline-flex min-h-10 items-center gap-2 text-sm font-extrabold text-[var(--color-pride-800)] transition hover:text-[var(--color-pride-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+            >
+              View Full Menu
+              <ArrowRight aria-hidden="true" size={15} />
+            </Link>
+          </div>
           <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {visibleItems.length > 0 ? (
               visibleItems.map((meal) => (
@@ -322,7 +319,7 @@ export function RestaurantMenuWorkspace({
         </div>
 
         <aside className="grid gap-4 lg:sticky lg:top-32 lg:gap-5">
-          <RestaurantBasketSummary whatsappNumber={settings.whatsappNumber} />
+          <RestaurantBasketSummary whatsappNumber={contact.whatsappNumber} />
           <OperationalCard settings={settings} />
         </aside>
       </div>
@@ -415,8 +412,12 @@ function RestaurantMealCard({ meal }: { meal: RestaurantMenuItem }) {
 }
 
 function OperationalCard({ settings }: { settings: BusinessSettings }) {
+  const contact = getBusinessContact("restaurant", {
+    contactNumber: settings.contactNumber,
+    whatsappNumber: settings.whatsappNumber,
+  });
   const whatsappHref = getWhatsAppHref(
-    settings.whatsappNumber,
+    contact.whatsappNumber,
     "Hello Pride of Scotland, I would like to ask about today's menu.",
   );
   const rows = [
@@ -429,7 +430,7 @@ function OperationalCard({ settings }: { settings: BusinessSettings }) {
     settings.collectionEnabled
       ? { label: "Collection", value: "Collection is available." }
       : null,
-    settings.whatsappNumber
+    contact.whatsappNumber
       ? {
           label: "WhatsApp",
           value: "WhatsApp ordering support is available.",

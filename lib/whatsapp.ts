@@ -53,7 +53,7 @@ export function buildGroceryWhatsAppOrderMessage({
   totalQuantity: number;
 }) {
   return [
-    "Hello, I would like to enquire about this Shop Africana grocery basket:",
+    "Hello, I would like to place this Shop Africana order:",
     "",
     ...items.map(
       (item) =>
@@ -65,7 +65,7 @@ export function buildGroceryWhatsAppOrderMessage({
     `Subtotal: ${formatMoney(subtotal)}`,
     `Total items: ${totalQuantity}`,
     "",
-    "Please confirm availability and the next steps.",
+    "Please confirm availability and the next steps for collection or delivery.",
   ].join("\n");
 }
 

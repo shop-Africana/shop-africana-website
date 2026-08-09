@@ -15,6 +15,7 @@ import {
   ShoppingBasket,
   X,
 } from "lucide-react";
+import { BusinessWhatsAppOrderButton } from "@/components/basket/BusinessWhatsAppOrderButton";
 import { useBasket } from "@/components/basket/BasketProvider";
 import {
   getBusinessContact,
@@ -93,7 +94,14 @@ export function BusinessFloatingActions({
 
   return (
     <>
-      <div className="fixed left-4 bottom-[calc(16px+env(safe-area-inset-bottom))] z-40 flex flex-col gap-3 sm:left-6 sm:bottom-[calc(24px+env(safe-area-inset-bottom))] lg:left-8">
+      <div
+        className={cn(
+          "fixed left-4 z-40 flex flex-col gap-3 sm:left-6 lg:left-8",
+          isShop
+            ? "bottom-[calc(16px+env(safe-area-inset-bottom))] sm:bottom-[calc(24px+env(safe-area-inset-bottom))]"
+            : "bottom-[calc(92px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))]",
+        )}
+      >
         <a
           href={contact.telHref}
           className={cn(
@@ -106,7 +114,21 @@ export function BusinessFloatingActions({
         >
           <Phone aria-hidden="true" size={21} />
         </a>
-        {showLeftWhatsApp ? (
+        {showLeftWhatsApp && activeItems.length > 0 ? (
+          <BusinessWhatsAppOrderButton
+            businessType={isShop ? "grocery" : "restaurant"}
+            whatsappNumber={contact.whatsappNumber}
+            className="inline-flex size-12 items-center justify-center rounded-full border border-white/30 bg-[#25D366] text-white shadow-[0_16px_36px_rgba(4,120,87,0.28)] transition hover:-translate-y-0.5 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14"
+            panelClassName="fixed bottom-[calc(150px+env(safe-area-inset-bottom))] left-4 z-50 w-[min(22rem,calc(100vw-2rem))] sm:left-6 lg:left-8"
+            ariaLabel={`Message ${
+              isShop ? "Shop Africana" : "Pride of Scotland"
+            } on WhatsApp`}
+          >
+            <span className="sr-only">
+              Message {isShop ? "Shop Africana" : "Pride of Scotland"} on WhatsApp
+            </span>
+          </BusinessWhatsAppOrderButton>
+        ) : showLeftWhatsApp ? (
           <a
             href={whatsappHref}
             className="inline-flex size-12 items-center justify-center rounded-full border border-white/30 bg-[#25D366] text-white shadow-[0_16px_36px_rgba(4,120,87,0.28)] transition hover:-translate-y-0.5 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14"
@@ -120,7 +142,14 @@ export function BusinessFloatingActions({
       </div>
 
       {showRightActions ? (
-        <div className="fixed right-4 bottom-[calc(16px+env(safe-area-inset-bottom))] z-40 flex flex-col items-end gap-3 sm:right-6 sm:bottom-[calc(24px+env(safe-area-inset-bottom))] lg:right-8">
+        <div
+          className={cn(
+            "fixed right-4 z-40 flex flex-col items-end gap-3 sm:right-6 lg:right-8",
+            isShop
+              ? "bottom-[calc(16px+env(safe-area-inset-bottom))] sm:bottom-[calc(24px+env(safe-area-inset-bottom))]"
+              : "bottom-[calc(92px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))]",
+          )}
+        >
           {showBasketAction ? (
             <Link
               href="/basket"
@@ -142,7 +171,21 @@ export function BusinessFloatingActions({
               ) : null}
             </Link>
           ) : null}
-          {showRightWhatsApp ? (
+          {showRightWhatsApp && activeItems.length > 0 ? (
+            <BusinessWhatsAppOrderButton
+              businessType={isShop ? "grocery" : "restaurant"}
+              whatsappNumber={contact.whatsappNumber}
+              className="inline-flex size-12 items-center justify-center rounded-full border border-white/30 bg-[#25D366] text-white shadow-[0_16px_36px_rgba(4,120,87,0.28)] transition hover:-translate-y-0.5 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14"
+              panelClassName="fixed bottom-[calc(150px+env(safe-area-inset-bottom))] right-4 z-50 w-[min(22rem,calc(100vw-2rem))] sm:right-6 lg:right-8"
+              ariaLabel={`Message ${
+                isShop ? "Shop Africana" : "Pride of Scotland"
+              } on WhatsApp`}
+            >
+              <span className="sr-only">
+                Message {isShop ? "Shop Africana" : "Pride of Scotland"} on WhatsApp
+              </span>
+            </BusinessWhatsAppOrderButton>
+          ) : showRightWhatsApp ? (
             <a
               href={whatsappHref}
               className="inline-flex size-12 items-center justify-center rounded-full border border-white/30 bg-[#25D366] text-white shadow-[0_16px_36px_rgba(4,120,87,0.28)] transition hover:-translate-y-0.5 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14"

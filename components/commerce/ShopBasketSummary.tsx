@@ -3,16 +3,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBasket, Trash2 } from "lucide-react";
+import { BusinessWhatsAppOrderButton } from "@/components/basket/BusinessWhatsAppOrderButton";
 import { useBasket } from "@/components/basket/BasketProvider";
 import { formatMoney } from "@/lib/money";
 
-export function ShopBasketSummary() {
-  const { groceryItems, getBusinessCount, removeItem, subtotal, updateQuantity } =
-    useBasket();
+type ShopBasketSummaryProps = {
+  whatsappNumber: string | null;
+};
+
+export function ShopBasketSummary({ whatsappNumber }: ShopBasketSummaryProps) {
+  const { groceryItems, getBusinessCount, removeItem, updateQuantity } = useBasket();
   const groceryCount = getBusinessCount("grocery");
+  const grocerySubtotal = groceryItems.reduce(
+    (total, item) => total + item.unitPrice * item.quantity,
+    0,
+  );
 
   return (
-    <section className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto_auto] overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-amber-100))] p-4 shadow-[var(--shadow-card)]">
+    <section className="flex h-auto min-h-0 flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-amber-100))] p-4 shadow-[var(--shadow-card)] lg:grid lg:h-full lg:grid-rows-[auto_minmax(0,1fr)_auto_auto_auto]">
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-shop-100)] pb-3">
         <div>
           <p className="text-xs font-bold uppercase text-[var(--color-shop-700)]">
@@ -31,7 +39,7 @@ export function ShopBasketSummary() {
 
       {groceryItems.length > 0 ? (
         <>
-          <div className="min-h-[160px] overflow-y-auto pr-1 [scrollbar-color:var(--color-shop-700)_var(--color-shop-50)] [scrollbar-width:thin]">
+          <div className="max-h-[260px] min-h-0 overflow-y-auto pr-1 [scrollbar-color:var(--color-shop-700)_var(--color-shop-50)] [scrollbar-width:thin] lg:max-h-none">
             {groceryItems.map((item) => (
               <div
                 key={item.catalogItemId}
@@ -106,7 +114,7 @@ export function ShopBasketSummary() {
               </div>
             ))}
           </div>
-          <div className="mt-2 min-h-[52px] rounded-[var(--radius-lg)] border border-[var(--color-shop-100)] bg-[var(--color-shop-50)] px-3 py-2.5">
+          <div className="mt-2 min-h-11 rounded-[var(--radius-lg)] border border-[var(--color-shop-100)] bg-[var(--color-shop-50)] px-3 py-2">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-bold uppercase text-[var(--color-shop-700)]">
@@ -117,19 +125,26 @@ export function ShopBasketSummary() {
                 </p>
               </div>
               <span className="text-base font-extrabold text-[var(--color-shop-900)]">
-                {formatMoney(subtotal)}
+                {formatMoney(grocerySubtotal)}
               </span>
             </div>
           </div>
+          <BusinessWhatsAppOrderButton
+            businessType="grocery"
+            whatsappNumber={whatsappNumber}
+            className="mt-2 inline-flex h-10 min-h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.24)] bg-[rgba(21,128,61,0.12)] px-5 text-sm font-extrabold text-[var(--color-shop-800)] shadow-[var(--shadow-input)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+          >
+            Order on WhatsApp
+          </BusinessWhatsAppOrderButton>
           <Link
-            href="/checkout"
-            className="mt-2 inline-flex h-[42px] min-h-[42px] w-full items-center justify-center rounded-[var(--radius-pill)] bg-[var(--color-orange-500)] px-5 text-sm font-extrabold text-[var(--color-foreground-strong)] shadow-[var(--shadow-input)] transition hover:bg-[var(--color-orange-400)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+            href="/checkout?business=shop"
+            className="mt-2 inline-flex h-10 min-h-10 w-full items-center justify-center rounded-[var(--radius-pill)] bg-[var(--color-orange-500)] px-5 text-sm font-extrabold text-[var(--color-foreground-strong)] shadow-[var(--shadow-input)] transition hover:bg-[var(--color-orange-400)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
           >
             Proceed to Checkout
           </Link>
         </>
       ) : (
-        <div className="col-span-1 row-span-3 flex min-h-0 flex-col justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--color-shop-200)] bg-[var(--color-shop-50)] p-4">
+        <div className="flex min-h-0 flex-col justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--color-shop-200)] bg-[var(--color-shop-50)] p-4 lg:col-span-1 lg:row-span-4">
           <p className="text-sm leading-6 text-[var(--color-muted)]">
             Add grocery items to see quantities and subtotal here.
           </p>

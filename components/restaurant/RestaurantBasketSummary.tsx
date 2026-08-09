@@ -3,19 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  MessageCircle,
   Minus,
   Plus,
   ShoppingBag,
   Trash2,
   Utensils,
 } from "lucide-react";
+import { BusinessWhatsAppOrderButton } from "@/components/basket/BusinessWhatsAppOrderButton";
 import { useBasket } from "@/components/basket/BasketProvider";
 import { formatMoney } from "@/lib/money";
-import {
-  buildRestaurantWhatsAppOrderMessage,
-  getWhatsAppHref,
-} from "@/lib/whatsapp";
 
 type RestaurantBasketSummaryProps = {
   whatsappNumber: string | null;
@@ -31,15 +27,6 @@ export function RestaurantBasketSummary({
     (total, item) => total + item.unitPrice * item.quantity,
     0,
   );
-  const whatsAppMessage = buildRestaurantWhatsAppOrderMessage({
-    items: restaurantItems,
-    subtotal: restaurantSubtotal,
-    totalQuantity: restaurantCount,
-  });
-  const whatsAppHref =
-    restaurantItems.length > 0
-      ? getWhatsAppHref(whatsappNumber, whatsAppMessage)
-      : null;
 
   return (
     <section className="grid max-h-[32rem] min-h-0 grid-rows-[auto_minmax(0,1fr)_auto_auto] overflow-hidden rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.18)] bg-[linear-gradient(180deg,#fff7ed,var(--color-pride-50))] p-4 shadow-[0_18px_50px_rgba(83,13,42,0.12)] lg:h-full lg:min-h-[22rem] lg:max-h-none">
@@ -154,28 +141,20 @@ export function RestaurantBasketSummary({
               </span>
             </div>
           </div>
-          <div className="mt-3 grid gap-2">
-            <Link
-              href="/basket"
-              className="inline-flex min-h-10 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--color-pride-200)] bg-white/80 px-4 text-sm font-bold text-[var(--color-pride-800)] transition hover:bg-[var(--color-pride-50)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+          <div className="mt-2 grid gap-2">
+            <BusinessWhatsAppOrderButton
+              businessType="restaurant"
+              whatsappNumber={whatsappNumber}
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-5 text-sm font-extrabold text-[var(--color-shop-800)] shadow-[var(--shadow-input)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
             >
-              View Basket
-            </Link>
+              Order on WhatsApp
+            </BusinessWhatsAppOrderButton>
             <Link
-              href="/checkout"
-              className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-pill)] bg-[var(--color-orange-500)] px-5 text-sm font-extrabold text-[var(--color-foreground-strong)] shadow-[var(--shadow-input)] transition hover:bg-[var(--color-orange-400)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+              href="/checkout?business=restaurant"
+              className="inline-flex min-h-10 items-center justify-center rounded-[var(--radius-pill)] bg-[var(--color-orange-500)] px-5 text-sm font-extrabold text-[var(--color-foreground-strong)] shadow-[var(--shadow-input)] transition hover:bg-[var(--color-orange-400)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
             >
               Proceed to Checkout
             </Link>
-            {whatsAppHref ? (
-              <a
-                href={whatsAppHref}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-5 text-sm font-extrabold text-[var(--color-shop-800)] shadow-[var(--shadow-input)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
-              >
-                <MessageCircle aria-hidden="true" size={17} />
-                Order on WhatsApp
-              </a>
-            ) : null}
           </div>
         </>
       ) : (

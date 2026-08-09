@@ -13,7 +13,13 @@ const navItems = [
   { label: "Contact", href: "/contact" },
 ];
 
-export function SiteHeader({ settings }: { settings: BusinessSettings }) {
+export function SiteHeader({
+  settings,
+  balancedMobileLogos = false,
+}: {
+  settings: BusinessSettings;
+  balancedMobileLogos?: boolean;
+}) {
   const whatsappHref = getWhatsAppHref(
     settings.whatsappNumber,
     `Hello, I would like information about ${settings.shopBusinessName} and ${settings.restaurantBusinessName}.`,
@@ -22,7 +28,7 @@ export function SiteHeader({ settings }: { settings: BusinessSettings }) {
   return (
     <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-white/95 backdrop-blur">
       <Container className="flex min-h-20 items-center justify-between gap-4">
-        <BrandSwitcher compact />
+        <BrandSwitcher compact balancedMobile={balancedMobileLogos} />
 
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
           {navItems.map((item) => (

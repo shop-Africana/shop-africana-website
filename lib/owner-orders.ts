@@ -15,6 +15,7 @@ export type OwnerOrderItem = {
 export type OwnerOrder = {
   id: string;
   reference: string;
+  businessType: BusinessType | null;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -45,6 +46,7 @@ type OrderItemRow = {
 type OrderRow = {
   id: string;
   order_reference: string;
+  business_type: BusinessType | null;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -65,6 +67,7 @@ function mapOrder(row: OrderRow): OwnerOrder {
   return {
     id: row.id,
     reference: row.order_reference,
+    businessType: row.business_type,
     customerName: row.customer_name,
     customerEmail: row.customer_email,
     customerPhone: row.customer_phone,
@@ -92,15 +95,21 @@ function mapOrder(row: OrderRow): OwnerOrder {
 }
 
 const orderSelect =
-  "id,order_reference,customer_name,customer_email,customer_phone,fulfilment_type,delivery_address,order_instructions,subtotal,delivery_fee,total,payment_method,payment_status,order_status,created_at,order_items(id,catalog_item_id,item_name_snapshot,business_type_snapshot,unit_price_snapshot,quantity,line_total,optional_meal_instructions)";
+  "id,order_reference,business_type,customer_name,customer_email,customer_phone,fulfilment_type,delivery_address,order_instructions,subtotal,delivery_fee,total,payment_method,payment_status,order_status,created_at,order_items(id,catalog_item_id,item_name_snapshot,business_type_snapshot,unit_price_snapshot,quantity,line_total,optional_meal_instructions)";
 
-export async function getOwnerOrders() {
+export async function getOwnerOrders(businessType?: BusinessType) {
   const admin = createSupabaseAdminClient();
-  const { data, error } = await admin
+  let query = admin
     .from("orders")
     .select(orderSelect)
     .order("created_at", { ascending: false })
     .limit(100);
+
+  if (businessType) {
+    query = query.eq("business_type", businessType);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw new Error(error.message);
 

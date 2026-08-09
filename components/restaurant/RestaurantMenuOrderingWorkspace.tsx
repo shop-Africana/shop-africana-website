@@ -11,7 +11,6 @@ import {
   Globe2,
   Heart,
   Leaf,
-  MessageCircle,
   Minus,
   Plus,
   ShoppingBasket,
@@ -24,15 +23,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { AddToBasketButton } from "@/components/basket/AddToBasketButton";
+import { BusinessWhatsAppOrderButton } from "@/components/basket/BusinessWhatsAppOrderButton";
 import { useBasket } from "@/components/basket/BasketProvider";
 import { BusinessFloatingActions } from "@/components/ui/BusinessFloatingActions";
+import { getBusinessContact } from "@/lib/business-contacts";
 import type { BusinessSettings } from "@/lib/business-settings";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
-import {
-  buildRestaurantWhatsAppOrderMessage,
-  getWhatsAppHref,
-} from "@/lib/whatsapp";
 import type {
   BasketItem,
   MenuWeekday,
@@ -708,11 +705,16 @@ function RightSidebar({
   specials: RestaurantMenuItem[];
   settings: BusinessSettings;
 }) {
+  const contact = getBusinessContact("restaurant", {
+    contactNumber: settings.contactNumber,
+    whatsappNumber: settings.whatsappNumber,
+  });
+
   return (
     <aside className="min-w-0 space-y-3 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0">
       <SpecialsCard specials={specials} />
       <RestaurantBasketCard
-        whatsappNumber={settings.whatsappNumber}
+        whatsappNumber={contact.whatsappNumber}
       />
     </aside>
   );
@@ -786,17 +788,6 @@ function RestaurantBasketCard({
     (total, item) => total + item.unitPrice * item.quantity,
     0,
   );
-  const whatsAppHref =
-    restaurantItems.length > 0
-      ? getWhatsAppHref(
-          whatsappNumber,
-          buildRestaurantWhatsAppOrderMessage({
-            items: restaurantItems,
-            subtotal: restaurantSubtotal,
-            totalQuantity: restaurantCount,
-          }),
-        )
-      : null;
 
   return (
     <section className="flex h-auto min-h-0 flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.16)] bg-[linear-gradient(180deg,#fffaf0,var(--color-pride-50))] p-3 shadow-[0_18px_50px_rgba(83,13,42,0.12)] lg:grid lg:h-full lg:flex-1 lg:grid-rows-[auto_minmax(0,1fr)_auto_auto_auto]">
@@ -861,8 +852,19 @@ function RestaurantBasketCard({
       ) : (
         <div />
       )}
+      {restaurantItems.length > 0 ? (
+        <BusinessWhatsAppOrderButton
+          businessType="restaurant"
+          whatsappNumber={whatsappNumber}
+          className="mt-2 inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-4 text-sm font-extrabold text-[var(--color-shop-800)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] lg:min-h-10"
+        >
+          Order via WhatsApp
+        </BusinessWhatsAppOrderButton>
+      ) : (
+        <div />
+      )}
       <Link
-        href="/checkout"
+        href="/checkout?business=restaurant"
         className={cn(
           "mt-2 inline-flex min-h-11 shrink-0 items-center justify-center rounded-[var(--radius-pill)] px-4 text-sm font-extrabold shadow-[var(--shadow-input)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] lg:min-h-10",
           restaurantItems.length > 0
@@ -873,17 +875,6 @@ function RestaurantBasketCard({
       >
         Proceed to Checkout
       </Link>
-      {whatsAppHref ? (
-        <a
-          href={whatsAppHref}
-          className="mt-2 inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-4 text-sm font-extrabold text-[var(--color-shop-800)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] lg:min-h-10"
-        >
-          <MessageCircle aria-hidden="true" size={17} />
-          Order via WhatsApp
-        </a>
-      ) : (
-        <div />
-      )}
     </section>
   );
 }

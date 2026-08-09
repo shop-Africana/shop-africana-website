@@ -18,7 +18,6 @@ import {
   Fish,
   House,
   Leaf,
-  MessageCircle,
   Milk,
   Package,
   RotateCcw,
@@ -26,7 +25,6 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Snowflake,
-  Store,
   Truck,
   Wheat,
 } from "lucide-react";
@@ -145,6 +143,16 @@ function getFeaturedCategories(
         (productCounts.get(b.id) ?? 0) * 10 +
         (getGroceryCategoryArtwork(b.slug) ? 1 : 0);
       if (aScore !== bScore) return bScore - aScore;
+      return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
+    })
+    .slice(0, 8);
+}
+
+function getHomepageProducts(products: CatalogItem[]) {
+  return [...products]
+    .sort((a, b) => {
+      if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
+      if (a.isAvailable !== b.isAvailable) return a.isAvailable ? -1 : 1;
       return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
     })
     .slice(0, 6);
@@ -519,38 +527,12 @@ export default async function ShopPage({
   ]);
 
   const filteredProducts = filterProducts(groceryProducts, categories, filters);
-  const discoveryProducts = filteredProducts.slice(0, 2);
+  const discoveryProducts = getHomepageProducts(filteredProducts);
+  const mobileDiscoveryProducts = discoveryProducts.slice(0, 4);
   const featuredCategories = getFeaturedCategories(categories, groceryProducts);
   const origins = Array.from(
     new Set(groceryProducts.map((product) => product.originRegion).filter(Boolean)),
   ).sort() as string[];
-  const serviceItems = [
-    {
-      title: "Local Dundee Delivery",
-      description: settings.serviceAreaText,
-      icon: Truck,
-    },
-    {
-      title: "Collection Available",
-      description: settings.collectionEnabled
-        ? "Collection is available for grocery orders."
-        : "Collection details are confirmed with the business.",
-      icon: Store,
-    },
-    {
-      title: "Secure Ordering",
-      description: "Orders are created securely with payment pending.",
-      icon: ShieldCheck,
-    },
-    {
-      title: "WhatsApp Support",
-      description: settings.whatsappNumber
-        ? "Message the business for ordering help."
-        : "Use the contact page for grocery support.",
-      icon: MessageCircle,
-    },
-  ];
-
   const supportingBenefits = [
     {
       title: "Fresh Quality",
@@ -615,32 +597,50 @@ export default async function ShopPage({
         </HeroCarousel>
 
         <Container className="max-w-[92rem]">
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {serviceItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className="group flex min-h-28 items-center gap-4 rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(135deg,var(--color-surface-warm),var(--color-shop-50))] p-4 shadow-[var(--shadow-input)] transition hover:-translate-y-1 hover:border-[var(--color-amber-500)] hover:shadow-[var(--shadow-card)]"
-                >
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[linear-gradient(135deg,var(--color-shop-50),var(--color-amber-100))] text-[var(--color-shop-700)] transition group-hover:scale-105">
-                    <Icon aria-hidden="true" size={21} />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-extrabold text-[var(--color-shop-900)]">
-                      {item.title}
-                    </h2>
-                    <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <div id="product-discovery" className="scroll-mt-28" />
+          <section className="mt-7 lg:hidden">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <SectionHeading title="Best Sellers">
+                Available grocery products from the live catalogue.
+              </SectionHeading>
+              <LinkButton href="/shop/products" variant="outline">
+                Browse All Products
+              </LinkButton>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {hasActiveFilters(filters) ? (
+                <Badge tone="shop">Showing filtered results</Badge>
+              ) : (
+                <Badge tone="shop">Featured first</Badge>
+              )}
+              <Badge tone="neutral">
+                {mobileDiscoveryProducts.length} product
+                {mobileDiscoveryProducts.length === 1 ? "" : "s"}
+              </Badge>
+            </div>
+            {mobileDiscoveryProducts.length > 0 ? (
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                {mobileDiscoveryProducts.map((product) => (
+                  <ProductCardShell key={product.id} product={product} compact />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-5 rounded-[var(--radius-xl)] border border-dashed border-[var(--color-shop-200)] bg-white p-5 shadow-[var(--shadow-input)]">
+                <h3 className="text-base font-extrabold text-[var(--color-shop-900)]">
+                  No products match these filters
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                  Reset the filters or browse the full product catalogue.
+                </p>
+                <LinkButton href="/shop" variant="outline" className="mt-5">
+                  Reset Filters
+                </LinkButton>
+              </div>
+            )}
+          </section>
 
-          <div className="mt-8 grid gap-6 lg:h-[740px] lg:grid-cols-[270px_minmax(0,1fr)_320px] lg:items-stretch">
-            <details className="rounded-[var(--radius-xl)] border border-[var(--color-shop-200)] bg-white p-4 shadow-[var(--shadow-input)] lg:hidden">
+          <div className="mt-6 grid gap-5 lg:mt-7 lg:h-[740px] lg:grid-cols-[270px_minmax(0,1fr)_320px] lg:items-stretch lg:gap-6">
+            <details className="order-2 rounded-[var(--radius-xl)] border border-[var(--color-shop-200)] bg-white p-4 shadow-[var(--shadow-input)] lg:hidden">
               <summary className="cursor-pointer text-sm font-bold uppercase text-[var(--color-shop-900)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]">
                 Browse Categories
               </summary>
@@ -659,8 +659,8 @@ export default async function ShopPage({
               </div>
             </aside>
 
-            <div className="min-w-0 lg:h-full lg:min-h-0">
-              <section id="product-discovery" className="flex h-full scroll-mt-28 flex-col rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-shop-50))] p-5 shadow-[var(--shadow-input)]">
+            <div className="hidden min-w-0 lg:block lg:h-full lg:min-h-0">
+              <section className="flex h-full flex-col rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-shop-50))] p-5 shadow-[var(--shadow-input)]">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <SectionHeading title="Best Sellers">
                     Available grocery products from the live catalogue.
@@ -681,10 +681,16 @@ export default async function ShopPage({
                   </Badge>
                 </div>
                 {discoveryProducts.length > 0 ? (
-                  <div className="mt-6 grid flex-1 gap-5 md:grid-cols-2">
+                  <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1 [scrollbar-color:var(--color-shop-700)_var(--color-shop-50)] [scrollbar-width:thin]">
+                    <div className="grid grid-cols-2 gap-4">
                     {discoveryProducts.map((product) => (
-                      <ProductCardShell key={product.id} product={product} />
+                      <ProductCardShell
+                        key={product.id}
+                        product={product}
+                        compact
+                      />
                     ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="mt-6 rounded-[var(--radius-xl)] border border-dashed border-[var(--color-shop-200)] bg-white p-6 shadow-[var(--shadow-input)]">
@@ -702,21 +708,8 @@ export default async function ShopPage({
               </section>
             </div>
 
-            <aside className="space-y-5 lg:grid lg:h-full lg:min-h-0 lg:grid-rows-[minmax(360px,420px)_minmax(0,1fr)] lg:gap-5 lg:space-y-0">
-              <ShopBasketSummary />
-              <details className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-input)] lg:hidden">
-                <summary className="cursor-pointer text-sm font-bold text-[var(--color-shop-900)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]">
-                  Filters
-                </summary>
-                <div className="mt-5">
-                  <ProductFilters
-                    categories={categories}
-                    filters={filters}
-                    origins={origins}
-                    resultCount={filteredProducts.length}
-                  />
-                </div>
-              </details>
+            <aside className="order-1 lg:order-none lg:grid lg:h-full lg:min-h-0 lg:grid-rows-[minmax(360px,420px)_minmax(0,1fr)] lg:gap-5">
+              <ShopBasketSummary whatsappNumber={settings.whatsappNumber} />
               <div className="hidden lg:block lg:min-h-0">
                 <ProductFilters
                   categories={categories}
@@ -727,37 +720,42 @@ export default async function ShopPage({
               </div>
             </aside>
           </div>
-          <section className="mt-14">
+          <section className="mt-10">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <SectionHeading title="Featured Categories">
-                Six active grocery ranges for quick browsing.
+                Active grocery ranges for quick browsing.
               </SectionHeading>
               <LinkButton href="/shop/categories" variant="outline">
                 View All Categories
               </LinkButton>
             </div>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredCategories.map((category) => (
-                <FeaturedCategoryTile key={category.id} category={category} />
+            <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {featuredCategories.map((category, index) => (
+                <div
+                  key={category.id}
+                  className={index >= 6 ? "hidden lg:block" : undefined}
+                >
+                  <FeaturedCategoryTile category={category} />
+                </div>
               ))}
             </div>
           </section>
 
-          <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-10 grid grid-cols-2 gap-4">
             {supportingBenefits.map((item) => {
               const Icon = item.icon;
               return (
                 <article
                   key={item.title}
-                  className="h-full rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-shop-50))] p-5 shadow-[var(--shadow-input)]"
+                  className="h-full rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-shop-50))] p-3 shadow-[var(--shadow-input)] sm:p-4"
                 >
-                  <div className="flex size-11 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-shop-50)] text-[var(--color-shop-700)]">
-                    <Icon aria-hidden="true" size={22} />
+                  <div className="flex size-10 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-shop-50)] text-[var(--color-shop-700)] sm:size-11">
+                    <Icon aria-hidden="true" size={20} />
                   </div>
-                  <h2 className="mt-4 text-base font-extrabold text-[var(--color-shop-900)]">
+                  <h2 className="mt-3 text-sm font-extrabold text-[var(--color-shop-900)] sm:text-base">
                     {item.title}
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                  <p className="mt-1 text-xs leading-5 text-[var(--color-muted)] sm:text-sm sm:leading-6">
                     {item.description}
                   </p>
                 </article>

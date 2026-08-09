@@ -172,8 +172,8 @@ function HomeCategoryCard({ category }: { category: CatalogCategory }) {
 
 function HomeProductCard({ product }: { product: CatalogItem }) {
   return (
-    <article className="group flex h-full min-h-[20rem] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-shop-50))] shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:border-[var(--color-shop-300)] hover:shadow-[var(--shadow-card)]">
-      <div className="relative h-44 overflow-hidden border-b border-[var(--color-shop-100)] bg-white">
+    <article className="group flex h-full min-h-[16.25rem] flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-shop-50))] shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:border-[var(--color-shop-300)] hover:shadow-[var(--shadow-card)] sm:min-h-[20rem] sm:rounded-[var(--radius-xl)]">
+      <div className="relative h-28 overflow-hidden border-b border-[var(--color-shop-100)] bg-white sm:h-44">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
@@ -187,30 +187,34 @@ function HomeProductCard({ product }: { product: CatalogItem }) {
             <PackageCheck aria-hidden="true" size={34} />
           </div>
         )}
-        <span className="absolute left-3 top-3 rounded-[var(--radius-pill)] bg-[var(--color-shop-700)] px-2.5 py-1 text-xs font-extrabold text-white shadow-[var(--shadow-input)]">
+        <span className="absolute left-2 top-2 rounded-[var(--radius-pill)] bg-[var(--color-shop-700)] px-2 py-0.5 text-[10px] font-extrabold text-white shadow-[var(--shadow-input)] sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-xs">
           {product.isAvailable ? (product.isFeatured ? "Featured" : "Available") : "Unavailable"}
         </span>
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <p className="text-xs font-bold uppercase text-[var(--color-shop-700)]">
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        <p className="text-[10px] font-bold uppercase text-[var(--color-shop-700)] sm:text-xs">
           {product.unitLabel ?? product.originRegion ?? "Grocery item"}
         </p>
         <Link
           href={`/shop/products/${product.slug}`}
-          className="mt-1 line-clamp-2 text-base font-extrabold leading-snug text-[var(--color-foreground-strong)] hover:text-[var(--color-shop-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+          className="mt-1 line-clamp-2 text-sm font-extrabold leading-snug text-[var(--color-foreground-strong)] hover:text-[var(--color-shop-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] sm:text-base"
         >
           {product.name}
         </Link>
         {cleanDescription(product.description) ? (
-          <p className="mt-2 line-clamp-2 text-sm leading-5 text-[var(--color-muted)]">
+          <p className="mt-1 line-clamp-2 text-xs leading-4 text-[var(--color-muted)] sm:mt-2 sm:text-sm sm:leading-5">
             {product.description}
           </p>
         ) : null}
-        <div className="mt-auto flex items-center justify-between gap-3 pt-4">
-          <p className="text-lg font-extrabold text-[var(--color-shop-800)]">
+        <div className="mt-auto grid gap-2 pt-3 sm:flex sm:items-center sm:justify-between sm:gap-3 sm:pt-4">
+          <p className="text-base font-extrabold text-[var(--color-shop-800)] sm:text-lg">
             {formatMoney(product.price)}
           </p>
-          <AddToBasketButton item={product} disabled={!product.isAvailable} />
+          <AddToBasketButton
+            item={product}
+            disabled={!product.isAvailable}
+            className="min-h-9 px-3 py-1.5 text-xs sm:min-h-11 sm:px-5 sm:py-2.5 sm:text-sm"
+          />
         </div>
       </div>
     </article>
@@ -219,8 +223,8 @@ function HomeProductCard({ product }: { product: CatalogItem }) {
 
 function HomeMealCard({ meal }: { meal: CatalogItem }) {
   return (
-    <article className="group flex h-full min-h-[19rem] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(180deg,#fff7ed,#fff)] shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:border-[var(--color-pride-200)] hover:shadow-[var(--shadow-card)]">
-      <div className="relative h-40 overflow-hidden border-b border-[rgba(128,20,61,0.12)] bg-[var(--color-pride-50)]">
+    <article className="group flex h-full min-h-[15.75rem] flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(180deg,#fff7ed,#fff)] shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:border-[var(--color-pride-200)] hover:shadow-[var(--shadow-card)] sm:min-h-[19rem] sm:rounded-[var(--radius-xl)]">
+      <div className="relative h-28 overflow-hidden border-b border-[rgba(128,20,61,0.12)] bg-[var(--color-pride-50)] sm:h-40">
         {meal.imageUrl ? (
           <Image
             src={meal.imageUrl}
@@ -235,24 +239,24 @@ function HomeMealCard({ meal }: { meal: CatalogItem }) {
             <Utensils aria-hidden="true" size={34} />
           </div>
         )}
-        <span className="absolute left-3 top-3 rounded-[var(--radius-pill)] bg-[var(--color-pride-700)] px-2.5 py-1 text-xs font-extrabold text-[var(--color-amber-100)] shadow-[var(--shadow-input)]">
+        <span className="absolute left-2 top-2 rounded-[var(--radius-pill)] bg-[var(--color-pride-700)] px-2 py-0.5 text-[10px] font-extrabold text-[var(--color-amber-100)] shadow-[var(--shadow-input)] sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-xs">
           {meal.isAvailable ? "Available" : "Unavailable"}
         </span>
       </div>
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
         <Link
           href={`/restaurant/meals/${meal.slug}`}
-          className="line-clamp-2 text-base font-extrabold leading-snug text-[var(--color-pride-900)] hover:text-[var(--color-pride-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+          className="line-clamp-2 text-sm font-extrabold leading-snug text-[var(--color-pride-900)] hover:text-[var(--color-pride-700)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] sm:text-base"
         >
           {meal.name}
         </Link>
         {cleanDescription(meal.description) ? (
-          <p className="mt-2 line-clamp-2 text-sm leading-5 text-[var(--color-muted)]">
+          <p className="mt-1 line-clamp-2 text-xs leading-4 text-[var(--color-muted)] sm:mt-2 sm:text-sm sm:leading-5">
             {meal.description}
           </p>
         ) : null}
-        <div className="mt-auto flex items-center justify-between gap-3 pt-4">
-          <p className="text-lg font-extrabold text-[var(--color-pride-800)]">
+        <div className="mt-auto grid gap-2 pt-3 sm:flex sm:items-center sm:justify-between sm:gap-3 sm:pt-4">
+          <p className="text-base font-extrabold text-[var(--color-pride-800)] sm:text-lg">
             {formatMoney(meal.price)}
           </p>
           <AddToBasketButton
@@ -260,6 +264,7 @@ function HomeMealCard({ meal }: { meal: CatalogItem }) {
             variant="restaurant"
             disabled={!meal.isAvailable}
             disabledLabel="Unavailable"
+            className="min-h-9 px-3 py-1.5 text-xs sm:min-h-11 sm:px-5 sm:py-2.5 sm:text-sm"
           />
         </div>
       </div>
@@ -281,12 +286,12 @@ export default async function Home() {
     .slice(0, 4);
   const menuHighlights = restaurantSpecials
     .filter((meal) => meal.isAvailable)
-    .slice(0, 3);
+    .slice(0, 4);
 
   return (
     <>
       <TopBar settings={settings} />
-      <SiteHeader settings={settings} />
+      <SiteHeader settings={settings} balancedMobileLogos />
       <main className="flex-1 bg-[var(--color-background)]">
         <SharedHero />
 
@@ -307,7 +312,7 @@ export default async function Home() {
           </Container>
         </section>
 
-        <section className="pt-8 sm:pt-9">
+        <section className="pt-6 sm:pt-9">
           <Container>
             <CompactSectionHeading
               eyebrow="Live catalogue"
@@ -316,7 +321,7 @@ export default async function Home() {
             >
               Browse selected live grocery products from Shop Africana.
             </CompactSectionHeading>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-4 lg:grid-cols-4">
               {groceryHighlights.map((product) => (
                 <HomeProductCard key={product.id} product={product} />
               ))}
@@ -324,7 +329,7 @@ export default async function Home() {
           </Container>
         </section>
 
-        <section className="pt-9">
+        <section className="pt-6 sm:pt-9">
           <Container>
             <CompactSectionHeading
               eyebrow="Pride of Scotland"
@@ -333,40 +338,43 @@ export default async function Home() {
             >
               Selected live restaurant meals available for menu browsing.
             </CompactSectionHeading>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {menuHighlights.map((meal) => (
-                <HomeMealCard key={meal.id} meal={meal} />
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-4 lg:grid-cols-3">
+              {menuHighlights.map((meal, index) => (
+                <div key={meal.id} className={index > 2 ? "h-full lg:hidden" : "h-full"}>
+                  <HomeMealCard meal={meal} />
+                </div>
               ))}
             </div>
           </Container>
         </section>
 
-        <section className="pt-9">
+        <section className="pt-6 sm:pt-9">
           <Container>
             <CompactSectionHeading eyebrow="Local food convenience" title="Why Shop With Us">
               A premium connected experience for groceries, restaurant meals and direct support.
             </CompactSectionHeading>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-4 grid grid-cols-3 gap-2.5 sm:mt-5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
               {valueFeatures.map((feature) => {
                 const Icon = feature.icon;
                 return (
                   <article
                     key={feature.title}
-                    className="group rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[linear-gradient(135deg,var(--color-surface-warm),#fff)] p-5 shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+                    className="group flex min-h-[8.75rem] flex-col rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[linear-gradient(135deg,var(--color-surface-warm),#fff)] p-2.5 shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] sm:min-h-0 sm:rounded-[var(--radius-xl)] sm:p-5"
                   >
                     <div
-                      className={`flex size-12 items-center justify-center rounded-[var(--radius-lg)] ${
+                      className={`flex size-8 items-center justify-center rounded-[var(--radius-md)] sm:size-12 sm:rounded-[var(--radius-lg)] ${
                         feature.tone === "restaurant"
                           ? "bg-[rgba(128,20,61,0.1)] text-[var(--color-pride-700)]"
                           : "bg-[var(--color-shop-50)] text-[var(--color-shop-700)]"
                       }`}
                     >
-                      <Icon aria-hidden="true" size={22} />
+                      <Icon aria-hidden="true" size={16} className="sm:hidden" />
+                      <Icon aria-hidden="true" size={22} className="hidden sm:block" />
                     </div>
-                    <h3 className="mt-4 text-base font-extrabold text-[var(--color-shop-900)]">
+                    <h3 className="mt-2 line-clamp-2 text-[11px] font-extrabold leading-tight text-[var(--color-shop-900)] sm:mt-4 sm:text-base">
                       {feature.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                    <p className="mt-1 line-clamp-3 text-[10px] leading-4 text-[var(--color-muted)] sm:mt-2 sm:text-sm sm:leading-6">
                       {feature.description}
                     </p>
                   </article>
@@ -376,7 +384,7 @@ export default async function Home() {
           </Container>
         </section>
 
-        <section className="pt-9">
+        <section className="pt-7 sm:pt-9">
           <Container>
             <CompactSectionHeading title="What Our Customers Say">
               Demonstration testimonials showing how the combined experience can feel for local Dundee customers.

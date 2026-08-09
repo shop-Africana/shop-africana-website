@@ -99,6 +99,7 @@ export type OrderStatus =
   | "cancelled";
 
 export type OrderRequestPayload = {
+  businessType: BusinessType;
   customer: {
     name: string;
     email: string;
@@ -116,6 +117,7 @@ export type OrderRequestPayload = {
   items: Array<{
     catalogItemId: string;
     slug?: string;
+    unitPriceSnapshot?: number;
     quantity: number;
     instructions?: string;
   }>;
@@ -124,6 +126,7 @@ export type OrderRequestPayload = {
 export type OrderResult = {
   order_id: string;
   order_reference: string;
+  business_type: BusinessType;
   subtotal: number;
   delivery_fee: number;
   total: number;

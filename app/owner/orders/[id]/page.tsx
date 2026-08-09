@@ -4,6 +4,7 @@ import { OwnerShell } from "@/components/owner/OwnerShell";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { businessTypeLabel } from "@/lib/business-scope";
 import { formatMoney } from "@/lib/money";
 import { requireOwner } from "@/lib/owner-auth";
 import { getOwnerOrder } from "@/lib/owner-orders";
@@ -45,6 +46,11 @@ export default async function OwnerOrderDetailPage({
             </h1>
             <p className="mt-2 text-sm text-[var(--color-muted)]">
               {new Date(order.createdAt).toLocaleString("en-GB")}
+            </p>
+            <p className="mt-3 inline-flex rounded-[var(--radius-pill)] bg-[var(--color-shop-50)] px-3 py-1 text-xs font-extrabold uppercase tracking-[0.1em] text-[var(--color-shop-800)]">
+              {order.businessType
+                ? businessTypeLabel(order.businessType)
+                : "Legacy mixed order"}
             </p>
           </div>
           <form action={updateOrderStatus} className="flex gap-2">

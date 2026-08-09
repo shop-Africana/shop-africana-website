@@ -5,20 +5,34 @@ import { LinkButton } from "@/components/ui/LinkButton";
 import { useBasket } from "@/components/basket/BasketProvider";
 import { formatMoney } from "@/lib/money";
 import { getWhatsAppHref, buildBasketWhatsAppMessage } from "@/lib/whatsapp";
+import type { BasketItem } from "@/types";
 
 type BasketSummaryProps = {
   showCheckoutButton?: boolean;
   whatsappNumber?: string | null;
+  itemsOverride?: BasketItem[];
+  title?: string;
 };
 
 export function BasketSummary({
   showCheckoutButton = true,
   whatsappNumber,
+  itemsOverride,
+  title = "Order Summary",
 }: BasketSummaryProps) {
   const { items, subtotal, totalQuantity } = useBasket();
+  const summaryItems = itemsOverride ?? items;
+  const summarySubtotal =
+    itemsOverride?.reduce(
+      (total, item) => total + item.unitPrice * item.quantity,
+      0,
+    ) ?? subtotal;
+  const summaryQuantity =
+    itemsOverride?.reduce((total, item) => total + item.quantity, 0) ??
+    totalQuantity;
   const whatsappHref = getWhatsAppHref(
     whatsappNumber,
-    buildBasketWhatsAppMessage({ total: subtotal, items }),
+    buildBasketWhatsAppMessage({ total: summarySubtotal, items: summaryItems }),
   );
 
   return (
@@ -30,17 +44,17 @@ export function BasketSummary({
           className="text-[var(--color-shop-700)]"
         />
         <h2 className="text-xl font-extrabold text-[var(--color-shop-900)]">
-          Order Summary
+          {title}
         </h2>
       </div>
       <div className="mt-6 space-y-3 border-b border-[var(--color-border)] pb-5 text-sm">
         <div className="flex justify-between gap-4">
           <span>Items</span>
-          <span className="font-semibold">{totalQuantity}</span>
+          <span className="font-semibold">{summaryQuantity}</span>
         </div>
         <div className="flex justify-between gap-4">
           <span>Subtotal</span>
-          <span className="font-semibold">{formatMoney(subtotal)}</span>
+          <span className="font-semibold">{formatMoney(summarySubtotal)}</span>
         </div>
         <p className="text-xs leading-5 text-[var(--color-muted)]">
           Delivery charge will be confirmed according to your order and
@@ -49,7 +63,7 @@ export function BasketSummary({
       </div>
       <div className="mt-5 flex items-center justify-between text-lg font-extrabold text-[var(--color-shop-900)]">
         <span>Current basket</span>
-        <span>{formatMoney(subtotal)}</span>
+        <span>{formatMoney(summarySubtotal)}</span>
       </div>
       {showCheckoutButton ? (
         <LinkButton href="/checkout" variant="secondary" className="mt-6 w-full">

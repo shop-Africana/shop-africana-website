@@ -4,9 +4,14 @@ import { cn } from "@/lib/cn";
 type BrandSwitcherProps = {
   primary?: "shop" | "restaurant";
   compact?: boolean;
+  balancedMobile?: boolean;
 };
 
-export function BrandSwitcher({ primary, compact = false }: BrandSwitcherProps) {
+export function BrandSwitcher({
+  primary,
+  compact = false,
+  balancedMobile = false,
+}: BrandSwitcherProps) {
   const first = primary ?? "shop";
   const second = first === "shop" ? "restaurant" : "shop";
 
@@ -15,6 +20,8 @@ export function BrandSwitcher({ primary, compact = false }: BrandSwitcherProps) 
       className={cn(
         "flex min-w-0 items-center gap-3",
         compact ? "max-w-full overflow-x-auto" : "flex-wrap",
+        balancedMobile &&
+          "grid w-full grid-cols-2 justify-items-center gap-4 overflow-visible sm:flex sm:w-auto sm:justify-items-start sm:overflow-x-auto",
       )}
     >
       <BrandLockup brand={first} size={compact ? "sm" : "md"} priority />

@@ -24,7 +24,11 @@ type BasketContextValue = {
   updateQuantity: (catalogItemId: string, quantity: number) => void;
   removeItem: (catalogItemId: string) => void;
   clearBasket: () => void;
+  clearBusinessItems: (businessType: BusinessType) => void;
   getBusinessCount: (businessType: BusinessType) => number;
+  getBusinessItems: (businessType: BusinessType) => BasketItem[];
+  getBusinessQuantity: (businessType: BusinessType) => number;
+  getBusinessSubtotal: (businessType: BusinessType) => number;
 };
 
 const BasketContext = createContext<BasketContextValue | null>(null);
@@ -117,6 +121,12 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     setItems([]);
   }, []);
 
+  const clearBusinessItems = useCallback((businessType: BusinessType) => {
+    setItems((currentItems) =>
+      currentItems.filter((item) => item.businessType !== businessType),
+    );
+  }, []);
+
   const value = useMemo(() => {
     const groceryItems = items.filter((item) => item.businessType === "grocery");
     const restaurantItems = items.filter(
@@ -138,12 +148,33 @@ export function BasketProvider({ children }: { children: ReactNode }) {
       updateQuantity,
       removeItem,
       clearBasket,
+      clearBusinessItems,
       getBusinessCount: (businessType: BusinessType) =>
         items
           .filter((item) => item.businessType === businessType)
           .reduce((total, item) => total + item.quantity, 0),
+      getBusinessItems: (businessType: BusinessType) =>
+        businessType === "grocery" ? groceryItems : restaurantItems,
+      getBusinessQuantity: (businessType: BusinessType) =>
+        items
+          .filter((item) => item.businessType === businessType)
+          .reduce((total, item) => total + item.quantity, 0),
+      getBusinessSubtotal: (businessType: BusinessType) =>
+        items
+          .filter((item) => item.businessType === businessType)
+          .reduce(
+            (total, item) => total + getLineTotal(item.unitPrice, item.quantity),
+            0,
+          ),
     };
-  }, [addItem, clearBasket, items, removeItem, updateQuantity]);
+  }, [
+    addItem,
+    clearBasket,
+    clearBusinessItems,
+    items,
+    removeItem,
+    updateQuantity,
+  ]);
 
   return (
     <BasketContext.Provider value={value}>{children}</BasketContext.Provider>

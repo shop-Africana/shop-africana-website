@@ -13,6 +13,7 @@ import { Container } from "@/components/ui/Container";
 import { HeroCarousel } from "@/components/ui/HeroCarousel";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { restaurantHeroArtwork } from "@/lib/artwork";
+import { getBusinessContact } from "@/lib/business-contacts";
 import { getBusinessSettings } from "@/lib/business-settings";
 import {
   getRestaurantMenuForWeekday,
@@ -130,11 +131,15 @@ export default async function RestaurantPage() {
       sanitizeMenu(weekdayMenus[index] as RestaurantTodayMenu),
     ]),
   ) as Record<MenuWeekday, RestaurantTodayMenu>;
+  const contact = getBusinessContact("restaurant", {
+    contactNumber: settings.contactNumber,
+    whatsappNumber: settings.whatsappNumber,
+  });
   const whatsappHref = getWhatsAppHref(
-    settings.whatsappNumber,
+    contact.whatsappNumber,
     "Hello Pride of Scotland, I would like to ask about today's menu.",
   );
-  const publicPhoneNumber = settings.contactNumber ?? settings.whatsappNumber;
+  const publicPhoneNumber = contact.phoneNumber;
   const telHref = normalizePhoneHref(publicPhoneNumber);
   const hasCallControl = Boolean(publicPhoneNumber && telHref);
   const bookingMealOptions = Array.from(
@@ -205,28 +210,28 @@ export default async function RestaurantPage() {
       <BusinessFloatingActions
         business="restaurant"
         phoneNumber={publicPhoneNumber}
-        whatsappNumber={settings.whatsappNumber}
+        whatsappNumber={contact.whatsappNumber}
         bookingMealOptions={bookingMealOptions}
       />
 
-      <section className="border-y border-[rgba(128,20,61,0.12)] bg-[linear-gradient(180deg,#fff7ed,var(--color-surface-warm))] py-10 sm:py-12">
+      <section className="border-y border-[rgba(128,20,61,0.12)] bg-[linear-gradient(180deg,#fff7ed,var(--color-surface-warm))] py-7 sm:py-8 lg:py-9">
         <Container>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 sm:gap-4">
             {benefits.map((benefit) => {
               const Icon = benefit.icon;
 
               return (
                 <article
                   key={benefit.title}
-                  className="rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(135deg,#fffaf0,var(--color-pride-50))] p-5 shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+                  className="h-full rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(135deg,#fffaf0,var(--color-pride-50))] p-3 shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] sm:p-4"
                 >
-                  <div className="flex size-12 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-amber-100)] text-[var(--color-pride-700)]">
-                    <Icon aria-hidden="true" size={22} />
+                  <div className="flex size-10 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-amber-100)] text-[var(--color-pride-700)] sm:size-11">
+                    <Icon aria-hidden="true" size={20} />
                   </div>
-                  <h2 className="mt-4 text-base font-extrabold text-[var(--color-pride-900)]">
+                  <h2 className="mt-3 text-sm font-extrabold text-[var(--color-pride-900)] sm:text-base">
                     {benefit.title}
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                  <p className="mt-1 text-xs leading-5 text-[var(--color-muted)] sm:text-sm sm:leading-6">
                     {benefit.description}
                   </p>
                 </article>
@@ -236,32 +241,32 @@ export default async function RestaurantPage() {
         </Container>
       </section>
 
-      <section className="bg-[var(--color-background)] py-12 sm:py-16">
+      <section className="bg-[var(--color-background)] py-8 sm:py-10">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-[var(--color-orange-600)]">
               Why Choose Us
             </p>
-            <h2 className="mt-3 text-3xl font-extrabold text-[var(--color-pride-900)] sm:text-4xl">
+            <h2 className="mt-2 text-2xl font-extrabold text-[var(--color-pride-900)] sm:text-3xl">
               Pride of Scotland restaurant service
             </h2>
           </div>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto mt-5 grid max-w-5xl grid-cols-2 gap-3 sm:gap-4">
             {whyChooseUs.map((item) => {
               const Icon = item.icon;
 
               return (
                 <article
                   key={item.title}
-                  className="flex h-full flex-col rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(180deg,#fff7ed,#fff)] p-5 shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:border-[var(--color-pride-200)] hover:shadow-[var(--shadow-card)]"
+                  className="flex h-full flex-col rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(180deg,#fff7ed,#fff)] p-3 shadow-[var(--shadow-input)] transition hover:-translate-y-0.5 hover:border-[var(--color-pride-200)] hover:shadow-[var(--shadow-card)] sm:p-4"
                 >
-                  <div className="flex size-12 items-center justify-center rounded-[var(--radius-lg)] bg-[rgba(128,20,61,0.1)] text-[var(--color-pride-700)]">
-                    <Icon aria-hidden="true" size={22} />
+                  <div className="flex size-10 items-center justify-center rounded-[var(--radius-lg)] bg-[rgba(128,20,61,0.1)] text-[var(--color-pride-700)] sm:size-11">
+                    <Icon aria-hidden="true" size={20} />
                   </div>
-                  <h3 className="mt-4 text-lg font-extrabold text-[var(--color-pride-900)]">
+                  <h3 className="mt-3 text-sm font-extrabold text-[var(--color-pride-900)] sm:text-base">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                  <p className="mt-1 text-xs leading-5 text-[var(--color-muted)] sm:text-sm sm:leading-6">
                     {item.description}
                   </p>
                 </article>

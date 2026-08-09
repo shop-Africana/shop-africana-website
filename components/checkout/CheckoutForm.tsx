@@ -10,44 +10,80 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
 import { LinkButton } from "@/components/ui/LinkButton";
+import { getBusinessContact } from "@/lib/business-contacts";
+import {
+  businessTypeCheckoutTitle,
+  businessTypeLabel,
+} from "@/lib/business-scope";
 import type { BusinessSettings } from "@/lib/business-settings";
-import { getWhatsAppHref, buildBasketWhatsAppMessage } from "@/lib/whatsapp";
-import type { FulfilmentType, PaymentMethod } from "@/types";
+import {
+  buildGroceryWhatsAppOrderMessage,
+  buildRestaurantWhatsAppOrderMessage,
+  getWhatsAppHref,
+} from "@/lib/whatsapp";
+import type { BusinessType, FulfilmentType, PaymentMethod } from "@/types";
 
-export function CheckoutForm({ settings }: { settings: BusinessSettings }) {
+export function CheckoutForm({
+  settings,
+  businessType,
+}: {
+  settings: BusinessSettings;
+  businessType: BusinessType | null;
+}) {
   const router = useRouter();
-  const { items, clearBasket } = useBasket();
+  const {
+    clearBusinessItems,
+    getBusinessItems,
+    getBusinessQuantity,
+    getBusinessSubtotal,
+    groceryItems,
+    restaurantItems,
+  } = useBasket();
   const [fulfilmentType, setFulfilmentType] =
     useState<FulfilmentType>("delivery");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pending");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const groupedItems = useMemo(
-    () => ({
-      grocery: items.filter((item) => item.businessType === "grocery"),
-      restaurant: items.filter((item) => item.businessType === "restaurant"),
-    }),
-    [items],
+  const scopedItems = useMemo(
+    () => (businessType ? getBusinessItems(businessType) : []),
+    [businessType, getBusinessItems],
   );
+  const scopedQuantity = businessType ? getBusinessQuantity(businessType) : 0;
+  const scopedSubtotal = businessType ? getBusinessSubtotal(businessType) : 0;
+  const businessName = businessType ? businessTypeLabel(businessType) : null;
+  const contact = businessType
+    ? getBusinessContact(businessType === "grocery" ? "shop" : "restaurant", {
+        contactNumber: settings.contactNumber,
+        whatsappNumber: settings.whatsappNumber,
+      })
+    : null;
   const whatsappHref = getWhatsAppHref(
-    settings.whatsappNumber,
-    buildBasketWhatsAppMessage({
-      fulfilmentType,
-      total: items.reduce(
-        (total, item) => total + item.unitPrice * item.quantity,
-        0,
-      ),
-      items,
-    }),
+    contact?.whatsappNumber,
+    businessType === "restaurant"
+      ? buildRestaurantWhatsAppOrderMessage({
+          items: scopedItems,
+          subtotal: scopedSubtotal,
+          totalQuantity: scopedQuantity,
+        })
+      : buildGroceryWhatsAppOrderMessage({
+          items: scopedItems,
+          subtotal: scopedSubtotal,
+          totalQuantity: scopedQuantity,
+        }),
   );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
-    if (items.length === 0) {
-      setError("Add at least one item before checkout.");
+    if (!businessType) {
+      setError("Choose Shop Africana or Pride of Scotland checkout.");
+      return;
+    }
+
+    if (scopedItems.length === 0) {
+      setError(`Add at least one ${businessType === "grocery" ? "grocery item" : "restaurant meal"} before checkout.`);
       return;
     }
 
@@ -70,11 +106,13 @@ export function CheckoutForm({ settings }: { settings: BusinessSettings }) {
           : undefined,
       instructions: String(formData.get("instructions") ?? ""),
       paymentMethod,
-      items: items.map((item) => ({
+      businessType,
+      items: scopedItems.map((item) => ({
         catalogItemId: item.catalogItemId,
         slug: item.slug,
         quantity: item.quantity,
         instructions: item.instructions ?? "",
+        unitPriceSnapshot: item.unitPrice,
       })),
     };
 
@@ -97,7 +135,7 @@ export function CheckoutForm({ settings }: { settings: BusinessSettings }) {
         return;
       }
 
-      clearBasket();
+      clearBusinessItems(businessType);
       router.push(`/checkout/confirmation/${result.order.order_reference}`);
     } catch {
       setError("Order submission is not available right now.");
@@ -106,21 +144,61 @@ export function CheckoutForm({ settings }: { settings: BusinessSettings }) {
     }
   }
 
-  if (items.length === 0) {
+  if (!businessType) {
     return (
       <section className="py-12 sm:py-16">
         <Container>
           <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
             <h1 className="text-3xl font-extrabold text-[var(--color-shop-900)]">
-              Your basket is empty
+              Choose a Checkout
             </h1>
             <p className="mt-3 text-sm text-[var(--color-muted)]">
-              Add grocery products or restaurant meals before checkout.
+              Your basket can contain both businesses, but each order is checked
+              out separately.
             </p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-              <LinkButton href="/shop">Shop Groceries</LinkButton>
-              <LinkButton href="/restaurant/menu" variant="restaurant">
-                View Menu
+              {groceryItems.length > 0 ? (
+                <LinkButton href="/checkout?business=shop">
+                  Checkout Shop Africana
+                </LinkButton>
+              ) : null}
+              {restaurantItems.length > 0 ? (
+                <LinkButton href="/checkout?business=restaurant" variant="restaurant">
+                  Checkout Pride of Scotland
+                </LinkButton>
+              ) : null}
+              {groceryItems.length === 0 && restaurantItems.length === 0 ? (
+                <>
+                  <LinkButton href="/shop">Shop Groceries</LinkButton>
+                  <LinkButton href="/restaurant/menu" variant="restaurant">
+                    View Menu
+                  </LinkButton>
+                </>
+              ) : null}
+            </div>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  if (scopedItems.length === 0) {
+    return (
+      <section className="py-12 sm:py-16">
+        <Container>
+          <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
+            <h1 className="text-3xl font-extrabold text-[var(--color-shop-900)]">
+              {businessName} basket is empty
+            </h1>
+            <p className="mt-3 text-sm text-[var(--color-muted)]">
+              Add {businessType === "grocery" ? "grocery products" : "restaurant meals"} before this checkout.
+            </p>
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <LinkButton href={businessType === "grocery" ? "/shop" : "/restaurant/menu"} variant={businessType === "grocery" ? "primary" : "restaurant"}>
+                {businessType === "grocery" ? "Shop Groceries" : "View Menu"}
+              </LinkButton>
+              <LinkButton href="/basket" variant="outline">
+                View Shared Basket
               </LinkButton>
             </div>
           </div>
@@ -137,7 +215,7 @@ export function CheckoutForm({ settings }: { settings: BusinessSettings }) {
             Basket / Checkout
           </p>
           <h1 className="mt-3 text-4xl font-extrabold text-[var(--color-shop-900)]">
-            Checkout
+            {businessTypeCheckoutTitle(businessType)}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
             Enter customer details and choose delivery or collection. Delivery
@@ -205,22 +283,22 @@ export function CheckoutForm({ settings }: { settings: BusinessSettings }) {
               <h2 className="text-xl font-extrabold text-[var(--color-shop-900)]">
                 Review Items
               </h2>
-              {groupedItems.grocery.length > 0 ? (
+                  {businessType === "grocery" ? (
                 <div className="mt-5">
                   <h3 className="text-sm font-bold text-[var(--color-shop-800)]">
-                    Groceries
+                    Shop Africana
                   </h3>
-                  {groupedItems.grocery.map((item) => (
+                  {scopedItems.map((item) => (
                     <BasketLineItem key={item.catalogItemId} item={item} />
                   ))}
                 </div>
               ) : null}
-              {groupedItems.restaurant.length > 0 ? (
+              {businessType === "restaurant" ? (
                 <div className="mt-5">
                   <h3 className="text-sm font-bold text-[var(--color-pride-800)]">
-                    Restaurant
+                    Pride of Scotland
                   </h3>
-                  {groupedItems.restaurant.map((item) => (
+                  {scopedItems.map((item) => (
                     <BasketLineItem key={item.catalogItemId} item={item} />
                   ))}
                 </div>
@@ -283,7 +361,11 @@ export function CheckoutForm({ settings }: { settings: BusinessSettings }) {
           </div>
 
           <div className="space-y-5">
-            <BasketSummary showCheckoutButton={false} />
+            <BasketSummary
+              showCheckoutButton={false}
+              itemsOverride={scopedItems}
+              title={`${businessName} Summary`}
+            />
             {whatsappHref ? (
               <LinkButton href={whatsappHref} variant="outline" className="w-full">
                 Message on WhatsApp

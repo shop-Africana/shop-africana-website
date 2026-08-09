@@ -1,105 +1,93 @@
 "use client";
 
 import Link from "next/link";
-import { MessageCircle, ShoppingBasket } from "lucide-react";
+import { ShoppingBasket } from "lucide-react";
+import { BusinessWhatsAppOrderButton } from "@/components/basket/BusinessWhatsAppOrderButton";
 import { BasketLineItem } from "@/components/basket/BasketLineItem";
 import { BasketSummary } from "@/components/basket/BasketSummary";
 import { useBasket } from "@/components/basket/BasketProvider";
 import { Container } from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { getBusinessContact } from "@/lib/business-contacts";
+import { businessTypeLabel } from "@/lib/business-scope";
 import type { BusinessSettings } from "@/lib/business-settings";
 import { formatMoney } from "@/lib/money";
-import {
-  buildRestaurantWhatsAppOrderMessage,
-  getWhatsAppHref,
-} from "@/lib/whatsapp";
+import type { BasketItem, BusinessType } from "@/types";
 
 function BasketGroup({
-  title,
+  businessType,
   items,
+  whatsappNumber,
 }: {
-  title: string;
-  items: ReturnType<typeof useBasket>["items"];
+  businessType: BusinessType;
+  items: BasketItem[];
+  whatsappNumber: string | null;
 }) {
   if (items.length === 0) return null;
 
+  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+  const subtotal = items.reduce(
+    (total, item) => total + item.unitPrice * item.quantity,
+    0,
+  );
+  const isShop = businessType === "grocery";
+
   return (
     <section className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-card)]">
-      <h2 className="text-lg font-extrabold text-[var(--color-shop-900)]">
-        {title}
-      </h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2
+            className={`text-lg font-extrabold ${
+              isShop
+                ? "text-[var(--color-shop-900)]"
+                : "text-[var(--color-pride-900)]"
+            }`}
+          >
+            {businessTypeLabel(businessType)}
+          </h2>
+          <p className="mt-1 text-sm font-semibold text-[var(--color-muted)]">
+            {itemCount} item{itemCount === 1 ? "" : "s"}
+          </p>
+        </div>
+        <p
+          className={`text-lg font-extrabold ${
+            isShop ? "text-[var(--color-shop-800)]" : "text-[var(--color-pride-800)]"
+          }`}
+        >
+          {formatMoney(subtotal)}
+        </p>
+      </div>
       <div className="mt-3">
         {items.map((item) => (
           <BasketLineItem key={item.catalogItemId} item={item} />
         ))}
       </div>
-    </section>
-  );
-}
-
-function RestaurantWhatsAppOrder({
-  whatsappNumber,
-}: {
-  whatsappNumber: string | null;
-}) {
-  const { restaurantItems, getBusinessCount } = useBasket();
-  const restaurantCount = getBusinessCount("restaurant");
-  const restaurantSubtotal = restaurantItems.reduce(
-    (total, item) => total + item.unitPrice * item.quantity,
-    0,
-  );
-  const whatsappHref =
-    restaurantItems.length > 0
-      ? getWhatsAppHref(
-          whatsappNumber,
-          buildRestaurantWhatsAppOrderMessage({
-            items: restaurantItems,
-            subtotal: restaurantSubtotal,
-            totalQuantity: restaurantCount,
-          }),
-        )
-      : null;
-
-  if (!whatsappHref) return null;
-
-  return (
-    <section className="rounded-[var(--radius-xl)] border border-[rgba(128,20,61,0.16)] bg-[linear-gradient(180deg,#fff7ed,var(--color-pride-50))] p-5 shadow-[var(--shadow-card)]">
-      <div className="flex items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[rgba(21,128,61,0.12)] text-[var(--color-shop-800)]">
-          <MessageCircle aria-hidden="true" size={20} />
-        </span>
-        <div className="min-w-0">
-          <h2 className="text-lg font-extrabold text-[var(--color-pride-900)]">
-            Pride of Scotland WhatsApp Order
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
-            Send only your restaurant items to Pride of Scotland for manual
-            confirmation.
-          </p>
-        </div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <BusinessWhatsAppOrderButton
+          businessType={businessType}
+          whatsappNumber={whatsappNumber}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-5 text-sm font-extrabold text-[var(--color-shop-800)] shadow-[var(--shadow-input)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+        >
+          Order {isShop ? "Shop" : "Restaurant"} on WhatsApp
+        </BusinessWhatsAppOrderButton>
+        <LinkButton
+          href={`/checkout?business=${isShop ? "shop" : "restaurant"}`}
+          variant={isShop ? "secondary" : "restaurant"}
+          className="w-full"
+        >
+          Checkout {businessTypeLabel(businessType)}
+        </LinkButton>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[rgba(128,20,61,0.12)] bg-white/70 px-3 py-2.5 text-sm">
-        <span className="font-bold text-[var(--color-pride-800)]">
-          {restaurantCount} item{restaurantCount === 1 ? "" : "s"}
-        </span>
-        <span className="font-extrabold text-[var(--color-pride-900)]">
-          {formatMoney(restaurantSubtotal)}
-        </span>
-      </div>
-      <a
-        href={whatsappHref}
-        className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-5 text-sm font-extrabold text-[var(--color-shop-800)] shadow-[var(--shadow-input)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
-      >
-        <MessageCircle aria-hidden="true" size={17} />
-        Order Pride of Scotland on WhatsApp
-      </a>
     </section>
   );
 }
 
 export function BasketPageContent({ settings }: { settings: BusinessSettings }) {
   const { items, groceryItems, restaurantItems, totalQuantity } = useBasket();
+  const shopContact = getBusinessContact("shop", {
+    contactNumber: settings.contactNumber,
+    whatsappNumber: settings.whatsappNumber,
+  });
   const restaurantContact = getBusinessContact("restaurant", {
     contactNumber: settings.contactNumber,
     whatsappNumber: settings.whatsappNumber,
@@ -158,9 +146,14 @@ export function BasketPageContent({ settings }: { settings: BusinessSettings }) 
                 {totalQuantity} item{totalQuantity === 1 ? "" : "s"} in your
                 shared basket.
               </div>
-              <BasketGroup title="Groceries" items={groceryItems} />
-              <BasketGroup title="Restaurant" items={restaurantItems} />
-              <RestaurantWhatsAppOrder
+              <BasketGroup
+                businessType="grocery"
+                items={groceryItems}
+                whatsappNumber={shopContact.whatsappNumber}
+              />
+              <BasketGroup
+                businessType="restaurant"
+                items={restaurantItems}
                 whatsappNumber={restaurantContact.whatsappNumber}
               />
               <p className="text-sm text-[var(--color-muted)]">
@@ -178,7 +171,7 @@ export function BasketPageContent({ settings }: { settings: BusinessSettings }) 
                 .
               </p>
             </div>
-            <BasketSummary />
+            <BasketSummary showCheckoutButton={false} />
           </div>
         )}
       </Container>

@@ -13,7 +13,6 @@ import {
   Heart,
   Home,
   Leaf,
-  MessageCircle,
   Milk,
   Minus,
   Package,
@@ -31,16 +30,13 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AddToBasketButton } from "@/components/basket/AddToBasketButton";
+import { BusinessWhatsAppOrderButton } from "@/components/basket/BusinessWhatsAppOrderButton";
 import { useBasket } from "@/components/basket/BasketProvider";
 import { BusinessFloatingActions } from "@/components/ui/BusinessFloatingActions";
 import { getBusinessContact } from "@/lib/business-contacts";
 import type { BusinessSettings } from "@/lib/business-settings";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/money";
-import {
-  buildGroceryWhatsAppOrderMessage,
-  getWhatsAppHref,
-} from "@/lib/whatsapp";
 import type { CatalogCategory, CatalogItem } from "@/types";
 
 type ShopProductsWorkspaceProps = {
@@ -641,16 +637,6 @@ function ProductPageBasket({ settings }: { settings: BusinessSettings }) {
     0,
   );
   const contact = getBusinessContact("shop", settings);
-  const whatsappHref = getWhatsAppHref(
-    contact.whatsappNumber,
-    groceryItems.length > 0
-      ? buildGroceryWhatsAppOrderMessage({
-          items: groceryItems,
-          subtotal: grocerySubtotal,
-          totalQuantity: groceryCount,
-        })
-      : "Hello, I would like to enquire about Shop Africana products.",
-  );
 
   return (
     <section className="mt-4 grid min-h-[24rem] overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-[linear-gradient(180deg,var(--color-surface-warm),var(--color-amber-100))] shadow-[var(--shadow-card)] lg:mt-0 lg:h-[66%] lg:min-h-0 lg:grid-rows-[auto_minmax(0,1fr)_auto_auto_auto]">
@@ -754,20 +740,18 @@ function ProductPageBasket({ settings }: { settings: BusinessSettings }) {
           </div>
           <div className="grid gap-2 px-4 pb-4 pt-3">
             <Link
-              href="/checkout"
+              href="/checkout?business=shop"
               className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-pill)] bg-[var(--color-orange-500)] px-5 text-sm font-extrabold text-[var(--color-foreground-strong)] shadow-[var(--shadow-input)] transition hover:bg-[var(--color-orange-400)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
             >
               Proceed to Checkout
             </Link>
-            {whatsappHref ? (
-              <a
-                href={whatsappHref}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[var(--color-shop-300)] bg-white px-5 text-sm font-extrabold text-[var(--color-shop-800)] transition hover:bg-[var(--color-shop-50)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
-              >
-                <MessageCircle aria-hidden="true" size={17} />
-                Order via WhatsApp
-              </a>
-            ) : null}
+            <BusinessWhatsAppOrderButton
+              businessType="grocery"
+              whatsappNumber={contact.whatsappNumber}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[var(--color-shop-300)] bg-white px-5 text-sm font-extrabold text-[var(--color-shop-800)] transition hover:bg-[var(--color-shop-50)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+            >
+              Order via WhatsApp
+            </BusinessWhatsAppOrderButton>
           </div>
         </>
       ) : (
