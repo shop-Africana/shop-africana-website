@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { getBusinessContact } from "@/lib/business-contacts";
 import { businessTypeLabel } from "@/lib/business-scope";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getBusinessSettingsFor, neutralBusinessSettings } from "@/lib/business-settings";
 import { getOrderConfirmationDetails } from "@/lib/order-confirmation";
 import {
   buildGroceryWhatsAppOrderMessage,
@@ -18,10 +18,10 @@ export default async function OrderConfirmationPage({
   params: Promise<{ reference: string }>;
 }) {
   const { reference } = await params;
-  const [settings, order] = await Promise.all([
-    getBusinessSettings(),
-    getOrderConfirmationDetails(reference),
-  ]);
+  const order = await getOrderConfirmationDetails(reference);
+  const settings = order?.businessType
+    ? await getBusinessSettingsFor(order.businessType)
+    : neutralBusinessSettings;
   const contact =
     order?.businessType
       ? getBusinessContact(
@@ -90,9 +90,8 @@ export default async function OrderConfirmationPage({
             ) : null}
             <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
               Your order has been created with payment status pending. Please
-              keep this reference for follow-up. Delivery charge, where
-              applicable, will be confirmed according to your order and
-              location.
+              keep this reference for follow-up.
+              {settings.deliveryNote ? ` ${settings.deliveryNote}` : ""}
             </p>
             <p className="mt-6 rounded-[var(--radius-lg)] bg-[var(--color-shop-50)] px-4 py-3 text-lg font-extrabold text-[var(--color-shop-900)]">
               {reference}

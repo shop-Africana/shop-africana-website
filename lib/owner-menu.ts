@@ -1,11 +1,13 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getUkServiceDateParts } from "@/lib/restaurant-menu";
+import { getOwnerPromotions } from "@/lib/promotions";
 import type {
   CatalogCategory,
   CatalogItem,
   DailyOverrideStatus,
   MenuWeekday,
   RestaurantMenuPeriod,
+  Promotion,
 } from "@/types";
 
 export const ownerWeekdays: MenuWeekday[] = [
@@ -84,6 +86,7 @@ export type OwnerScheduleRow = {
 export type OwnerMeal = CatalogItem & {
   schedules: OwnerScheduleRow[];
   todayStatus: "scheduled" | DailyOverrideStatus;
+  promotion: Promotion | null;
 };
 
 function mapCategory(row: CategoryRow): CatalogCategory {
@@ -155,7 +158,14 @@ export function slugifyMealName(name: string) {
 export async function getOwnerMenuData() {
   const admin = createSupabaseAdminClient();
   const { serviceDate, weekday } = getUkServiceDateParts();
-  const [categoriesResult, periodsResult, mealsResult, schedulesResult, overridesResult] =
+  const [
+    categoriesResult,
+    periodsResult,
+    mealsResult,
+    schedulesResult,
+    overridesResult,
+    promotions,
+  ] =
     await Promise.all([
       admin
         .from("categories")
@@ -182,6 +192,7 @@ export async function getOwnerMenuData() {
         .from("restaurant_daily_overrides")
         .select("catalog_item_id,service_date,override_status")
         .eq("service_date", serviceDate),
+      getOwnerPromotions("restaurant"),
     ]);
 
   if (categoriesResult.error) throw new Error(categoriesResult.error.message);
@@ -197,8 +208,12 @@ export async function getOwnerMenuData() {
       row.override_status,
     ]),
   );
+  const promotionsByItem = new Map(
+    promotions.map((promotion) => [promotion.catalogItemId, promotion]),
+  );
   const meals: OwnerMeal[] = ((mealsResult.data ?? []) as ItemRow[]).map((row) => {
     const item = mapItem(row);
+    const promotion = promotionsByItem.get(item.id) ?? null;
     const itemSchedules = schedules.filter(
       (schedule) => schedule.catalogItemId === item.id,
     );
@@ -208,6 +223,10 @@ export async function getOwnerMenuData() {
 
     return {
       ...item,
+      regularPrice: item.price,
+      effectivePrice: promotion?.specialPrice ?? item.price,
+      activePromotion: promotion,
+      promotion,
       schedules: itemSchedules,
       todayStatus: overrides.get(item.id) ?? (scheduledToday ? "scheduled" : "hidden"),
     };

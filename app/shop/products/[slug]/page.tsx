@@ -6,7 +6,7 @@ import { AddToBasketPanel } from "@/components/basket/AddToBasketPanel";
 import { Container } from "@/components/ui/Container";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getBusinessSettingsFor } from "@/lib/business-settings";
 import { getCatalogItemBySlug, getCatalogItems } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
 
@@ -17,7 +17,7 @@ export default async function ProductDetailPage({
 }) {
   const { slug } = await params;
   const [settings, product, relatedProducts] = await Promise.all([
-    getBusinessSettings(),
+    getBusinessSettingsFor("grocery"),
     getCatalogItemBySlug(slug, "grocery"),
     getCatalogItems("grocery"),
   ]);

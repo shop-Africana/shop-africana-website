@@ -1,6 +1,7 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { isLegacyGroceryOriginCategory } from "@/lib/catalog";
-import type { CatalogCategory, CatalogItem } from "@/types";
+import { getOwnerPromotions } from "@/lib/promotions";
+import type { CatalogCategory, CatalogItem, Promotion } from "@/types";
 
 type CategoryRow = {
   id: string;
@@ -32,6 +33,7 @@ type ItemRow = {
 
 export type OwnerProduct = CatalogItem & {
   categoryName: string | null;
+  promotion: Promotion | null;
 };
 
 function mapCategory(row: CategoryRow): CatalogCategory {
@@ -47,7 +49,11 @@ function mapCategory(row: CategoryRow): CatalogCategory {
   };
 }
 
-function mapProduct(row: ItemRow, categories: CatalogCategory[]): OwnerProduct {
+function mapProduct(
+  row: ItemRow,
+  categories: CatalogCategory[],
+  promotion: Promotion | null,
+): OwnerProduct {
   const category = categories.find((item) => item.id === row.category_id);
 
   return {
@@ -66,6 +72,10 @@ function mapProduct(row: ItemRow, categories: CatalogCategory[]): OwnerProduct {
     isDemo: row.is_demo,
     sortOrder: row.sort_order,
     originRegion: row.origin_region,
+    regularPrice: row.price,
+    effectivePrice: promotion?.specialPrice ?? row.price,
+    activePromotion: promotion,
+    promotion,
   };
 }
 
@@ -81,7 +91,7 @@ export function slugifyProductName(name: string) {
 
 export async function getOwnerProductData() {
   const admin = createSupabaseAdminClient();
-  const [categoriesResult, productsResult] = await Promise.all([
+  const [categoriesResult, productsResult, promotions] = await Promise.all([
     admin
       .from("categories")
         .select("id,name,slug,business_type,description,image_url,sort_order,is_active")
@@ -94,14 +104,16 @@ export async function getOwnerProductData() {
       )
       .eq("business_type", "grocery")
       .order("sort_order", { ascending: true }),
+    getOwnerPromotions("grocery"),
   ]);
 
   if (categoriesResult.error) throw new Error(categoriesResult.error.message);
   if (productsResult.error) throw new Error(productsResult.error.message);
 
   const categories = ((categoriesResult.data ?? []) as CategoryRow[]).map(mapCategory);
+  const promotionsByItem = new Map(promotions.map((promotion) => [promotion.catalogItemId, promotion]));
   const products = ((productsResult.data ?? []) as ItemRow[]).map((row) =>
-    mapProduct(row, categories),
+    mapProduct(row, categories, promotionsByItem.get(row.id) ?? null),
   );
 
   const ownerSelectableCategories = categories.filter(

@@ -38,7 +38,7 @@ import { HeroCarousel } from "@/components/ui/HeroCarousel";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getGroceryCategoryArtwork, shopHeroArtwork } from "@/lib/artwork";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getBusinessSettingsFor } from "@/lib/business-settings";
 import { getCatalogItems, getCategories } from "@/lib/catalog";
 import type { CatalogCategory, CatalogItem } from "@/types";
 
@@ -521,7 +521,7 @@ export default async function ShopPage({
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const filters = getFilterState(resolvedSearchParams);
   const [settings, categories, groceryProducts] = await Promise.all([
-    getBusinessSettings(),
+    getBusinessSettingsFor("grocery"),
     getCategories("grocery"),
     getCatalogItems("grocery"),
   ]);

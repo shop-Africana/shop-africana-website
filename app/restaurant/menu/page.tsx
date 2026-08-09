@@ -1,5 +1,5 @@
 import { RestaurantMenuOrderingWorkspace } from "@/components/restaurant/RestaurantMenuOrderingWorkspace";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getBusinessSettingsFor } from "@/lib/business-settings";
 import {
   getRestaurantMenuForWeekday,
   getTodayRestaurantMenu,
@@ -52,7 +52,7 @@ function sanitizeMenu(menu: RestaurantTodayMenu): RestaurantTodayMenu {
 
 export default async function RestaurantMenuPage() {
   const [settings, todayMenu, ...weekdayMenus] = await Promise.all([
-    getBusinessSettings(),
+    getBusinessSettingsFor("restaurant"),
     getTodayRestaurantMenu(),
     ...weekdays.map((weekday) => getRestaurantMenuForWeekday(weekday)),
   ]);

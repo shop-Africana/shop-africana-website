@@ -74,6 +74,23 @@ export type CatalogItem = {
   dietaryLabels?: string[] | null;
   preparationTime?: string | null;
   allergenInformation?: string | null;
+  regularPrice?: number;
+  effectivePrice?: number;
+  activePromotion?: Promotion | null;
+};
+
+export type Promotion = {
+  id: string;
+  businessType: BusinessType;
+  catalogItemId: string;
+  title: string;
+  description: string | null;
+  badgeText: string | null;
+  specialPrice: number;
+  startsAt: string;
+  endsAt: string | null;
+  isActive: boolean;
+  displayOrder: number;
 };
 
 export type BasketItem = {

@@ -70,9 +70,16 @@ export function MealCardShell({
           {meal.description}
         </p>
         <div className="mt-auto flex flex-col gap-4 border-t border-[var(--color-border)] bg-[linear-gradient(180deg,#fff,var(--color-pride-50))] p-4 sm:items-stretch">
-          <p className="text-xl font-extrabold text-[var(--color-pride-800)]">
-            {formatMoney(meal.price)}
-          </p>
+          <div className="flex flex-wrap items-baseline gap-2">
+            <p className="text-xl font-extrabold text-[var(--color-pride-800)]">
+              {formatMoney(meal.price)}
+            </p>
+            {meal.activePromotion && meal.regularPrice ? (
+              <p className="text-xs font-bold text-[var(--color-muted)] line-through">
+                {formatMoney(meal.regularPrice)}
+              </p>
+            ) : null}
+          </div>
           <AddToBasketButton
             item={meal}
             variant="restaurant"

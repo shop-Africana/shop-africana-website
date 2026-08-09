@@ -40,7 +40,7 @@ export function CheckoutForm({
     restaurantItems,
   } = useBasket();
   const [fulfilmentType, setFulfilmentType] =
-    useState<FulfilmentType>("delivery");
+    useState<FulfilmentType>(settings.deliveryEnabled ? "delivery" : "collection");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pending");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,6 +52,17 @@ export function CheckoutForm({
   const scopedQuantity = businessType ? getBusinessQuantity(businessType) : 0;
   const scopedSubtotal = businessType ? getBusinessSubtotal(businessType) : 0;
   const businessName = businessType ? businessTypeLabel(businessType) : null;
+  const fulfilmentOptions = useMemo(
+    () =>
+      ([
+        settings.deliveryEnabled ? "delivery" : null,
+        settings.collectionEnabled ? "collection" : null,
+      ].filter(Boolean) as FulfilmentType[]),
+    [settings.collectionEnabled, settings.deliveryEnabled],
+  );
+  const activeFulfilmentType = fulfilmentOptions.includes(fulfilmentType)
+    ? fulfilmentType
+    : fulfilmentOptions[0] ?? "collection";
   const contact = businessType
     ? getBusinessContact(businessType === "grocery" ? "shop" : "restaurant", {
         contactNumber: settings.contactNumber,
@@ -87,6 +98,11 @@ export function CheckoutForm({
       return;
     }
 
+    if (!fulfilmentOptions.includes(activeFulfilmentType)) {
+      setError("The selected fulfilment option is not currently available.");
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const payload = {
       customer: {
@@ -94,9 +110,9 @@ export function CheckoutForm({
         email: String(formData.get("email") ?? ""),
         phone: String(formData.get("phone") ?? ""),
       },
-      fulfilmentType,
+      fulfilmentType: activeFulfilmentType,
       deliveryAddress:
-        fulfilmentType === "delivery"
+        activeFulfilmentType === "delivery"
           ? {
               line1: String(formData.get("addressLine1") ?? ""),
               line2: String(formData.get("addressLine2") ?? ""),
@@ -218,8 +234,8 @@ export function CheckoutForm({
             {businessTypeCheckoutTitle(businessType)}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
-            Enter customer details and choose delivery or collection. Delivery
-            charge will be confirmed according to your order and location.
+            Enter customer details and choose an available fulfilment option.
+            {settings.deliveryNote ? ` ${settings.deliveryNote}` : ""}
           </p>
         </div>
 
@@ -234,11 +250,11 @@ export function CheckoutForm({
                 Delivery or Collection
               </h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {(["delivery", "collection"] as FulfilmentType[]).map((type) => (
+                {fulfilmentOptions.map((type) => (
                   <label
                     key={type}
                     className={`rounded-[var(--radius-lg)] border p-4 text-sm font-semibold ${
-                      fulfilmentType === type
+                      activeFulfilmentType === type
                         ? "border-[var(--color-shop-500)] bg-[var(--color-shop-50)] text-[var(--color-shop-900)]"
                         : "border-[var(--color-border)] bg-white text-[var(--color-muted)]"
                     }`}
@@ -247,7 +263,7 @@ export function CheckoutForm({
                       type="radio"
                       name="fulfilmentType"
                       value={type}
-                      checked={fulfilmentType === type}
+                      checked={activeFulfilmentType === type}
                       onChange={() => setFulfilmentType(type)}
                       className="mr-2"
                     />
@@ -259,7 +275,7 @@ export function CheckoutForm({
                 <Input name="name" placeholder="Full name" required />
                 <Input name="email" type="email" placeholder="Email address" required />
                 <Input name="phone" placeholder="Phone number" required />
-                {fulfilmentType === "delivery" ? (
+                {activeFulfilmentType === "delivery" ? (
                   <>
                     <Input
                       name="addressLine1"

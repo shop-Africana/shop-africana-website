@@ -1,5 +1,6 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getTodayRestaurantMenuItem } from "@/lib/restaurant-menu";
+import { getEffectiveCatalogPrice } from "@/lib/promotions";
 import type { OrderRequestPayload, OrderResult } from "@/types";
 
 type CatalogLookupRow = {
@@ -128,6 +129,12 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
         }
 
         authoritativePrice = todayItem.effectivePrice;
+      } else {
+        authoritativePrice = await getEffectiveCatalogPrice({
+          id: row.id,
+          businessType: row.business_type,
+          price: row.price,
+        });
       }
 
       if (

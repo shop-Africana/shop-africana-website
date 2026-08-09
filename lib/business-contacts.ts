@@ -41,29 +41,19 @@ export function normalizeUkWhatsAppNumber(number: string | null | undefined) {
   return normalized?.replace(/^\+/, "") ?? null;
 }
 
-function isSameNumber(first: string | null | undefined, second: string) {
-  return normalizeUkPhoneNumber(first) === normalizeUkPhoneNumber(second);
-}
-
 export function getBusinessContact(
   brand: BusinessContactBrand,
   settings?: Pick<BusinessSettings, "contactNumber" | "whatsappNumber">,
 ) {
   const fallback = confirmedContacts[brand];
-  const settingsPhone = isSameNumber(settings?.contactNumber, fallback.phoneNumber)
-    ? normalizeUkPhoneNumber(settings?.contactNumber)
-    : null;
-  const settingsWhatsApp = isSameNumber(
-    settings?.whatsappNumber,
-    fallback.whatsappNumber,
-  )
-    ? normalizeUkWhatsAppNumber(settings?.whatsappNumber)
-    : null;
+  const settingsPhone = normalizeUkPhoneNumber(settings?.contactNumber);
+  const settingsWhatsApp = normalizeUkWhatsAppNumber(settings?.whatsappNumber);
+  const phoneNumber = settingsPhone ?? fallback.phoneNumber;
 
   return {
-    displayPhone: fallback.displayPhone,
-    phoneNumber: settingsPhone ?? fallback.phoneNumber,
-    telHref: `tel:${settingsPhone ?? fallback.phoneNumber}`,
+    displayPhone: settings?.contactNumber?.trim() || fallback.displayPhone,
+    phoneNumber,
+    telHref: `tel:${phoneNumber}`,
     whatsappNumber: settingsWhatsApp ?? fallback.whatsappNumber,
   };
 }

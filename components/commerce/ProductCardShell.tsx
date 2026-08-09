@@ -114,14 +114,21 @@ export function ProductCardShell({
             compact && "space-y-2 p-2.5 sm:p-3",
           )}
         >
-          <p
-            className={cn(
-              "text-xl font-extrabold text-[var(--color-shop-800)]",
-              compact && "text-base",
-            )}
-          >
-            {formatMoney(product.price)}
-          </p>
+          <div className="flex flex-wrap items-baseline gap-2">
+            <p
+              className={cn(
+                "text-xl font-extrabold text-[var(--color-shop-800)]",
+                compact && "text-base",
+              )}
+            >
+              {formatMoney(product.price)}
+            </p>
+            {product.activePromotion && product.regularPrice ? (
+              <p className="text-xs font-bold text-[var(--color-muted)] line-through">
+                {formatMoney(product.regularPrice)}
+              </p>
+            ) : null}
+          </div>
           <QuantitySelector compact={compact} />
           <AddToBasketButton
             item={product}

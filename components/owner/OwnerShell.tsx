@@ -1,6 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CalendarDays, ClipboardList, LogOut, Package, Plus, Utensils } from "lucide-react";
+import {
+  CalendarDays,
+  ClipboardList,
+  LogOut,
+  Package,
+  Plus,
+  Settings,
+  Utensils,
+} from "lucide-react";
 import { logoutOwner } from "@/app/owner/actions";
 import { BrandLockup } from "@/components/brand/BrandLockup";
 import { Container } from "@/components/ui/Container";
@@ -19,6 +27,7 @@ const ownerNav = [
   { label: "Add Product", href: "/owner/products/new", icon: Plus },
   { label: "Menu", href: "/owner/menu", icon: Utensils },
   { label: "Add Meal", href: "/owner/menu/new", icon: Plus },
+  { label: "Settings", href: "/owner/settings", icon: Settings },
 ];
 
 export function OwnerShell({ owner, children }: OwnerShellProps) {

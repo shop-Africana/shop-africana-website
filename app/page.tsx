@@ -25,7 +25,7 @@ import { Container } from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { SharedHero } from "@/components/home/SharedHero";
 import { getGroceryCategoryArtwork } from "@/lib/artwork";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getAllBusinessSettings } from "@/lib/business-settings";
 import { getCatalogItems, getCategories } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
 import type { CatalogCategory, CatalogItem } from "@/types";
@@ -275,7 +275,7 @@ function HomeMealCard({ meal }: { meal: CatalogItem }) {
 export default async function Home() {
   const [settings, groceryProducts, restaurantSpecials, groceryCategories] =
     await Promise.all([
-      getBusinessSettings(),
+      getAllBusinessSettings(),
       getCatalogItems("grocery"),
       getCatalogItems("restaurant"),
       getCategories("grocery"),
@@ -290,8 +290,8 @@ export default async function Home() {
 
   return (
     <>
-      <TopBar settings={settings} />
-      <SiteHeader settings={settings} balancedMobileLogos />
+      <TopBar settings={settings.shop} />
+      <SiteHeader settings={settings.shop} balancedMobileLogos />
       <main className="flex-1 bg-[var(--color-background)]">
         <SharedHero />
 
@@ -427,12 +427,12 @@ export default async function Home() {
                 { label: "Located in Dundee", icon: MapPin },
                 {
                   label:
-                    settings.openingHoursText ??
+                    settings.shop.openingHoursText ??
                     "Opening hours will be published soon",
                   icon: CheckCircle2,
                 },
                 {
-                  label: settings.contactNumber ?? "Contact number to be added",
+                  label: settings.shop.contactNumber ?? "Contact number to be added",
                   icon: Headphones,
                 },
                 { label: "Delivery charge confirmed manually", icon: Truck },
@@ -469,7 +469,11 @@ export default async function Home() {
           </Container>
         </section>
       </main>
-      <SiteFooter settings={settings} />
+      <SiteFooter
+        settings={settings.shop}
+        shopSettings={settings.shop}
+        restaurantSettings={settings.restaurant}
+      />
       <MobileBottomNavigation />
     </>
   );

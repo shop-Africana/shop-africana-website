@@ -46,14 +46,22 @@ const socialChannels = [
   { label: "TikTok", icon: TikTokIcon },
 ];
 
-export function SiteFooter({ settings }: { settings: BusinessSettings }) {
+export function SiteFooter({
+  settings,
+  shopSettings = settings,
+  restaurantSettings = settings,
+}: {
+  settings: BusinessSettings;
+  shopSettings?: BusinessSettings;
+  restaurantSettings?: BusinessSettings;
+}) {
   const shopContact = getBusinessContact("shop", {
-    contactNumber: settings.contactNumber,
-    whatsappNumber: settings.whatsappNumber,
+    contactNumber: shopSettings.contactNumber,
+    whatsappNumber: shopSettings.whatsappNumber,
   });
   const restaurantContact = getBusinessContact("restaurant", {
-    contactNumber: settings.contactNumber,
-    whatsappNumber: settings.whatsappNumber,
+    contactNumber: restaurantSettings.contactNumber,
+    whatsappNumber: restaurantSettings.whatsappNumber,
   });
   const shopWhatsappHref = getWhatsAppHref(
     shopContact.whatsappNumber,
@@ -99,11 +107,25 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
             <p className="flex items-start gap-2">
               <MapPin aria-hidden="true" size={16} className="mt-0.5 shrink-0" />
               <span>
-                14-16 Arbroath Road
-                <br />
-                Dundee
-                <br />
-                DD4 6EP
+                {restaurantSettings.addressLine1 ?? "Restaurant address to be confirmed"}
+                {restaurantSettings.addressLine2 ? (
+                  <>
+                    <br />
+                    {restaurantSettings.addressLine2}
+                  </>
+                ) : null}
+                {restaurantSettings.city ? (
+                  <>
+                    <br />
+                    {restaurantSettings.city}
+                  </>
+                ) : null}
+                {restaurantSettings.postcode ? (
+                  <>
+                    <br />
+                    {restaurantSettings.postcode}
+                  </>
+                ) : null}
               </span>
             </p>
           </div>

@@ -1,5 +1,9 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { demoCatalogItems } from "@/lib/catalog";
+import {
+  applyPromotionToItem,
+  getActivePromotionsForItems,
+} from "@/lib/promotions";
 import type {
   CatalogItem,
   DailyOverrideStatus,
@@ -98,6 +102,9 @@ function mapItem(row: CatalogItemRow): CatalogItem {
     dietaryLabels: row.dietary_labels,
     preparationTime: row.preparation_time,
     allergenInformation: row.allergen_information,
+    regularPrice: row.price,
+    effectivePrice: row.price,
+    activePromotion: null,
   };
 }
 
@@ -201,6 +208,7 @@ export async function getTodayRestaurantMenu(
   const itemsById = new Map(
     (itemsResult.data as CatalogItemRow[]).map((row) => [row.id, mapItem(row)]),
   );
+  const promotions = await getActivePromotionsForItems("restaurant", catalogIds);
   const overridesByItemId = new Map(
     ((overridesResult.data ?? []) as OverrideRow[]).map((row) => [
       row.catalog_item_id,
@@ -224,13 +232,18 @@ export async function getTodayRestaurantMenu(
 
     if (!period) return;
 
+    const overridePrice = override?.override_price ?? item.price;
+    const promotedItem = applyPromotionToItem(
+      { ...item, price: overridePrice, regularPrice: overridePrice },
+      promotions.get(item.id),
+    );
+
     menuItems.push({
-      ...item,
-      price: override?.override_price ?? item.price,
+      ...promotedItem,
       menuPeriod: period,
       menuStatus:
         override?.override_status === "finished" ? "finished" : "available",
-      effectivePrice: override?.override_price ?? item.price,
+      effectivePrice: promotedItem.effectivePrice ?? promotedItem.price,
       scheduleDisplayOrder: schedule.display_order,
     });
   });
@@ -303,6 +316,7 @@ export async function getRestaurantMenuForWeekday(
   const itemsById = new Map(
     (data as CatalogItemRow[]).map((row) => [row.id, mapItem(row)]),
   );
+  const promotions = await getActivePromotionsForItems("restaurant", catalogIds);
   const periodsById = new Map(periods.map((period) => [period.id, period]));
   const menuItems: RestaurantMenuItem[] = [];
 
@@ -312,11 +326,13 @@ export async function getRestaurantMenuForWeekday(
 
     if (!item || !period) return;
 
+    const promotedItem = applyPromotionToItem(item, promotions.get(item.id));
+
     menuItems.push({
-      ...item,
+      ...promotedItem,
       menuPeriod: period,
       menuStatus: "available",
-      effectivePrice: item.price,
+      effectivePrice: promotedItem.effectivePrice ?? promotedItem.price,
       scheduleDisplayOrder: schedule.display_order,
     });
   });

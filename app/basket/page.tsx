@@ -1,13 +1,16 @@
 import { SharedPageShell } from "@/components/layout/SharedPageShell";
 import { BasketPageContent } from "@/components/basket/BasketPageContent";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getAllBusinessSettings } from "@/lib/business-settings";
 
 export default async function BasketPage() {
-  const settings = await getBusinessSettings();
+  const settings = await getAllBusinessSettings();
 
   return (
     <SharedPageShell>
-      <BasketPageContent settings={settings} />
+      <BasketPageContent
+        shopSettings={settings.shop}
+        restaurantSettings={settings.restaurant}
+      />
     </SharedPageShell>
   );
 }

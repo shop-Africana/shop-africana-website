@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { PlaceholderFrame } from "@/components/ui/PlaceholderFrame";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getBusinessSettingsFor } from "@/lib/business-settings";
 import { getCatalogItemBySlug } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
 import {
@@ -23,7 +23,7 @@ export default async function MealDetailPage({
 }) {
   const { slug } = await params;
   const [settings, todayMeal, fallbackMeal, todayMenu] = await Promise.all([
-    getBusinessSettings(),
+    getBusinessSettingsFor("restaurant"),
     getTodayRestaurantMenuItemBySlug(slug),
     getCatalogItemBySlug(slug, "restaurant"),
     getTodayRestaurantMenu(),

@@ -14,7 +14,7 @@ import { HeroCarousel } from "@/components/ui/HeroCarousel";
 import { LinkButton } from "@/components/ui/LinkButton";
 import { restaurantHeroArtwork } from "@/lib/artwork";
 import { getBusinessContact } from "@/lib/business-contacts";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getBusinessSettingsFor } from "@/lib/business-settings";
 import {
   getRestaurantMenuForWeekday,
   getTodayRestaurantMenu,
@@ -120,7 +120,7 @@ function sanitizeMenu(menu: RestaurantTodayMenu): RestaurantTodayMenu {
 
 export default async function RestaurantPage() {
   const [settings, todayMenu, ...weekdayMenus] = await Promise.all([
-    getBusinessSettings(),
+    getBusinessSettingsFor("restaurant"),
     getTodayRestaurantMenu(),
     ...weekdays.map((weekday) => getRestaurantMenuForWeekday(weekday)),
   ]);

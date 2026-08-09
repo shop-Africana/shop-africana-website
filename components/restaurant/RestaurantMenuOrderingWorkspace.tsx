@@ -269,8 +269,13 @@ export function RestaurantMenuOrderingWorkspace({
   );
   const specials = useMemo(() => {
     const todayItems = uniqueItems(itemsFromMenu(todayMenu)).filter(available);
+    const promoted = todayItems.filter((item) => item.activePromotion);
     const featured = todayItems.filter((item) => item.isFeatured);
-    return (featured.length > 0 ? featured : todayItems).slice(0, 5);
+    return [
+      ...promoted,
+      ...(promoted.length < 5 ? featured.filter((item) => !promoted.includes(item)) : []),
+      ...(promoted.length === 0 && featured.length === 0 ? todayItems : []),
+    ].slice(0, 5);
   }, [todayMenu]);
   const bookingMealOptions = useMemo(
     () => uniqueItems(itemsFromMenu(todayMenu)).filter(available).map((item) => item.name),

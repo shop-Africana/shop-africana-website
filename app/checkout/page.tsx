@@ -1,6 +1,6 @@
 import { SharedPageShell } from "@/components/layout/SharedPageShell";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getBusinessSettingsFor } from "@/lib/business-settings";
 import { checkoutBusinessToType } from "@/lib/business-scope";
 
 function firstParam(value: string | string[] | undefined) {
@@ -13,8 +13,8 @@ export default async function CheckoutPage({
   searchParams?: Promise<{ business?: string | string[] }>;
 }) {
   const params = await searchParams;
-  const settings = await getBusinessSettings();
   const businessType = checkoutBusinessToType(firstParam(params?.business));
+  const settings = await getBusinessSettingsFor(businessType ?? "grocery");
 
   return (
     <SharedPageShell>

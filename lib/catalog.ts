@@ -1,5 +1,9 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
+  applyPromotionToItem,
+  getActivePromotionsForItems,
+} from "@/lib/promotions";
+import {
   groceryCategoryArtworkDetails,
   groceryCategoryArtworkSlugs,
 } from "@/lib/artwork";
@@ -226,6 +230,9 @@ function mapItem(row: CatalogItemRow): CatalogItem {
     dietaryLabels: row.dietary_labels,
     preparationTime: row.preparation_time,
     allergenInformation: row.allergen_information,
+    regularPrice: row.price,
+    effectivePrice: row.price,
+    activePromotion: null,
   };
 }
 
@@ -346,7 +353,15 @@ export async function getCatalogItems(businessType?: BusinessType) {
     );
   }
 
-  return data.map((row) => mapItem(row as CatalogItemRow));
+  const items = data.map((row) => mapItem(row as CatalogItemRow));
+  if (!businessType) return items;
+
+  const promotions = await getActivePromotionsForItems(
+    businessType,
+    items.map((item) => item.id),
+  );
+
+  return items.map((item) => applyPromotionToItem(item, promotions.get(item.id)));
 }
 
 export async function getCatalogItemBySlug(slug: string, businessType?: BusinessType) {
@@ -385,5 +400,10 @@ export async function getCatalogItemBySlug(slug: string, businessType?: Business
     );
   }
 
-  return data ? mapItem(data as CatalogItemRow) : null;
+  if (!data) return null;
+
+  const item = mapItem(data as CatalogItemRow);
+  const promotions = await getActivePromotionsForItems(item.businessType, [item.id]);
+
+  return applyPromotionToItem(item, promotions.get(item.id));
 }

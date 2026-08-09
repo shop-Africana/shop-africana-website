@@ -82,16 +82,16 @@ function BasketGroup({
   );
 }
 
-export function BasketPageContent({ settings }: { settings: BusinessSettings }) {
+export function BasketPageContent({
+  shopSettings,
+  restaurantSettings,
+}: {
+  shopSettings: BusinessSettings;
+  restaurantSettings: BusinessSettings;
+}) {
   const { items, groceryItems, restaurantItems, totalQuantity } = useBasket();
-  const shopContact = getBusinessContact("shop", {
-    contactNumber: settings.contactNumber,
-    whatsappNumber: settings.whatsappNumber,
-  });
-  const restaurantContact = getBusinessContact("restaurant", {
-    contactNumber: settings.contactNumber,
-    whatsappNumber: settings.whatsappNumber,
-  });
+  const shopContact = getBusinessContact("shop", shopSettings);
+  const restaurantContact = getBusinessContact("restaurant", restaurantSettings);
 
   return (
     <section className="py-12 sm:py-16">

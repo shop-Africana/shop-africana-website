@@ -9,7 +9,10 @@ import {
 } from "@/components/layout/SectionNavigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { getBusinessSettings } from "@/lib/business-settings";
+import {
+  getAllBusinessSettings,
+  getBusinessSettingsFor,
+} from "@/lib/business-settings";
 import { RestaurantMobileBottomNavigation } from "@/components/layout/RestaurantMobileBottomNavigation";
 
 type SectionShellProps = {
@@ -28,7 +31,10 @@ export async function SectionShell({
   tone,
   navItems,
 }: SectionShellProps) {
-  const settings = await getBusinessSettings();
+  const [settings, allSettings] = await Promise.all([
+    getBusinessSettingsFor(tone === "restaurant" ? "restaurant" : "grocery"),
+    getAllBusinessSettings(),
+  ]);
 
   return (
     <>
@@ -73,7 +79,11 @@ export async function SectionShell({
       >
         {children}
       </main>
-      <SiteFooter settings={settings} />
+      <SiteFooter
+        settings={settings}
+        shopSettings={allSettings.shop}
+        restaurantSettings={allSettings.restaurant}
+      />
       {tone === "restaurant" ? <RestaurantMobileBottomNavigation /> : null}
     </>
   );

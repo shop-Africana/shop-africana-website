@@ -12,7 +12,7 @@ import {
 } from "@/lib/owner-menu";
 import { slugifyProductName } from "@/lib/owner-products";
 import { getUkServiceDateParts } from "@/lib/restaurant-menu";
-import type { DailyOverrideStatus, MenuWeekday, OrderStatus } from "@/types";
+import type { BusinessType, DailyOverrideStatus, MenuWeekday, OrderStatus } from "@/types";
 
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxImageSize = 5 * 1024 * 1024;
@@ -35,6 +35,13 @@ function parseLabels(value: FormDataEntryValue | null) {
     .split(",")
     .map((label) => label.trim())
     .filter(Boolean);
+}
+
+function parseDateTime(value: FormDataEntryValue | null) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 function getImageValidationError(image: FormDataEntryValue | null) {
@@ -77,6 +84,73 @@ async function syncSchedules(
   }));
 
   const { error } = await admin.from("restaurant_weekly_schedule").insert(rows);
+  if (error) throw new Error(error.message);
+}
+
+async function syncPromotion({
+  admin,
+  formData,
+  catalogItemId,
+  businessType,
+  normalPrice,
+}: {
+  admin: ReturnType<typeof createSupabaseAdminClient>;
+  formData: FormData;
+  catalogItemId: string;
+  businessType: BusinessType;
+  normalPrice: number;
+}) {
+  const promotionId = String(formData.get("promotionId") ?? "");
+  const enabled = formData.get("promotionEnabled") === "on";
+  const title = String(formData.get("promotionTitle") ?? "").trim();
+  const description = String(formData.get("promotionDescription") ?? "").trim();
+  const specialPrice = parseInteger(formData.get("promotionPrice"), 0);
+  const startsAt = parseDateTime(formData.get("promotionStartsAt")) ?? new Date().toISOString();
+  const endsAt = parseDateTime(formData.get("promotionEndsAt"));
+
+  if (!enabled) {
+    if (promotionId) {
+      const { error } = await admin
+        .from("promotions")
+        .update({ is_active: false })
+        .eq("id", promotionId)
+        .eq("catalog_item_id", catalogItemId)
+        .eq("business_type", businessType);
+      if (error) throw new Error(error.message);
+    }
+    return;
+  }
+
+  if (!title || specialPrice <= 0 || specialPrice >= normalPrice) {
+    throw new Error("promotion");
+  }
+
+  if (endsAt && new Date(endsAt).getTime() < new Date(startsAt).getTime()) {
+    throw new Error("promotion");
+  }
+
+  const payload = {
+    catalog_item_id: catalogItemId,
+    business_type: businessType,
+    title,
+    description: description || null,
+    badge_text: businessType === "grocery" ? "Offer" : "Special",
+    special_price: specialPrice,
+    starts_at: startsAt,
+    ends_at: endsAt,
+    is_active: true,
+    display_order: parseInteger(formData.get("displayOrder"), 0),
+  };
+
+  const { error } = promotionId
+    ? await admin
+        .from("promotions")
+        .update(payload)
+        .eq("id", promotionId)
+        .eq("catalog_item_id", catalogItemId)
+        .eq("business_type", businessType)
+    : await admin.from("promotions").insert(payload);
+
   if (error) throw new Error(error.message);
 }
 
@@ -183,6 +257,20 @@ export async function saveMeal(formData: FormData) {
 
   const catalogItemId = (data as { id: string }).id;
   await syncSchedules(catalogItemId, selectedWeekdays, menuPeriodId, displayOrder);
+  try {
+    await syncPromotion({
+      admin,
+      formData,
+      catalogItemId,
+      businessType: "restaurant",
+      normalPrice: mealPayload.price,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "promotion") {
+      redirectWithMealError(catalogItemId, "promotion");
+    }
+    throw error;
+  }
 
   if (image instanceof File && image.size > 0) {
     const extension = image.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -206,6 +294,7 @@ export async function saveMeal(formData: FormData) {
   revalidatePath("/owner");
   revalidatePath("/owner/menu");
   revalidatePath("/restaurant");
+  revalidatePath("/restaurant/specials");
   revalidatePath("/restaurant/menu");
   redirect(`/owner/menu/${catalogItemId}`);
 }
@@ -258,6 +347,20 @@ export async function saveProduct(formData: FormData) {
   }
 
   const catalogItemId = (data as { id: string }).id;
+  try {
+    await syncPromotion({
+      admin,
+      formData,
+      catalogItemId,
+      businessType: "grocery",
+      normalPrice: productPayload.price,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "promotion") {
+      redirectWithProductError(catalogItemId, "promotion");
+    }
+    throw error;
+  }
 
   if (image instanceof File && image.size > 0) {
     const extension = image.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -281,9 +384,70 @@ export async function saveProduct(formData: FormData) {
   revalidatePath("/owner");
   revalidatePath("/owner/products");
   revalidatePath("/shop");
+  revalidatePath("/shop/offers");
   revalidatePath("/shop/products");
   revalidatePath(`/shop/products/${slug}`);
   redirect(`/owner/products/${catalogItemId}`);
+}
+
+export async function saveBusinessSettings(formData: FormData) {
+  await requireOwner();
+  const admin = createSupabaseAdminClient();
+  const businessType = String(formData.get("businessType") ?? "") as BusinessType;
+
+  if (!["grocery", "restaurant"].includes(businessType)) return;
+
+  const payload = {
+    singleton_key: businessType === "grocery" ? "shop" : "restaurant",
+    business_type: businessType,
+    shop_business_name: "Shop Africana",
+    restaurant_business_name: "Pride of Scotland",
+    address_line_1: String(formData.get("addressLine1") ?? "").trim() || null,
+    address_line_2: String(formData.get("addressLine2") ?? "").trim() || null,
+    city: String(formData.get("city") ?? "").trim() || null,
+    postcode: String(formData.get("postcode") ?? "").trim() || null,
+    public_email: String(formData.get("publicEmail") ?? "").trim() || null,
+    contact_number: String(formData.get("contactNumber") ?? "").trim() || null,
+    whatsapp_number: String(formData.get("whatsappNumber") ?? "").trim() || null,
+    opening_hours_text:
+      String(formData.get("openingHoursText") ?? "").trim() || null,
+    service_area_text:
+      String(formData.get("serviceAreaText") ?? "").trim() ||
+      "Serving grocery and restaurant customers in Dundee.",
+    order_cutoff_text: String(formData.get("orderCutoffText") ?? "").trim() || null,
+    temporary_closure_message:
+      String(formData.get("temporaryClosureMessage") ?? "").trim() || null,
+    delivery_note:
+      String(formData.get("deliveryNote") ?? "").trim() ||
+      "Delivery charge will be confirmed according to your order and location.",
+    delivery_enabled: formData.get("deliveryEnabled") === "on",
+    collection_enabled: formData.get("collectionEnabled") === "on",
+    delivery_fee: parseInteger(formData.get("deliveryFee"), 0),
+    free_delivery_threshold:
+      String(formData.get("freeDeliveryThreshold") ?? "").trim() === ""
+        ? null
+        : parseInteger(formData.get("freeDeliveryThreshold"), 0),
+    ordering_enabled: formData.get("orderingEnabled") === "on",
+    is_open: formData.get("isOpen") === "on",
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await admin
+    .from("business_settings")
+    .upsert(payload, { onConflict: "singleton_key" });
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/");
+  revalidatePath("/shop");
+  revalidatePath("/shop/products");
+  revalidatePath("/shop/offers");
+  revalidatePath("/restaurant");
+  revalidatePath("/restaurant/menu");
+  revalidatePath("/restaurant/specials");
+  revalidatePath("/contact");
+  revalidatePath("/checkout");
+  revalidatePath("/owner/settings");
 }
 
 export async function saveGroceryCategory(formData: FormData) {
@@ -351,6 +515,7 @@ export async function setTodayMealStatus(formData: FormData) {
   revalidatePath("/owner");
   revalidatePath("/owner/menu");
   revalidatePath("/restaurant");
+  revalidatePath("/restaurant/specials");
   revalidatePath("/restaurant/menu");
 }
 

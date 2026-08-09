@@ -2,12 +2,12 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ShopProductsWorkspace } from "@/components/commerce/ShopProductsWorkspace";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getBusinessSettings } from "@/lib/business-settings";
+import { getBusinessSettingsFor } from "@/lib/business-settings";
 import { getCategories, getCatalogItems } from "@/lib/catalog";
 
 export default async function ShopProductsPage() {
   const [settings, categories, products] = await Promise.all([
-    getBusinessSettings(),
+    getBusinessSettingsFor("grocery"),
     getCategories("grocery"),
     getCatalogItems("grocery"),
   ]);
