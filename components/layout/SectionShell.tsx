@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ShoppingBasket, UserRound } from "lucide-react";
+import { ShoppingBasket } from "lucide-react";
 import { BrandSwitcher } from "@/components/layout/BrandSwitcher";
 import { Container } from "@/components/ui/Container";
 import {
@@ -106,13 +106,6 @@ function HeaderActions({
         className={homepageClass}
       >
         Main homepage
-      </Link>
-      <Link
-        href="/account"
-        className="flex size-10 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--color-border-strong)] text-[var(--color-muted)] transition hover:bg-[var(--color-muted-surface)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
-        aria-label="Account area"
-      >
-        <UserRound aria-hidden="true" size={18} />
       </Link>
       <Link
         href="/basket"

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptionsWithName } from "@supabase/ssr";
+import { isAllowlistedOwner } from "@/lib/owner-auth";
 
 type CookieToSet = {
   name: string;
@@ -53,6 +54,13 @@ export async function POST(request: NextRequest) {
 
   if (error || !data.user) {
     return redirectWithCookies(request, "/owner/login?error=auth", cookiesToSet);
+  }
+
+  const isOwner = await isAllowlistedOwner(data.user.id, authClient);
+
+  if (!isOwner) {
+    await authClient.auth.signOut();
+    return redirectWithCookies(request, "/owner/login?error=owner", cookiesToSet);
   }
 
   return redirectWithCookies(request, "/owner", cookiesToSet);

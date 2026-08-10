@@ -720,6 +720,8 @@ function RightSidebar({
       <SpecialsCard specials={specials} />
       <RestaurantBasketCard
         whatsappNumber={contact.whatsappNumber}
+        deliveryEnabled={settings.deliveryEnabled}
+        collectionEnabled={settings.collectionEnabled}
       />
     </aside>
   );
@@ -783,8 +785,12 @@ function SpecialsCard({ specials }: { specials: RestaurantMenuItem[] }) {
 
 function RestaurantBasketCard({
   whatsappNumber,
+  deliveryEnabled,
+  collectionEnabled,
 }: {
   whatsappNumber: string | null;
+  deliveryEnabled: boolean;
+  collectionEnabled: boolean;
 }) {
   const { getBusinessCount, removeItem, restaurantItems, updateQuantity } =
     useBasket();
@@ -861,6 +867,8 @@ function RestaurantBasketCard({
         <BusinessWhatsAppOrderButton
           businessType="restaurant"
           whatsappNumber={whatsappNumber}
+          deliveryEnabled={deliveryEnabled}
+          collectionEnabled={collectionEnabled}
           className="mt-2 inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-4 text-sm font-extrabold text-[var(--color-shop-800)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] lg:min-h-10"
         >
           Order via WhatsApp

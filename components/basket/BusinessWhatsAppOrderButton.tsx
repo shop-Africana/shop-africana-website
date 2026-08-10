@@ -23,6 +23,8 @@ type BusinessWhatsAppOrderButtonProps = {
   panelClassName?: string;
   showIcon?: boolean;
   ariaLabel?: string;
+  deliveryEnabled?: boolean;
+  collectionEnabled?: boolean;
 };
 
 export function BusinessWhatsAppOrderButton({
@@ -33,6 +35,8 @@ export function BusinessWhatsAppOrderButton({
   panelClassName,
   showIcon = true,
   ariaLabel,
+  deliveryEnabled = true,
+  collectionEnabled = true,
 }: BusinessWhatsAppOrderButtonProps) {
   const router = useRouter();
   const {
@@ -44,7 +48,7 @@ export function BusinessWhatsAppOrderButton({
   const [pendingConfirmation, setPendingConfirmation] = useState(false);
   const [showDetailsForm, setShowDetailsForm] = useState(false);
   const [fulfilmentType, setFulfilmentType] =
-    useState<FulfilmentType>("collection");
+    useState<FulfilmentType>(collectionEnabled ? "collection" : "delivery");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +56,17 @@ export function BusinessWhatsAppOrderButton({
   const subtotal = getBusinessSubtotal(businessType);
   const totalQuantity = getBusinessQuantity(businessType);
   const businessName = businessTypeLabel(businessType);
+  const fulfilmentOptions = useMemo(
+    () =>
+      ([
+        collectionEnabled ? "collection" : null,
+        deliveryEnabled ? "delivery" : null,
+      ].filter(Boolean) as FulfilmentType[]),
+    [collectionEnabled, deliveryEnabled],
+  );
+  const activeFulfilmentType = fulfilmentOptions.includes(fulfilmentType)
+    ? fulfilmentType
+    : fulfilmentOptions[0] ?? "collection";
   const whatsappMessage = useMemo(
     () =>
       businessType === "grocery"
@@ -80,6 +95,11 @@ export function BusinessWhatsAppOrderButton({
       return;
     }
 
+    if (fulfilmentOptions.length === 0) {
+      setError(`${businessName} is not accepting delivery or collection orders right now.`);
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const payload = {
       businessType,
@@ -88,9 +108,9 @@ export function BusinessWhatsAppOrderButton({
         email: String(formData.get("email") ?? ""),
         phone: String(formData.get("phone") ?? ""),
       },
-      fulfilmentType,
+      fulfilmentType: activeFulfilmentType,
       deliveryAddress:
-        fulfilmentType === "delivery"
+        activeFulfilmentType === "delivery"
           ? {
               line1: String(formData.get("addressLine1") ?? ""),
               line2: String(formData.get("addressLine2") ?? ""),
@@ -213,7 +233,7 @@ export function BusinessWhatsAppOrderButton({
               </div>
               <Input name="email" type="email" placeholder="Email address" required />
               <div className="grid gap-2 sm:grid-cols-2">
-                {(["collection", "delivery"] as FulfilmentType[]).map((type) => (
+                {fulfilmentOptions.map((type) => (
                   <label
                     key={type}
                     className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-3 py-2 text-xs font-bold text-[var(--color-foreground-strong)]"
@@ -222,7 +242,7 @@ export function BusinessWhatsAppOrderButton({
                       type="radio"
                       name="fulfilmentType"
                       value={type}
-                      checked={fulfilmentType === type}
+                      checked={activeFulfilmentType === type}
                       onChange={() => setFulfilmentType(type)}
                       className="mr-2"
                     />
@@ -230,12 +250,12 @@ export function BusinessWhatsAppOrderButton({
                   </label>
                 ))}
               </div>
-              {fulfilmentType === "delivery" ? (
+              {activeFulfilmentType === "delivery" ? (
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Input name="addressLine1" placeholder="Address line 1" required />
                   <Input name="city" placeholder="Town or city" required />
                   <Input name="addressLine2" placeholder="Address line 2" />
-                  <Input name="postcode" placeholder="Postcode" />
+                  <Input name="postcode" placeholder="Postcode" required />
                 </div>
               ) : null}
               <textarea

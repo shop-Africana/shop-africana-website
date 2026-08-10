@@ -283,6 +283,8 @@ export function ShopProductsWorkspace({
         business="shop"
         phoneNumber={settings.contactNumber}
         whatsappNumber={settings.whatsappNumber}
+        deliveryEnabled={settings.deliveryEnabled}
+        collectionEnabled={settings.collectionEnabled}
         showBasketAction={false}
         whatsappPlacement="right"
       />
@@ -748,6 +750,8 @@ function ProductPageBasket({ settings }: { settings: BusinessSettings }) {
             <BusinessWhatsAppOrderButton
               businessType="grocery"
               whatsappNumber={contact.whatsappNumber}
+              deliveryEnabled={settings.deliveryEnabled}
+              collectionEnabled={settings.collectionEnabled}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[var(--color-shop-300)] bg-white px-5 text-sm font-extrabold text-[var(--color-shop-800)] transition hover:bg-[var(--color-shop-50)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
             >
               Order via WhatsApp

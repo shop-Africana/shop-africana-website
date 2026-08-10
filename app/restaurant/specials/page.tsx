@@ -9,7 +9,6 @@ const navItems = [
   { label: "Home", href: "/restaurant" },
   { label: "Menu", href: "/restaurant/menu" },
   { label: "Specials", href: "/restaurant/specials" },
-  { label: "About", href: "/restaurant/about" },
   { label: "Contact", href: "/contact" },
   { label: "Basket", href: "/basket" },
 ];
@@ -50,8 +49,7 @@ export default async function RestaurantSpecialsPage() {
             </div>
           ) : (
             <div className="mt-8 rounded-[var(--radius-xl)] border border-[var(--color-pride-100)] bg-white p-6 text-sm font-semibold text-[var(--color-muted)] shadow-[var(--shadow-input)]">
-              Pride of Scotland specials will appear here when active restaurant
-              promotions are published.
+              There are no active Pride of Scotland specials right now.
             </div>
           )}
         </Container>

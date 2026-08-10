@@ -26,7 +26,7 @@ export function MealCardShell({
           tone={isFinished ? "destructive" : "restaurant"}
           className="absolute left-7 top-7 z-10"
         >
-          {isFinished ? "Finished today" : meal.isDemo ? "Demo item" : "Available"}
+          {isFinished ? "Finished today" : meal.isFeatured ? "Featured" : "Available"}
         </Badge>
         {meal.imageUrl && showImage ? (
           <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-pride-100)] bg-[var(--color-pride-50)] shadow-[var(--shadow-input)]">
@@ -51,7 +51,7 @@ export function MealCardShell({
         <div className="px-4">
           <div className="flex flex-wrap gap-2">
             <p className="rounded-[var(--radius-pill)] bg-[var(--color-pride-50)] px-2.5 py-1 text-xs font-bold uppercase text-[var(--color-pride-700)]">
-            {meal.isDemo ? "Demo menu item" : "Menu item"}
+            Menu item
             </p>
             {meal.spiceLevel ? (
               <p className="rounded-[var(--radius-pill)] bg-[var(--color-amber-50)] px-2.5 py-1 text-xs font-bold text-[var(--color-orange-700)]">

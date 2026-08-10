@@ -20,7 +20,6 @@ const quickLinks = [
 ];
 
 const customerLinks = [
-  { label: "Account area", href: "/account" },
   { label: "Basket", href: "/basket" },
   { label: "Checkout information", href: "/checkout" },
   { label: "Customer support", href: "/contact" },
@@ -30,13 +29,11 @@ const shopLinks = [
   { label: "Grocery categories", href: "/shop/categories" },
   { label: "Grocery products", href: "/shop/products" },
   { label: "Shop offers", href: "/shop/offers" },
-  { label: "About Shop Africana", href: "/shop/about" },
 ];
 
 const restaurantLinks = [
   { label: "Restaurant menu", href: "/restaurant/menu" },
   { label: "Restaurant specials", href: "/restaurant/specials" },
-  { label: "About Pride of Scotland", href: "/restaurant/about" },
 ];
 
 const socialChannels = [
@@ -107,7 +104,7 @@ export function SiteFooter({
             <p className="flex items-start gap-2">
               <MapPin aria-hidden="true" size={16} className="mt-0.5 shrink-0" />
               <span>
-                {restaurantSettings.addressLine1 ?? "Restaurant address to be confirmed"}
+                {restaurantSettings.addressLine1 ?? "Pride of Scotland, Dundee"}
                 {restaurantSettings.addressLine2 ? (
                   <>
                     <br />
@@ -161,8 +158,8 @@ export function SiteFooter({
                       type="button"
                       disabled
                       className="flex size-9 items-center justify-center rounded-[var(--radius-pill)] border border-white/15 bg-white/10 text-[var(--color-amber-100)] opacity-80"
-                      aria-label={`${channel.label} - coming soon`}
-                      title={`${channel.label} - coming soon`}
+                      aria-label={`${channel.label} social profile is not linked`}
+                      title={`${channel.label} social profile is not linked`}
                     >
                       <Icon className="size-[15px]" />
                     </button>
@@ -170,12 +167,12 @@ export function SiteFooter({
                 })}
               </div>
               <p className="mt-2 text-xs text-white/60">
-                Social channels connecting soon.
+                Social profiles are not linked.
               </p>
             </div>
             <p className="rounded-[var(--radius-md)] border border-white/15 bg-white/10 p-3 text-xs leading-5">
-              PayPal and email notifications are not active until credentials are
-              configured.
+              Manual ordering and direct contact are active. PayPal and email
+              notifications remain inactive until configured.
             </p>
           </div>
         </div>

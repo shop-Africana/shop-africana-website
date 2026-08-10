@@ -35,6 +35,8 @@ type BusinessFloatingActionsProps = {
   bookingMealOptions?: string[];
   showBasketAction?: boolean;
   whatsappPlacement?: "left" | "right";
+  deliveryEnabled?: boolean;
+  collectionEnabled?: boolean;
 };
 
 const guestOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
@@ -53,6 +55,8 @@ export function BusinessFloatingActions({
   bookingMealOptions = [],
   showBasketAction = true,
   whatsappPlacement = "left",
+  deliveryEnabled = true,
+  collectionEnabled = true,
 }: BusinessFloatingActionsProps) {
   const {
     getBusinessCount,
@@ -118,6 +122,8 @@ export function BusinessFloatingActions({
           <BusinessWhatsAppOrderButton
             businessType={isShop ? "grocery" : "restaurant"}
             whatsappNumber={contact.whatsappNumber}
+            deliveryEnabled={deliveryEnabled}
+            collectionEnabled={collectionEnabled}
             className="inline-flex size-12 items-center justify-center rounded-full border border-white/30 bg-[#25D366] text-white shadow-[0_16px_36px_rgba(4,120,87,0.28)] transition hover:-translate-y-0.5 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14"
             panelClassName="fixed bottom-[calc(150px+env(safe-area-inset-bottom))] left-4 z-50 w-[min(22rem,calc(100vw-2rem))] sm:left-6 lg:left-8"
             ariaLabel={`Message ${
@@ -175,6 +181,8 @@ export function BusinessFloatingActions({
             <BusinessWhatsAppOrderButton
               businessType={isShop ? "grocery" : "restaurant"}
               whatsappNumber={contact.whatsappNumber}
+              deliveryEnabled={deliveryEnabled}
+              collectionEnabled={collectionEnabled}
               className="inline-flex size-12 items-center justify-center rounded-full border border-white/30 bg-[#25D366] text-white shadow-[0_16px_36px_rgba(4,120,87,0.28)] transition hover:-translate-y-0.5 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[var(--color-focus)] active:translate-y-0 sm:size-14"
               panelClassName="fixed bottom-[calc(150px+env(safe-area-inset-bottom))] right-4 z-50 w-[min(22rem,calc(100vw-2rem))] sm:right-6 lg:right-8"
               ariaLabel={`Message ${

@@ -9,6 +9,10 @@ import {
 } from "@/lib/artwork";
 import type { BusinessType, CatalogCategory, CatalogItem } from "@/types";
 
+const allowDemoCatalogFallback =
+  process.env.NODE_ENV !== "production" &&
+  process.env.NEXT_PUBLIC_ALLOW_DEMO_CATALOG === "true";
+
 export const demoCategories: CatalogCategory[] = [
   {
     id: "00000000-0000-4000-8000-000000000101",
@@ -94,7 +98,7 @@ export const demoCatalogItems: CatalogItem[] = [
     businessType: "grocery",
     name: "Seasoning Selection",
     slug: "seasoning-selection",
-    description: "Spices and seasonings will be published with product details.",
+    description: "Spices and seasoning selection.",
     price: 299,
     imageUrl: null,
     unitLabel: "range",
@@ -124,7 +128,7 @@ export const demoCatalogItems: CatalogItem[] = [
     businessType: "restaurant",
     name: "African Dish Selection",
     slug: "african-dish-selection",
-    description: "Menu details will be published soon.",
+    description: "African dish selection.",
     price: 899,
     imageUrl: null,
     unitLabel: "serving",
@@ -154,7 +158,7 @@ export const demoCatalogItems: CatalogItem[] = [
     businessType: "restaurant",
     name: "Soups & Stews Selection",
     slug: "soups-and-stews-selection",
-    description: "Soup and stew options will be published soon.",
+    description: "Soup and stew selection.",
     price: 799,
     imageUrl: null,
     unitLabel: "serving",
@@ -328,9 +332,11 @@ export async function getCatalogItems(businessType?: BusinessType) {
   const supabase = createSupabaseServerClient();
 
   if (!supabase) {
-    return demoCatalogItems.filter(
-      (item) => !businessType || item.businessType === businessType,
-    );
+    return allowDemoCatalogFallback
+      ? demoCatalogItems.filter(
+          (item) => !businessType || item.businessType === businessType,
+        )
+      : [];
   }
 
   let query = supabase
@@ -348,9 +354,11 @@ export async function getCatalogItems(businessType?: BusinessType) {
   const { data, error } = await query;
 
   if (error || !data) {
-    return demoCatalogItems.filter(
-      (item) => !businessType || item.businessType === businessType,
-    );
+    return allowDemoCatalogFallback
+      ? demoCatalogItems.filter(
+          (item) => !businessType || item.businessType === businessType,
+        )
+      : [];
   }
 
   const items = data.map((row) => mapItem(row as CatalogItemRow));
@@ -364,10 +372,16 @@ export async function getCatalogItems(businessType?: BusinessType) {
   return items.map((item) => applyPromotionToItem(item, promotions.get(item.id)));
 }
 
-export async function getCatalogItemBySlug(slug: string, businessType?: BusinessType) {
+export async function getCatalogItemBySlug(
+  slug: string,
+  businessType?: BusinessType,
+  options: { includeUnavailable?: boolean } = {},
+) {
   const supabase = createSupabaseServerClient();
 
   if (!supabase) {
+    if (!allowDemoCatalogFallback) return null;
+
     return (
       demoCatalogItems.find(
         (item) =>
@@ -382,8 +396,11 @@ export async function getCatalogItemBySlug(slug: string, businessType?: Business
       "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,origin_region,spice_level,dietary_labels,preparation_time,allergen_information",
     )
     .eq("slug", slug)
-    .eq("is_available", true)
     .limit(1);
+
+  if (!options.includeUnavailable) {
+    query = query.eq("is_available", true);
+  }
 
   if (businessType) {
     query = query.eq("business_type", businessType);
@@ -392,6 +409,8 @@ export async function getCatalogItemBySlug(slug: string, businessType?: Business
   const { data, error } = await query.maybeSingle();
 
   if (error) {
+    if (!allowDemoCatalogFallback) return null;
+
     return (
       demoCatalogItems.find(
         (item) =>
@@ -403,6 +422,8 @@ export async function getCatalogItemBySlug(slug: string, businessType?: Business
   if (!data) return null;
 
   const item = mapItem(data as CatalogItemRow);
+  if (!item.isAvailable) return item;
+
   const promotions = await getActivePromotionsForItems(item.businessType, [item.id]);
 
   return applyPromotionToItem(item, promotions.get(item.id));

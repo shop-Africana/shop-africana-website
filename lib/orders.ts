@@ -52,6 +52,9 @@ export function validateOrderPayload(payload: OrderRequestPayload) {
     if (!payload.deliveryAddress?.city?.trim()) {
       errors.push("Delivery city is required.");
     }
+    if (!payload.deliveryAddress?.postcode?.trim()) {
+      errors.push("Delivery postcode is required.");
+    }
   }
   if (!payload.items?.length) {
     errors.push("Your basket is empty.");
@@ -84,7 +87,10 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
       .in("id", itemIds);
 
     if (error) {
-      return { ok: false as const, errors: [error.message] };
+      return {
+        ok: false as const,
+        errors: ["Order submission is not available right now."],
+      };
     }
 
     lookupRows.push(...((data ?? []) as CatalogLookupRow[]));
@@ -97,7 +103,10 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
       .in("slug", itemSlugs);
 
     if (error) {
-      return { ok: false as const, errors: [error.message] };
+      return {
+        ok: false as const,
+        errors: ["Order submission is not available right now."],
+      };
     }
 
     lookupRows.push(...((data ?? []) as CatalogLookupRow[]));
@@ -138,6 +147,7 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
       }
 
       if (
+        businessType === "grocery" &&
         typeof item.unitPriceSnapshot === "number" &&
         item.unitPriceSnapshot !== authoritativePrice
       ) {
@@ -213,7 +223,7 @@ export async function createCustomerOrder(payload: OrderRequestPayload) {
   if (error) {
     return {
       ok: false as const,
-      errors: [error.message],
+      errors: ["Order submission is not available right now."],
     };
   }
 

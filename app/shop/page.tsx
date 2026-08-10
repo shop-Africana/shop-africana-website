@@ -709,7 +709,11 @@ export default async function ShopPage({
             </div>
 
             <aside className="order-1 lg:order-none lg:grid lg:h-full lg:min-h-0 lg:grid-rows-[minmax(360px,420px)_minmax(0,1fr)] lg:gap-5">
-              <ShopBasketSummary whatsappNumber={settings.whatsappNumber} />
+              <ShopBasketSummary
+                whatsappNumber={settings.whatsappNumber}
+                deliveryEnabled={settings.deliveryEnabled}
+                collectionEnabled={settings.collectionEnabled}
+              />
               <div className="hidden lg:block lg:min-h-0">
                 <ProductFilters
                   categories={categories}
@@ -768,6 +772,8 @@ export default async function ShopPage({
         business="shop"
         phoneNumber={settings.contactNumber}
         whatsappNumber={settings.whatsappNumber}
+        deliveryEnabled={settings.deliveryEnabled}
+        collectionEnabled={settings.collectionEnabled}
       />
     </>
   );

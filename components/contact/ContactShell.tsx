@@ -1,4 +1,4 @@
-import { Clock, Headphones, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Headphones, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { ServiceStrip } from "@/components/home/ServiceStrip";
 import { formatAddress, type BusinessSettings } from "@/lib/business-settings";
@@ -6,8 +6,8 @@ import { getBusinessContact } from "@/lib/business-contacts";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const contactCards = [
-  { title: "Friendly Support", text: "Contact channels will be added soon.", icon: Headphones },
-  { title: "Clear Information", text: "Business details will be published once confirmed.", icon: Clock },
+  { title: "Friendly Support", text: "Use the confirmed phone, email or WhatsApp channels.", icon: Headphones },
+  { title: "Clear Information", text: "Business details are kept aligned with owner settings.", icon: Mail },
   { title: "Local Service", text: "Serving grocery and restaurant customers in Dundee.", icon: MessageCircle },
 ];
 
@@ -32,11 +32,25 @@ export function ContactShell({
   );
   const contactDetails = [
     { title: "Shop Africana Phone", value: shopContact.displayPhone, icon: Phone },
-    { title: "Shop Africana WhatsApp", value: shopWhatsappHref ? "WhatsApp available" : "WhatsApp details to be added", icon: MessageCircle },
+    ...(shopWhatsappHref
+      ? [{ title: "Shop Africana WhatsApp", value: shopContact.displayPhone, icon: MessageCircle }]
+      : []),
     { title: "Pride of Scotland Phone", value: restaurantContact.displayPhone, icon: Phone },
-    { title: "Pride of Scotland WhatsApp", value: restaurantWhatsappHref ? "WhatsApp available" : "WhatsApp details to be added", icon: MessageCircle },
-    { title: "Email", value: settings.publicEmail ?? "Email address to be added", icon: Mail },
-    { title: "Pride of Scotland Address", value: restaurantAddress || "Business address to be confirmed", icon: MapPin },
+    ...(restaurantWhatsappHref
+      ? [
+          {
+            title: "Pride of Scotland WhatsApp",
+            value: restaurantContact.displayPhone,
+            icon: MessageCircle,
+          },
+        ]
+      : []),
+    ...(settings.publicEmail
+      ? [{ title: "Email", value: settings.publicEmail, icon: Mail }]
+      : []),
+    ...(restaurantAddress
+      ? [{ title: "Pride of Scotland Address", value: restaurantAddress, icon: MapPin }]
+      : []),
   ];
 
   return (
@@ -51,8 +65,8 @@ export function ContactShell({
               We are here to help
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--color-muted)]">
-              Get in touch with Shop Africana and Pride of Scotland. Confirmed
-              contact details will be published here as they become available.
+              Get in touch with Shop Africana and Pride of Scotland using the
+              confirmed public channels below.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {contactCards.map((card) => {
@@ -88,9 +102,7 @@ export function ContactShell({
                   Visit information
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
-                  {restaurantAddress ||
-                    shopAddress ||
-                    "Business address to be confirmed."}
+                  {restaurantAddress || shopAddress || "Serving customers in Dundee."}
                 </p>
               </div>
               <div className="rounded-[var(--radius-lg)] bg-[var(--color-pride-50)] p-5">
@@ -105,7 +117,7 @@ export function ContactShell({
                 <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
                   {settings.contactNumber || shopWhatsappHref || restaurantWhatsappHref
                     ? "Use the confirmed contact channels shown below."
-                    : "Contact number and direct messaging details to be added."}
+                    : "Use the email contact channel shown below."}
                 </p>
               </div>
             </div>
@@ -157,11 +169,6 @@ export function ContactShell({
                   Message Pride of Scotland on WhatsApp
                 </a>
               ) : null}
-              {!settings.publicEmail && !settings.contactNumber && !shopWhatsappHref && !restaurantWhatsappHref ? (
-                <p className="rounded-[var(--radius-md)] bg-[var(--color-shop-50)] px-4 py-3 text-sm font-bold text-[var(--color-shop-900)]">
-                  Contact channels will be published once confirmed.
-                </p>
-              ) : null}
             </div>
           </section>
 
@@ -208,12 +215,13 @@ export function ContactShell({
                 <p className="mt-4 text-sm font-semibold text-[var(--color-shop-900)]">
                   {restaurantAddress ||
                     shopAddress ||
-                    "Business address to be confirmed"}
+                    "Serving customers in Dundee"}
                 </p>
               </div>
             </div>
             <p className="mt-5 text-sm leading-6 text-[var(--color-muted)]">
-              Map and social links will be added once confirmed.
+              Please use the listed phone, email or WhatsApp channels for directions
+              and customer support.
             </p>
           </article>
         </Container>

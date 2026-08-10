@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageCircle, ShoppingBasket, UserRound, Utensils } from "lucide-react";
+import { MessageCircle, ShoppingBasket, Utensils } from "lucide-react";
 import { BrandSwitcher } from "@/components/layout/BrandSwitcher";
 import { Container } from "@/components/ui/Container";
 import { LinkButton } from "@/components/ui/LinkButton";
@@ -52,13 +52,6 @@ export function SiteHeader({
               <MessageCircle aria-hidden="true" size={18} />
             </Link>
           ) : null}
-          <Link
-            href="/account"
-            className="flex size-11 items-center justify-center rounded-[var(--radius-pill)] border border-[var(--color-border-strong)] text-[var(--color-foreground-strong)] transition hover:bg-[var(--color-muted-surface)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
-            aria-label="Account area"
-          >
-            <UserRound aria-hidden="true" size={18} />
-          </Link>
           <LinkButton
             href="/restaurant/menu"
             variant="outline"

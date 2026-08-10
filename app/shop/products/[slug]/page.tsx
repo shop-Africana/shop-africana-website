@@ -18,7 +18,7 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const [settings, product, relatedProducts] = await Promise.all([
     getBusinessSettingsFor("grocery"),
-    getCatalogItemBySlug(slug, "grocery"),
+    getCatalogItemBySlug(slug, "grocery", { includeUnavailable: true }),
     getCatalogItems("grocery"),
   ]);
 
@@ -48,7 +48,7 @@ export default async function ProductDetailPage({
             </div>
           ) : (
             <PlaceholderFrame
-              label="Product imagery will be added soon"
+              label="Grocery item"
               tone="shop"
               className="min-h-[26rem] rounded-[var(--radius-xl)] shadow-[var(--shadow-card)]"
             />
@@ -61,7 +61,7 @@ export default async function ProductDetailPage({
               {product.name}
             </h1>
             <p className="mt-4 max-w-xl text-base leading-7 text-[var(--color-muted)]">
-              {product.description ?? "Product details will be published soon."}
+              {product.description ?? "Product details are not listed for this item."}
             </p>
             {product.originRegion ? (
               <p className="mt-4 inline-flex rounded-[var(--radius-pill)] bg-[var(--color-orange-50)] px-3 py-1 text-sm font-bold text-[var(--color-orange-700)]">
@@ -71,6 +71,11 @@ export default async function ProductDetailPage({
             <p className="mt-4 text-2xl font-bold text-[var(--color-shop-800)]">
               {formatMoney(product.price)}
             </p>
+            {!product.isAvailable ? (
+              <p className="mt-4 inline-flex rounded-[var(--radius-pill)] bg-[var(--color-warning-soft)] px-3 py-1 text-sm font-bold text-[var(--color-warning)]">
+                This item is currently unavailable.
+              </p>
+            ) : null}
             <AddToBasketPanel item={product} disabled={!product.isAvailable} />
             <p className="mt-4 rounded-[var(--radius-lg)] border border-[var(--color-shop-200)] bg-[var(--color-shop-50)] p-4 text-sm leading-6 text-[var(--color-shop-900)]">
               {settings.serviceAreaText} Delivery charge will be confirmed
@@ -87,7 +92,7 @@ export default async function ProductDetailPage({
             >
               <h2 className="font-bold text-[var(--color-shop-900)]">{title}</h2>
               <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
-                {title} information will be published with the live catalogue.
+                {title} information is not listed for this item.
               </p>
             </section>
           ))}
@@ -95,7 +100,7 @@ export default async function ProductDetailPage({
 
         <div className="mt-14">
           <SectionHeading title="Related product ranges">
-            Product selection will be available soon.
+            Browse more live Shop Africana products.
           </SectionHeading>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {relatedProducts.slice(0, 4).map((product) => (

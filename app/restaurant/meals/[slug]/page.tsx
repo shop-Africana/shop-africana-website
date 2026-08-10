@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { MealCardShell } from "@/components/restaurant/MealCardShell";
 import { AddToBasketPanel } from "@/components/basket/AddToBasketPanel";
@@ -25,12 +26,16 @@ export default async function MealDetailPage({
   const [settings, todayMeal, fallbackMeal, todayMenu] = await Promise.all([
     getBusinessSettingsFor("restaurant"),
     getTodayRestaurantMenuItemBySlug(slug),
-    getCatalogItemBySlug(slug, "restaurant"),
+    getCatalogItemBySlug(slug, "restaurant", { includeUnavailable: true }),
     getTodayRestaurantMenu(),
   ]);
   const meal = todayMeal ?? fallbackMeal;
   const relatedMeals = todayMenu.groups.flatMap((group) => group.items);
-  const isOrderable = Boolean(todayMeal && todayMeal.menuStatus === "available");
+  if (!meal) notFound();
+
+  const isOrderable = Boolean(
+    meal.isAvailable && todayMeal && todayMeal.menuStatus === "available",
+  );
 
   return (
     <section className="py-12 sm:py-16">
@@ -55,7 +60,7 @@ export default async function MealDetailPage({
             />
           ) : (
             <PlaceholderFrame
-              label="Menu imagery will be added soon"
+              label="Pride of Scotland meal"
               tone="restaurant"
               className="min-h-[26rem] rounded-[var(--radius-xl)] shadow-[var(--shadow-card)]"
             />
@@ -65,14 +70,13 @@ export default async function MealDetailPage({
               Meal detail
             </p>
             <h1 className="mt-3 text-4xl font-extrabold text-[var(--color-pride-800)]">
-              {meal?.name ?? "Menu details will be published soon"}
+              {meal.name}
             </h1>
             <p className="mt-4 text-base leading-7 text-[var(--color-muted)]">
-              {meal?.description ??
-                "Restaurant menu information is being prepared for publication."}
+              {meal.description ?? "Menu details are not listed for this dish."}
             </p>
             <p className="mt-4 text-2xl font-bold text-[var(--color-pride-800)]">
-              {meal ? formatMoney(meal.price) : "Details coming soon"}
+              {formatMoney(meal.price)}
             </p>
             {!isOrderable && meal ? (
               <Badge tone="warning" className="mt-4">
@@ -85,25 +89,23 @@ export default async function MealDetailPage({
                   Optional extras
                 </h2>
                 <p className="mt-2 text-sm text-[var(--color-muted)]">
-                  Extras information will be published with the menu.
+                  Add any meal requests in the basket instructions.
                 </p>
               </div>
             </div>
-            {meal ? (
-              <AddToBasketPanel
-                item={meal}
-                variant="restaurant"
-                showInstructions
-                disabled={!isOrderable}
-                disabledLabel={
-                  todayMeal?.menuStatus === "finished"
-                    ? "Finished Today"
-                    : "Not Scheduled Today"
-                }
-              />
-            ) : null}
+            <AddToBasketPanel
+              item={meal}
+              variant="restaurant"
+              showInstructions
+              disabled={!isOrderable}
+              disabledLabel={
+                todayMeal?.menuStatus === "finished"
+                  ? "Finished Today"
+                  : "Not Scheduled Today"
+              }
+            />
             <p className="mt-4 rounded-[var(--radius-lg)] border border-[var(--color-pride-200)] bg-[var(--color-pride-50)] p-4 text-sm leading-6 text-[var(--color-pride-800)]">
-              {settings.openingHoursText ?? "Opening hours will be published soon"}.
+              {settings.openingHoursText ?? "Please contact Pride of Scotland for current opening hours"}.
               Delivery charge will be confirmed according to your order and
               location.
             </p>
@@ -112,7 +114,7 @@ export default async function MealDetailPage({
 
         <div className="mt-14">
           <SectionHeading title="Related menu ranges">
-            Menu details will be published soon.
+            Browse more currently scheduled Pride of Scotland dishes.
           </SectionHeading>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {relatedMeals.slice(0, 3).map((meal) => (

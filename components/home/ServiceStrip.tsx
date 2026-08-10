@@ -17,17 +17,17 @@ const serviceItems: ServiceItem[] = [
   },
   {
     title: "Local Service",
-    description: "Service details for Dundee will be published as confirmed.",
+    description: "Serving customers across Dundee and nearby areas.",
     icon: Truck,
   },
   {
     title: "Ordering Journey",
-    description: "Online ordering information will be added before launch.",
+    description: "Order groceries and restaurant meals through the secure flow.",
     icon: LockKeyhole,
   },
   {
     title: "Great Support",
-    description: "Contact details will be added for customer questions.",
+    description: "Use the confirmed phone, email and WhatsApp channels.",
     icon: Headphones,
   },
   {

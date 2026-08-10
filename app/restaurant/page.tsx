@@ -211,6 +211,8 @@ export default async function RestaurantPage() {
         business="restaurant"
         phoneNumber={publicPhoneNumber}
         whatsappNumber={contact.whatsappNumber}
+        deliveryEnabled={settings.deliveryEnabled}
+        collectionEnabled={settings.collectionEnabled}
         bookingMealOptions={bookingMealOptions}
       />
 

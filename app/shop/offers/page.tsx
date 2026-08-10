@@ -34,8 +34,7 @@ export default async function ShopOffersPage() {
             </div>
           ) : (
             <div className="mt-8 rounded-[var(--radius-xl)] border border-[var(--color-shop-100)] bg-white p-6 text-sm font-semibold text-[var(--color-muted)] shadow-[var(--shadow-input)]">
-              Shop Africana offers will appear here when active promotions are
-              published.
+              There are no active Shop Africana offers right now.
             </div>
           )}
         </Container>

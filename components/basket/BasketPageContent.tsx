@@ -18,10 +18,14 @@ function BasketGroup({
   businessType,
   items,
   whatsappNumber,
+  deliveryEnabled,
+  collectionEnabled,
 }: {
   businessType: BusinessType;
   items: BasketItem[];
   whatsappNumber: string | null;
+  deliveryEnabled: boolean;
+  collectionEnabled: boolean;
 }) {
   if (items.length === 0) return null;
 
@@ -66,6 +70,8 @@ function BasketGroup({
         <BusinessWhatsAppOrderButton
           businessType={businessType}
           whatsappNumber={whatsappNumber}
+          deliveryEnabled={deliveryEnabled}
+          collectionEnabled={collectionEnabled}
           className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-5 text-sm font-extrabold text-[var(--color-shop-800)] shadow-[var(--shadow-input)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
         >
           Order {isShop ? "Shop" : "Restaurant"} on WhatsApp
@@ -150,11 +156,15 @@ export function BasketPageContent({
                 businessType="grocery"
                 items={groceryItems}
                 whatsappNumber={shopContact.whatsappNumber}
+                deliveryEnabled={shopSettings.deliveryEnabled}
+                collectionEnabled={shopSettings.collectionEnabled}
               />
               <BasketGroup
                 businessType="restaurant"
                 items={restaurantItems}
                 whatsappNumber={restaurantContact.whatsappNumber}
+                deliveryEnabled={restaurantSettings.deliveryEnabled}
+                collectionEnabled={restaurantSettings.collectionEnabled}
               />
               <p className="text-sm text-[var(--color-muted)]">
                 Need to keep browsing? Visit{" "}

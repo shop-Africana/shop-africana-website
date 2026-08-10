@@ -28,6 +28,7 @@ import { getGroceryCategoryArtwork } from "@/lib/artwork";
 import { getAllBusinessSettings } from "@/lib/business-settings";
 import { getCatalogItems, getCategories } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
+import { getTodayRestaurantMenu } from "@/lib/restaurant-menu";
 import type { CatalogCategory, CatalogItem } from "@/types";
 
 const valueFeatures = [
@@ -68,33 +69,6 @@ const valueFeatures = [
     tone: "shop",
   },
 ] as const;
-
-const demoTestimonials = [
-  {
-    name: "Amina K.",
-    location: "Dundee",
-    quote:
-      "The grocery selection makes it much easier to find familiar ingredients locally, and ordering feels straightforward.",
-  },
-  {
-    name: "Kwame A.",
-    location: "Dundee",
-    quote:
-      "I like being able to browse groceries and prepared meals in one place. The whole experience feels convenient.",
-  },
-  {
-    name: "Priya S.",
-    location: "Dundee",
-    quote:
-      "The menu browsing is clear, and the Asian meal options make the restaurant section feel welcoming and varied.",
-  },
-  {
-    name: "Chen L.",
-    location: "Dundee",
-    quote:
-      "The site is easy to use, and having collection, delivery and direct contact options is very helpful.",
-  },
-];
 
 function cleanDescription(description: string | null | undefined) {
   const text = description?.trim();
@@ -273,19 +247,20 @@ function HomeMealCard({ meal }: { meal: CatalogItem }) {
 }
 
 export default async function Home() {
-  const [settings, groceryProducts, restaurantSpecials, groceryCategories] =
+  const [settings, groceryProducts, todayMenu, groceryCategories] =
     await Promise.all([
       getAllBusinessSettings(),
       getCatalogItems("grocery"),
-      getCatalogItems("restaurant"),
+      getTodayRestaurantMenu(),
       getCategories("grocery"),
     ]);
   const featuredCategories = groceryCategories.slice(0, 6);
   const groceryHighlights = groceryProducts
     .filter((product) => product.isAvailable)
     .slice(0, 4);
-  const menuHighlights = restaurantSpecials
-    .filter((meal) => meal.isAvailable)
+  const menuHighlights = todayMenu.groups
+    .flatMap((group) => group.items)
+    .filter((meal) => meal.isAvailable && meal.menuStatus === "available")
     .slice(0, 4);
 
   return (
@@ -384,42 +359,6 @@ export default async function Home() {
           </Container>
         </section>
 
-        <section className="pt-7 sm:pt-9">
-          <Container>
-            <CompactSectionHeading title="What Our Customers Say">
-              Demonstration testimonials showing how the combined experience can feel for local Dundee customers.
-            </CompactSectionHeading>
-            <div className="mt-5 flex snap-x gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-4">
-              {demoTestimonials.map((testimonial) => (
-                <article
-                  key={testimonial.name}
-                  className="min-w-[17rem] snap-start rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[linear-gradient(180deg,var(--color-surface-warm),#fff)] p-5 shadow-[var(--shadow-input)] md:min-w-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--color-shop-700),var(--color-pride-700))] text-sm font-extrabold text-[var(--color-amber-100)]">
-                      {testimonial.name
-                        .split(" ")
-                        .map((part) => part[0])
-                        .join("")}
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-extrabold text-[var(--color-shop-900)]">
-                        {testimonial.name}
-                      </h3>
-                      <p className="text-xs font-semibold text-[var(--color-muted)]">
-                        {testimonial.location}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm leading-6 text-[var(--color-muted)]">
-                    &ldquo;{testimonial.quote}&rdquo;
-                  </p>
-                </article>
-              ))}
-            </div>
-          </Container>
-        </section>
-
         <section className="pb-12 pt-10 sm:pb-14">
           <Container>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -428,11 +367,11 @@ export default async function Home() {
                 {
                   label:
                     settings.shop.openingHoursText ??
-                    "Opening hours will be published soon",
+                    "Contact us for current opening hours",
                   icon: CheckCircle2,
                 },
                 {
-                  label: settings.shop.contactNumber ?? "Contact number to be added",
+                  label: settings.shop.contactNumber ?? "Use the contact page",
                   icon: Headphones,
                 },
                 { label: "Delivery charge confirmed manually", icon: Truck },

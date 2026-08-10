@@ -319,7 +319,11 @@ export function RestaurantMenuWorkspace({
         </div>
 
         <aside className="grid gap-4 lg:sticky lg:top-32 lg:gap-5">
-          <RestaurantBasketSummary whatsappNumber={contact.whatsappNumber} />
+          <RestaurantBasketSummary
+            whatsappNumber={contact.whatsappNumber}
+            deliveryEnabled={settings.deliveryEnabled}
+            collectionEnabled={settings.collectionEnabled}
+          />
           <OperationalCard settings={settings} />
         </aside>
       </div>

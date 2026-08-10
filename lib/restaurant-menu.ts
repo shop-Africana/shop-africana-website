@@ -1,5 +1,4 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { demoCatalogItems } from "@/lib/catalog";
 import {
   applyPromotionToItem,
   getActivePromotionsForItems,
@@ -110,27 +109,34 @@ function mapItem(row: CatalogItemRow): CatalogItem {
 
 function fallbackTodayMenu(): RestaurantTodayMenu {
   const { serviceDate, weekday } = getUkServiceDateParts();
-  const period: RestaurantMenuPeriod = {
-    id: "fallback-lunch",
-    name: "Lunch",
-    slug: "lunch",
-    displayOrder: 20,
-    isActive: true,
-  };
-  const items = demoCatalogItems
-    .filter((item) => item.businessType === "restaurant")
-    .map((item, index) => ({
-      ...item,
-      menuPeriod: period,
-      menuStatus: "available" as const,
-      effectivePrice: item.price,
-      scheduleDisplayOrder: index,
-    }));
+  const periods: RestaurantMenuPeriod[] = [
+    {
+      id: "fallback-breakfast",
+      name: "Breakfast",
+      slug: "breakfast",
+      displayOrder: 10,
+      isActive: true,
+    },
+    {
+      id: "fallback-lunch",
+      name: "Lunch",
+      slug: "lunch",
+      displayOrder: 20,
+      isActive: true,
+    },
+    {
+      id: "fallback-dinner",
+      name: "Dinner",
+      slug: "dinner",
+      displayOrder: 30,
+      isActive: true,
+    },
+  ];
 
   return {
     serviceDate,
     weekday,
-    groups: [{ period, items }],
+    groups: periods.map((period) => ({ period, items: [] })),
   };
 }
 

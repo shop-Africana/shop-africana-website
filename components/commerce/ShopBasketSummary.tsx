@@ -9,9 +9,15 @@ import { formatMoney } from "@/lib/money";
 
 type ShopBasketSummaryProps = {
   whatsappNumber: string | null;
+  deliveryEnabled?: boolean;
+  collectionEnabled?: boolean;
 };
 
-export function ShopBasketSummary({ whatsappNumber }: ShopBasketSummaryProps) {
+export function ShopBasketSummary({
+  whatsappNumber,
+  deliveryEnabled = true,
+  collectionEnabled = true,
+}: ShopBasketSummaryProps) {
   const { groceryItems, getBusinessCount, removeItem, updateQuantity } = useBasket();
   const groceryCount = getBusinessCount("grocery");
   const grocerySubtotal = groceryItems.reduce(
@@ -132,6 +138,8 @@ export function ShopBasketSummary({ whatsappNumber }: ShopBasketSummaryProps) {
           <BusinessWhatsAppOrderButton
             businessType="grocery"
             whatsappNumber={whatsappNumber}
+            deliveryEnabled={deliveryEnabled}
+            collectionEnabled={collectionEnabled}
             className="mt-2 inline-flex h-10 min-h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.24)] bg-[rgba(21,128,61,0.12)] px-5 text-sm font-extrabold text-[var(--color-shop-800)] shadow-[var(--shadow-input)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
           >
             Order on WhatsApp

@@ -6,7 +6,6 @@ const shopNav = [
   { label: "Categories", href: "/shop/categories" },
   { label: "Products", href: "/shop/products" },
   { label: "Offers", href: "/shop/offers" },
-  { label: "About", href: "/shop/about" },
   { label: "Contact", href: "/contact" },
   { label: "Basket", href: "/basket" },
 ];

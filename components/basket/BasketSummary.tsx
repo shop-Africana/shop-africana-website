@@ -56,10 +56,6 @@ export function BasketSummary({
           <span>Subtotal</span>
           <span className="font-semibold">{formatMoney(summarySubtotal)}</span>
         </div>
-        <p className="text-xs leading-5 text-[var(--color-muted)]">
-          Delivery charge will be confirmed according to your order and
-          location.
-        </p>
       </div>
       <div className="mt-5 flex items-center justify-between text-lg font-extrabold text-[var(--color-shop-900)]">
         <span>Current basket</span>

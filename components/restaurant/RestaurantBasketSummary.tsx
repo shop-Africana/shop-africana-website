@@ -15,10 +15,14 @@ import { formatMoney } from "@/lib/money";
 
 type RestaurantBasketSummaryProps = {
   whatsappNumber: string | null;
+  deliveryEnabled?: boolean;
+  collectionEnabled?: boolean;
 };
 
 export function RestaurantBasketSummary({
   whatsappNumber,
+  deliveryEnabled = true,
+  collectionEnabled = true,
 }: RestaurantBasketSummaryProps) {
   const { getBusinessCount, removeItem, restaurantItems, updateQuantity } =
     useBasket();
@@ -145,6 +149,8 @@ export function RestaurantBasketSummary({
             <BusinessWhatsAppOrderButton
               businessType="restaurant"
               whatsappNumber={whatsappNumber}
+              deliveryEnabled={deliveryEnabled}
+              collectionEnabled={collectionEnabled}
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[rgba(21,128,61,0.22)] bg-[rgba(21,128,61,0.12)] px-5 text-sm font-extrabold text-[var(--color-shop-800)] shadow-[var(--shadow-input)] transition hover:bg-[rgba(21,128,61,0.18)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
             >
               Order on WhatsApp

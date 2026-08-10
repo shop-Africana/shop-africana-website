@@ -63,6 +63,7 @@ export function CheckoutForm({
   const activeFulfilmentType = fulfilmentOptions.includes(fulfilmentType)
     ? fulfilmentType
     : fulfilmentOptions[0] ?? "collection";
+  const hasFulfilmentOptions = fulfilmentOptions.length > 0;
   const contact = businessType
     ? getBusinessContact(businessType === "grocery" ? "shop" : "restaurant", {
         contactNumber: settings.contactNumber,
@@ -95,6 +96,11 @@ export function CheckoutForm({
 
     if (scopedItems.length === 0) {
       setError(`Add at least one ${businessType === "grocery" ? "grocery item" : "restaurant meal"} before checkout.`);
+      return;
+    }
+
+    if (!hasFulfilmentOptions) {
+      setError(`${businessName} ordering is not available for delivery or collection right now.`);
       return;
     }
 
@@ -223,6 +229,32 @@ export function CheckoutForm({
     );
   }
 
+  if (!hasFulfilmentOptions) {
+    return (
+      <section className="py-12 sm:py-16">
+        <Container>
+          <div className="rounded-[var(--radius-xl)] border border-[var(--color-warning-border)] bg-[var(--color-warning-soft)] p-8 text-center shadow-[var(--shadow-card)]">
+            <h1 className="text-3xl font-extrabold text-[var(--color-shop-900)]">
+              Ordering paused
+            </h1>
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[var(--color-muted)]">
+              {businessName} is not accepting delivery or collection orders right now.
+              Please contact the business directly for assistance.
+            </p>
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <LinkButton href="/contact" variant="outline">
+                Contact Us
+              </LinkButton>
+              <LinkButton href="/basket" variant="secondary">
+                Return to Basket
+              </LinkButton>
+            </div>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
   return (
     <section className="py-12 sm:py-16">
       <Container>
@@ -284,7 +316,7 @@ export function CheckoutForm({
                     />
                     <Input name="addressLine2" placeholder="Address line 2" />
                     <Input name="city" placeholder="Town or city" required />
-                    <Input name="postcode" placeholder="Postcode" />
+                    <Input name="postcode" placeholder="Postcode" required />
                   </>
                 ) : null}
               </div>
