@@ -35,8 +35,9 @@ function parseInteger(value: FormDataEntryValue | null, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function parseLabels(value: FormDataEntryValue | null) {
-  return String(value ?? "")
+function parseLabels(value: FormDataEntryValue | FormDataEntryValue[] | null) {
+  const raw = Array.isArray(value) ? value.join(",") : String(value ?? "");
+  return raw
     .split(",")
     .map((label) => label.trim())
     .filter(Boolean);
@@ -277,7 +278,7 @@ export async function saveMeal(formData: FormData) {
     is_demo: false,
     sort_order: displayOrder,
     spice_level: String(formData.get("spiceLevel") ?? "") || null,
-    dietary_labels: parseLabels(formData.get("dietaryLabels")),
+    dietary_labels: parseLabels(formData.getAll("dietaryLabels")),
     preparation_time: String(formData.get("preparationTime") ?? "") || null,
     allergen_information: String(formData.get("allergenInformation") ?? "") || null,
   };
@@ -511,6 +512,8 @@ export async function setTodayMealStatus(formData: FormData) {
   const admin = createSupabaseAdminClient();
   const catalogItemId = String(formData.get("catalogItemId") ?? "");
   const status = String(formData.get("status") ?? "") as DailyOverrideStatus | "restore";
+  const overridePriceRaw = String(formData.get("overridePrice") ?? "").trim();
+  const overridePrice = overridePriceRaw ? parseInteger(overridePriceRaw, 0) : null;
   const { serviceDate } = getUkServiceDateParts();
 
   if (!catalogItemId) return;
@@ -527,6 +530,7 @@ export async function setTodayMealStatus(formData: FormData) {
         catalog_item_id: catalogItemId,
         service_date: serviceDate,
         override_status: status,
+        override_price: status === "available" ? overridePrice : null,
       },
       { onConflict: "catalog_item_id,service_date" },
     );

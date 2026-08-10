@@ -72,6 +72,7 @@ type OverrideRow = {
   catalog_item_id: string;
   service_date: string;
   override_status: DailyOverrideStatus;
+  override_price: number | null;
 };
 
 export type OwnerScheduleRow = {
@@ -86,6 +87,7 @@ export type OwnerScheduleRow = {
 export type OwnerMeal = CatalogItem & {
   schedules: OwnerScheduleRow[];
   todayStatus: "scheduled" | DailyOverrideStatus;
+  todayOverridePrice: number | null;
   promotion: Promotion | null;
 };
 
@@ -190,7 +192,7 @@ export async function getOwnerMenuData() {
         .order("display_order", { ascending: true }),
       admin
         .from("restaurant_daily_overrides")
-        .select("catalog_item_id,service_date,override_status")
+        .select("catalog_item_id,service_date,override_status,override_price")
         .eq("service_date", serviceDate),
       getOwnerPromotions("restaurant"),
     ]);
@@ -205,7 +207,7 @@ export async function getOwnerMenuData() {
   const overrides = new Map(
     ((overridesResult.data ?? []) as OverrideRow[]).map((row) => [
       row.catalog_item_id,
-      row.override_status,
+      row,
     ]),
   );
   const promotionsByItem = new Map(
@@ -228,7 +230,10 @@ export async function getOwnerMenuData() {
       activePromotion: promotion,
       promotion,
       schedules: itemSchedules,
-      todayStatus: overrides.get(item.id) ?? (scheduledToday ? "scheduled" : "hidden"),
+      todayStatus:
+        overrides.get(item.id)?.override_status ??
+        (scheduledToday ? "scheduled" : "hidden"),
+      todayOverridePrice: overrides.get(item.id)?.override_price ?? null,
     };
   });
 

@@ -76,13 +76,15 @@ const categories: MenuCategory[] = [
     id: "african",
     label: "African Dishes",
     icon: Globe2,
-    matches: (item) => textForItem(item).includes("african"),
+    matches: (item) =>
+      item.categorySlug === "african-dishes" || textForItem(item).includes("african"),
   },
   {
     id: "asian",
     label: "Asian Dishes",
     icon: Wheat,
-    matches: (item) => textForItem(item).includes("asian"),
+    matches: (item) =>
+      item.categorySlug === "asian-dishes" || textForItem(item).includes("asian"),
   },
   {
     id: "soups",
@@ -90,36 +92,33 @@ const categories: MenuCategory[] = [
     icon: Soup,
     matches: (item) => {
       const text = textForItem(item);
-      return text.includes("soup") || text.includes("stew");
+      return (
+        item.categorySlug === "soups-and-stews" ||
+        text.includes("soup") ||
+        text.includes("stew")
+      );
     },
   },
   {
     id: "sides",
     label: "Sides",
     icon: Leaf,
-    matches: (item) => textForItem(item).includes("side"),
+    matches: (item) => item.categorySlug === "sides" || textForItem(item).includes("side"),
   },
   {
     id: "drinks",
     label: "Drinks",
     icon: Coffee,
-    matches: (item) => textForItem(item).includes("drink"),
+    matches: (item) =>
+      item.categorySlug === "drinks" || textForItem(item).includes("drink"),
   },
   {
     id: "desserts",
     label: "Desserts",
     icon: CakeSlice,
-    matches: (item) => textForItem(item).includes("dessert"),
+    matches: (item) =>
+      item.categorySlug === "desserts" || textForItem(item).includes("dessert"),
   },
-];
-
-const heroPills = [
-  { label: "Today's Menu", value: "today" },
-  { label: "Breakfast", value: "breakfast" },
-  { label: "Lunch", value: "lunch" },
-  { label: "Dinner", value: "dinner" },
-  { label: "Drinks", value: "drinks" },
-  { label: "Desserts", value: "desserts" },
 ];
 
 const initialFilters: FilterState = {
@@ -135,6 +134,8 @@ function textForItem(item: RestaurantMenuItem) {
   return [
     item.name,
     item.description,
+    item.categoryName,
+    item.categorySlug,
     item.originRegion,
     item.unitLabel,
     item.menuPeriod.name,
@@ -158,10 +159,7 @@ function available(item: RestaurantMenuItem) {
 }
 
 function itemCuisine(item: RestaurantMenuItem) {
-  const text = textForItem(item);
-  if (text.includes("asian")) return "Asian";
-  if (text.includes("african")) return "African";
-  return item.originRegion ?? "Restaurant";
+  return item.categoryName ?? item.originRegion ?? "Restaurant";
 }
 
 function normalizeSpiceLevel(spice: string | null | undefined): DisplaySpiceLevel {
@@ -252,6 +250,17 @@ export function RestaurantMenuOrderingWorkspace({
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const activeMenu = menuMode === "today" ? todayMenu : weeklyMenus[selectedWeekday];
   const activeItems = useMemo(() => uniqueItems(itemsFromMenu(activeMenu)), [activeMenu]);
+  const activePeriods = todayMenu.groups.map((group) => group.period);
+  const heroPills = useMemo(
+    () => [
+      { label: "Today's Menu", value: "today" },
+      ...activePeriods.map((period) => ({
+        label: period.name,
+        value: period.slug,
+      })),
+    ],
+    [activePeriods],
+  );
   const visibleItems = useMemo(
     () => filterItems(activeItems, selectedCategory, selectedPeriod, filters),
     [activeItems, filters, selectedCategory, selectedPeriod],

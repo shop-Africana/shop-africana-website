@@ -58,6 +58,8 @@ export type CatalogCategory = {
 export type CatalogItem = {
   id: string;
   categoryId: string | null;
+  categoryName?: string | null;
+  categorySlug?: string | null;
   businessType: BusinessType;
   name: string;
   slug: string;

@@ -84,6 +84,12 @@ export function TodayMenuManager({
                         >
                           Edit
                         </Link>
+                        <p className="mt-1 text-xs text-[var(--color-muted)]">
+                          Today&apos;s override price:{" "}
+                          {meal.todayOverridePrice
+                            ? `${meal.todayOverridePrice}p`
+                            : "not set"}
+                        </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {[
@@ -95,6 +101,17 @@ export function TodayMenuManager({
                           <form key={status} action={setTodayMealStatus}>
                             <input type="hidden" name="catalogItemId" value={meal.id} />
                             <input type="hidden" name="status" value={status} />
+                            {status === "available" ? (
+                              <input
+                                name="overridePrice"
+                                type="number"
+                                min="0"
+                                defaultValue={meal.todayOverridePrice ?? ""}
+                                aria-label={`${meal.name} daily override price in pence`}
+                                className="mb-2 min-h-10 w-36 rounded-[var(--radius-md)] border border-[var(--color-border-strong)] bg-white px-3 text-sm shadow-[var(--shadow-input)] focus:border-[var(--color-shop-500)] focus:outline-none focus:ring-4 focus:ring-[var(--color-focus-soft)]"
+                                placeholder="Price pence"
+                              />
+                            ) : null}
                             <Button type="submit" variant="outline">
                               {label}
                             </Button>

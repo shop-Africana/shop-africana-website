@@ -26,6 +26,9 @@ const formErrors: Record<string, string> = {
   promotion: "Special details need a title, lower price and valid dates.",
 };
 
+const spiceLevels = ["Mild", "Medium", "Spicy", "Very Spicy"];
+const dietaryOptions = ["Vegetarian", "Vegan", "Gluten Free"];
+
 export function OwnerMealForm({
   meal,
   categories,
@@ -141,16 +144,39 @@ export function OwnerMealForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2 text-sm font-bold text-[var(--color-foreground-strong)]">
           Spice level
-          <Input name="spiceLevel" defaultValue={meal?.spiceLevel ?? ""} />
+          <select
+            name="spiceLevel"
+            defaultValue={meal?.spiceLevel ?? ""}
+            className="min-h-11 rounded-[var(--radius-md)] border border-[var(--color-border-strong)] bg-white px-4 text-sm shadow-[var(--shadow-input)] focus:border-[var(--color-shop-500)] focus:outline-none focus:ring-4 focus:ring-[var(--color-focus-soft)]"
+          >
+            <option value="">Choose spice level</option>
+            {spiceLevels.map((level) => (
+              <option key={level} value={level}>
+                {level}
+              </option>
+            ))}
+          </select>
         </label>
-        <label className="grid gap-2 text-sm font-bold text-[var(--color-foreground-strong)]">
-          Dietary labels
-          <Input
-            name="dietaryLabels"
-            defaultValue={meal?.dietaryLabels?.join(", ") ?? ""}
-            placeholder="Vegetarian, Gluten free"
-          />
-        </label>
+        <fieldset className="grid gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <legend className="px-1 text-sm font-bold text-[var(--color-foreground-strong)]">
+            Dietary preferences
+          </legend>
+          <div className="grid gap-2">
+            {dietaryOptions.map((label) => (
+              <label key={label} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="dietaryLabels"
+                  value={label}
+                  defaultChecked={(meal?.dietaryLabels ?? []).some(
+                    (value) => value.toLowerCase() === label.toLowerCase(),
+                  )}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <label className="grid gap-2 text-sm font-bold text-[var(--color-foreground-strong)]">
           Preparation time
           <Input
@@ -184,7 +210,7 @@ export function OwnerMealForm({
             name="isAvailable"
             defaultChecked={meal?.isAvailable ?? true}
           />
-          Active
+          Available
         </label>
         <label className="flex items-center gap-2 text-sm font-bold">
           <input
@@ -192,7 +218,7 @@ export function OwnerMealForm({
             name="isFeatured"
             defaultChecked={meal?.isFeatured ?? false}
           />
-          Featured
+          Featured / Chef Choice
         </label>
       </div>
 

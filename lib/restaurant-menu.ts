@@ -37,6 +37,16 @@ type OverrideRow = {
 type CatalogItemRow = {
   id: string;
   category_id: string | null;
+  categories?:
+    | {
+        name: string | null;
+        slug: string | null;
+      }
+    | {
+        name: string | null;
+        slug: string | null;
+      }[]
+    | null;
   business_type: "restaurant";
   name: string;
   slug: string;
@@ -53,6 +63,10 @@ type CatalogItemRow = {
   preparation_time: string | null;
   allergen_information: string | null;
 };
+
+function getCategoryForItem(row: CatalogItemRow) {
+  return Array.isArray(row.categories) ? row.categories[0] : row.categories;
+}
 
 export function getUkServiceDateParts(date = new Date()) {
   const formatter = new Intl.DateTimeFormat("en-GB", {
@@ -83,9 +97,13 @@ function mapPeriod(row: PeriodRow): RestaurantMenuPeriod {
 }
 
 function mapItem(row: CatalogItemRow): CatalogItem {
+  const category = getCategoryForItem(row);
+
   return {
     id: row.id,
     categoryId: row.category_id,
+    categoryName: category?.name ?? null,
+    categorySlug: category?.slug ?? null,
     businessType: row.business_type,
     name: row.name,
     slug: row.slug,
@@ -194,7 +212,7 @@ export async function getTodayRestaurantMenu(
     admin
       .from("catalog_items")
       .select(
-        "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,spice_level,dietary_labels,preparation_time,allergen_information",
+        "id,category_id,categories(name,slug),business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,spice_level,dietary_labels,preparation_time,allergen_information",
       )
       .in("id", catalogIds)
       .eq("business_type", "restaurant")
@@ -311,7 +329,7 @@ export async function getRestaurantMenuForWeekday(
   const { data, error } = await admin
     .from("catalog_items")
     .select(
-      "id,category_id,business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,spice_level,dietary_labels,preparation_time,allergen_information",
+      "id,category_id,categories(name,slug),business_type,name,slug,description,price,image_url,unit_label,is_available,is_featured,is_demo,sort_order,spice_level,dietary_labels,preparation_time,allergen_information",
     )
     .in("id", catalogIds)
     .eq("business_type", "restaurant")
