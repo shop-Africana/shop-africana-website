@@ -12,6 +12,11 @@ import {
 } from "@/lib/owner-menu";
 import { slugifyProductName } from "@/lib/owner-products";
 import { getUkServiceDateParts } from "@/lib/restaurant-menu";
+import {
+  deleteCloudinaryImage,
+  getCloudinaryPublicIdFromUrl,
+  uploadOwnerImageToCloudinary,
+} from "@/lib/cloudinary";
 import type { BusinessType, DailyOverrideStatus, MenuWeekday, OrderStatus } from "@/types";
 
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -49,6 +54,41 @@ function getImageValidationError(image: FormDataEntryValue | null) {
   if (!imageTypes.has(image.type)) return "image";
   if (image.size > maxImageSize) return "image";
   return null;
+}
+
+async function replaceOwnerImage({
+  admin,
+  catalogItemId,
+  image,
+  previousImageUrl,
+  folder,
+}: {
+  admin: ReturnType<typeof createSupabaseAdminClient>;
+  catalogItemId: string;
+  image: File;
+  previousImageUrl: string | null;
+  folder: "shop-africana/products" | "shop-africana/restaurant";
+}) {
+  const uploadedImage = await uploadOwnerImageToCloudinary({
+    image,
+    folder,
+    publicIdPrefix: catalogItemId,
+  });
+
+  const { error } = await admin
+    .from("catalog_items")
+    .update({ image_url: uploadedImage.secureUrl })
+    .eq("id", catalogItemId);
+
+  if (error) {
+    await deleteCloudinaryImage(uploadedImage.publicId);
+    throw new Error(error.message);
+  }
+
+  const previousPublicId = getCloudinaryPublicIdFromUrl(previousImageUrl);
+  if (previousPublicId) {
+    await deleteCloudinaryImage(previousPublicId);
+  }
 }
 
 function redirectWithMealError(id: string, error: string): never {
@@ -273,22 +313,13 @@ export async function saveMeal(formData: FormData) {
   }
 
   if (image instanceof File && image.size > 0) {
-    const extension = image.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${catalogItemId}/${crypto.randomUUID()}.${extension}`;
-    const { error: uploadError } = await admin.storage
-      .from("restaurant-menu-images")
-      .upload(path, image, { contentType: image.type, upsert: false });
-
-    if (uploadError) throw new Error(uploadError.message);
-
-    const { data: publicUrl } = admin.storage
-      .from("restaurant-menu-images")
-      .getPublicUrl(path);
-
-    await admin
-      .from("catalog_items")
-      .update({ image_url: publicUrl.publicUrl })
-      .eq("id", catalogItemId);
+    await replaceOwnerImage({
+      admin,
+      catalogItemId,
+      image,
+      previousImageUrl: mealPayload.image_url,
+      folder: "shop-africana/restaurant",
+    });
   }
 
   revalidatePath("/owner");
@@ -363,22 +394,13 @@ export async function saveProduct(formData: FormData) {
   }
 
   if (image instanceof File && image.size > 0) {
-    const extension = image.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${catalogItemId}/${crypto.randomUUID()}.${extension}`;
-    const { error: uploadError } = await admin.storage
-      .from("shop-product-images")
-      .upload(path, image, { contentType: image.type, upsert: false });
-
-    if (uploadError) throw new Error(uploadError.message);
-
-    const { data: publicUrl } = admin.storage
-      .from("shop-product-images")
-      .getPublicUrl(path);
-
-    await admin
-      .from("catalog_items")
-      .update({ image_url: publicUrl.publicUrl })
-      .eq("id", catalogItemId);
+    await replaceOwnerImage({
+      admin,
+      catalogItemId,
+      image,
+      previousImageUrl: productPayload.image_url,
+      folder: "shop-africana/products",
+    });
   }
 
   revalidatePath("/owner");

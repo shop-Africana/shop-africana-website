@@ -11,17 +11,26 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    remotePatterns: supabaseHostname
-      ? [
-          {
-            protocol: "https",
-            hostname: supabaseHostname,
-            port: "",
-            pathname: "/storage/v1/object/public/**",
-            search: "",
-          },
-        ]
-      : [],
+    remotePatterns: [
+      ...(supabaseHostname
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: supabaseHostname,
+              port: "",
+              pathname: "/storage/v1/object/public/**",
+              search: "",
+            },
+          ]
+        : []),
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "/**",
+        search: "",
+      },
+    ],
   },
 };
 
