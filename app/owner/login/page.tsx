@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand/BrandLockup";
+import { OwnerPasswordInput } from "@/components/owner/OwnerPasswordInput";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
@@ -39,9 +40,8 @@ export default async function OwnerLoginPage({
             className="mt-8 grid gap-4"
           >
             <Input name="email" type="email" placeholder="Owner email" required />
-            <Input
+            <OwnerPasswordInput
               name="password"
-              type="password"
               placeholder="Password"
               required
             />

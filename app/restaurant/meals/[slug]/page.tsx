@@ -49,15 +49,16 @@ export default async function MealDetailPage({
         />
         <div className="mt-8 grid gap-10 lg:grid-cols-[0.95fr_1fr]">
           {meal?.imageUrl ? (
-            <Image
-              src={meal.imageUrl}
-              alt={meal.name}
-              width={900}
-              height={700}
-              sizes="(min-width: 1024px) 48vw, 100vw"
-              unoptimized
-              className="min-h-[26rem] w-full rounded-[var(--radius-xl)] object-cover shadow-[var(--shadow-card)]"
-            />
+            <div className="relative min-h-[26rem] overflow-hidden rounded-[var(--radius-xl)] bg-[linear-gradient(135deg,#fff7ed,var(--color-pride-50))] shadow-[var(--shadow-card)]">
+              <Image
+                src={meal.imageUrl}
+                alt={meal.name}
+                fill
+                sizes="(min-width: 1024px) 48vw, 100vw"
+                unoptimized
+                className="object-contain p-3"
+              />
+            </div>
           ) : (
             <PlaceholderFrame
               label="Pride of Scotland meal"

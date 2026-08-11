@@ -58,7 +58,7 @@ export function RestaurantBasketSummary({
                 key={item.catalogItemId}
                 className="grid min-h-16 grid-cols-[2.75rem_1fr_auto] gap-2 border-b border-[rgba(128,20,61,0.12)] py-2.5 last:border-b-0"
               >
-                <div className="relative size-11 overflow-hidden rounded-[var(--radius-md)] border border-[rgba(128,20,61,0.14)] bg-[rgba(255,255,255,0.62)]">
+                <div className="relative size-11 overflow-hidden rounded-[var(--radius-md)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(135deg,#fff7ed,var(--color-pride-50))]">
                   {item.imageUrl ? (
                     <Image
                       src={item.imageUrl}
@@ -66,7 +66,7 @@ export function RestaurantBasketSummary({
                       fill
                       sizes="48px"
                       unoptimized
-                      className="object-cover"
+                      className="object-contain p-0.5"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-[var(--color-pride-700)]">

@@ -71,7 +71,13 @@ const weekdays: Array<{ label: string; value: MenuWeekday }> = [
 ];
 
 const categories: MenuCategory[] = [
-  { id: "all", label: "All Dishes", icon: Utensils, matches: () => true },
+  {
+    id: "all",
+    label: "All Dishes",
+    icon: Utensils,
+    matches: (item) =>
+      item.categorySlug !== "drinks" && item.categorySlug !== "extras",
+  },
   {
     id: "african",
     label: "African Dishes",
@@ -118,6 +124,13 @@ const categories: MenuCategory[] = [
     icon: CakeSlice,
     matches: (item) =>
       item.categorySlug === "desserts" || textForItem(item).includes("dessert"),
+  },
+  {
+    id: "extras",
+    label: "Extras",
+    icon: Plus,
+    matches: (item) =>
+      item.categorySlug === "extras" || textForItem(item).includes("extra"),
   },
 ];
 
@@ -643,7 +656,7 @@ function RestaurantMenuCard({ meal }: { meal: RestaurantMenuItem }) {
     <article className="group flex h-full min-h-[17rem] min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(180deg,#fffaf0,#fff)] shadow-[var(--shadow-input)] transition duration-200 hover:-translate-y-1 hover:border-[rgba(128,20,61,0.28)] hover:shadow-[0_22px_55px_rgba(83,13,42,0.16)] sm:min-h-[18.5rem] lg:min-h-[18rem] xl:min-h-[19rem]">
       <Link
         href={`/restaurant/meals/${meal.slug}`}
-        className="relative block h-24 overflow-hidden bg-[var(--color-pride-50)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] min-[390px]:h-28 sm:h-40 lg:h-28 xl:h-32 2xl:h-32"
+        className="relative block h-24 overflow-hidden bg-[linear-gradient(135deg,#fff7ed,var(--color-pride-50))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] min-[390px]:h-28 sm:h-40 lg:h-28 xl:h-32 2xl:h-32"
       >
         <Image
           src={meal.imageUrl ?? fallbackMealImage}
@@ -651,7 +664,7 @@ function RestaurantMenuCard({ meal }: { meal: RestaurantMenuItem }) {
           fill
           sizes="(min-width: 1024px) 22vw, (min-width: 640px) 42vw, 50vw"
           unoptimized={Boolean(meal.imageUrl)}
-          className="object-cover transition duration-300 group-hover:scale-[1.03]"
+          className="object-contain p-1.5 transition duration-300 group-hover:scale-[1.03]"
         />
         <div className="absolute left-3 top-3">
           <span
@@ -752,14 +765,14 @@ function SpecialsCard({ specials }: { specials: RestaurantMenuItem[] }) {
               key={meal.id}
               className="grid grid-cols-[4rem_1fr] gap-2.5 rounded-[var(--radius-lg)] border border-[rgba(128,20,61,0.12)] bg-white/78 p-2 xl:grid-cols-[4.5rem_1fr]"
             >
-              <div className="relative size-16 overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-pride-50)] xl:size-[72px]">
+              <div className="relative size-16 overflow-hidden rounded-[var(--radius-md)] bg-[linear-gradient(135deg,#fff7ed,var(--color-pride-50))] xl:size-[72px]">
                 <Image
                   src={meal.imageUrl ?? fallbackMealImage}
                   alt={meal.imageUrl ? meal.name : ""}
                   fill
                   sizes="72px"
                   unoptimized={Boolean(meal.imageUrl)}
-                  className="object-cover"
+                  className="object-contain p-1"
                 />
               </div>
               <div className="min-w-0">
@@ -914,7 +927,7 @@ function RestaurantBasketLine({
 }) {
   return (
     <div className="grid grid-cols-[3rem_1fr_auto] gap-2 border-b border-[rgba(128,20,61,0.1)] py-2.5 last:border-b-0">
-      <div className="relative size-12 overflow-hidden rounded-[var(--radius-md)] border border-[rgba(128,20,61,0.12)] bg-white">
+      <div className="relative size-12 overflow-hidden rounded-[var(--radius-md)] border border-[rgba(128,20,61,0.12)] bg-[linear-gradient(135deg,#fff7ed,var(--color-pride-50))]">
         {item.imageUrl ? (
           <Image
             src={item.imageUrl}
@@ -922,7 +935,7 @@ function RestaurantBasketLine({
             fill
             sizes="48px"
             unoptimized
-            className="object-cover"
+            className="object-contain p-0.5"
           />
         ) : (
           <div className="grid h-full place-items-center text-[var(--color-pride-700)]">

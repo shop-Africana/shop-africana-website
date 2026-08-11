@@ -3,8 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import { OwnerPasswordInput } from "@/components/owner/OwnerPasswordInput";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 
 export function OwnerResetPasswordForm() {
   const router = useRouter();
@@ -51,15 +51,13 @@ export function OwnerResetPasswordForm() {
           {error}
         </div>
       ) : null}
-      <Input
+      <OwnerPasswordInput
         name="password"
-        type="password"
         placeholder="New password"
         required
       />
-      <Input
+      <OwnerPasswordInput
         name="confirmPassword"
-        type="password"
         placeholder="Confirm new password"
         required
       />

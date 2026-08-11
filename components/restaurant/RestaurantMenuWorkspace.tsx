@@ -346,14 +346,14 @@ function RestaurantMealCard({ meal }: { meal: RestaurantMenuItem }) {
           {isFinished ? "Finished today" : "Available"}
         </Badge>
         {meal.imageUrl ? (
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-lg)] border border-[rgba(128,20,61,0.14)] bg-[var(--color-pride-50)] shadow-[var(--shadow-input)]">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-lg)] border border-[rgba(128,20,61,0.14)] bg-[linear-gradient(135deg,#fff7ed,var(--color-pride-50))] shadow-[var(--shadow-input)]">
             <Image
               src={meal.imageUrl}
               alt={meal.name}
               fill
               sizes="(min-width: 1280px) 25vw, (min-width: 768px) 45vw, 100vw"
               unoptimized
-              className="object-cover transition duration-300 group-hover:scale-[1.025]"
+              className="object-contain p-2 transition duration-300 group-hover:scale-[1.025]"
             />
           </div>
         ) : (
