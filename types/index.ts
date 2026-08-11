@@ -109,6 +109,7 @@ export type BasketItem = {
 
 export type FulfilmentType = "delivery" | "collection";
 export type PaymentMethod = "pending" | "paypal" | "whatsapp";
+export type PaymentStatus = "pending" | "paid" | "failed" | "cancelled";
 export type OrderStatus =
   | "pending"
   | "accepted"
@@ -149,7 +150,7 @@ export type OrderResult = {
   subtotal: number;
   delivery_fee: number;
   total: number;
-  payment_status: "pending";
+  payment_status: PaymentStatus;
   order_status: "pending";
 };
 

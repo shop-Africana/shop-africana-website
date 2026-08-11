@@ -38,6 +38,7 @@ Do not commit real values.
 - `NEXT_PUBLIC_SITE_URL`
 - `PAYPAL_CLIENT_ID`
 - `PAYPAL_CLIENT_SECRET`
+- `PAYPAL_WEBHOOK_ID`
 - `PAYPAL_ENVIRONMENT`
 - `RESEND_API_KEY`
 - `OWNER_NOTIFICATION_EMAIL`
@@ -53,6 +54,14 @@ Do not commit real values.
 - Add a meal at `/owner/menu/new`.
 - Mark meals finished, available or hidden from `/owner/menu`.
 - View customer orders at `/owner/orders`.
+
+## PayPal Preparation
+
+PayPal integration is prepared for the owner's existing PayPal account. When
+ready, log in with the owner, create or select the REST API app, register the
+production webhook, and add the Client ID, Client Secret, Webhook ID and
+environment values to hosting. PayPal remains unavailable in checkout until
+those values are present.
 - Open an order to review customer and item details.
 - Update order status to pending, accepted, preparing, ready, completed or cancelled.
 

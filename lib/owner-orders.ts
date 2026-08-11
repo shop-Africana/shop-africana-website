@@ -1,5 +1,5 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { BusinessType, FulfilmentType, OrderStatus, PaymentMethod } from "@/types";
+import type { BusinessType, FulfilmentType, OrderStatus, PaymentMethod, PaymentStatus } from "@/types";
 
 export type OwnerOrderItem = {
   id: string;
@@ -26,7 +26,11 @@ export type OwnerOrder = {
   deliveryFee: number;
   total: number;
   paymentMethod: PaymentMethod;
-  paymentStatus: string;
+  paymentStatus: PaymentStatus;
+  paymentProvider: string | null;
+  paymentProviderOrderId: string | null;
+  paymentProviderCaptureId: string | null;
+  paidAt: string | null;
   orderStatus: OrderStatus;
   createdAt: string;
   items: OwnerOrderItem[];
@@ -57,7 +61,11 @@ type OrderRow = {
   delivery_fee: number;
   total: number;
   payment_method: PaymentMethod;
-  payment_status: string;
+  payment_status: PaymentStatus;
+  payment_provider: string | null;
+  payment_provider_order_id: string | null;
+  payment_provider_capture_id: string | null;
+  paid_at: string | null;
   order_status: OrderStatus;
   created_at: string;
   order_items?: OrderItemRow[];
@@ -79,6 +87,10 @@ function mapOrder(row: OrderRow): OwnerOrder {
     total: row.total,
     paymentMethod: row.payment_method,
     paymentStatus: row.payment_status,
+    paymentProvider: row.payment_provider,
+    paymentProviderOrderId: row.payment_provider_order_id,
+    paymentProviderCaptureId: row.payment_provider_capture_id,
+    paidAt: row.paid_at,
     orderStatus: row.order_status,
     createdAt: row.created_at,
     items: (row.order_items ?? []).map((item) => ({
@@ -95,7 +107,7 @@ function mapOrder(row: OrderRow): OwnerOrder {
 }
 
 const orderSelect =
-  "id,order_reference,business_type,customer_name,customer_email,customer_phone,fulfilment_type,delivery_address,order_instructions,subtotal,delivery_fee,total,payment_method,payment_status,order_status,created_at,order_items(id,catalog_item_id,item_name_snapshot,business_type_snapshot,unit_price_snapshot,quantity,line_total,optional_meal_instructions)";
+  "id,order_reference,business_type,customer_name,customer_email,customer_phone,fulfilment_type,delivery_address,order_instructions,subtotal,delivery_fee,total,payment_method,payment_status,payment_provider,payment_provider_order_id,payment_provider_capture_id,paid_at,order_status,created_at,order_items(id,catalog_item_id,item_name_snapshot,business_type_snapshot,unit_price_snapshot,quantity,line_total,optional_meal_instructions)";
 
 export async function getOwnerOrders(businessType?: BusinessType) {
   const admin = createSupabaseAdminClient();

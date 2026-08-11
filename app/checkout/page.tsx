@@ -2,6 +2,7 @@ import { SharedPageShell } from "@/components/layout/SharedPageShell";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { getBusinessSettingsFor } from "@/lib/business-settings";
 import { checkoutBusinessToType } from "@/lib/business-scope";
+import { isPayPalConfigured } from "@/lib/paypal";
 
 function firstParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -15,10 +16,15 @@ export default async function CheckoutPage({
   const params = await searchParams;
   const businessType = checkoutBusinessToType(firstParam(params?.business));
   const settings = await getBusinessSettingsFor(businessType ?? "grocery");
+  const paypalEnabled = isPayPalConfigured();
 
   return (
     <SharedPageShell>
-      <CheckoutForm settings={settings} businessType={businessType} />
+      <CheckoutForm
+        settings={settings}
+        businessType={businessType}
+        paypalEnabled={paypalEnabled}
+      />
     </SharedPageShell>
   );
 }

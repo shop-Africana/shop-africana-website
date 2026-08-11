@@ -26,9 +26,11 @@ import type { BusinessType, FulfilmentType, PaymentMethod } from "@/types";
 export function CheckoutForm({
   settings,
   businessType,
+  paypalEnabled,
 }: {
   settings: BusinessSettings;
   businessType: BusinessType | null;
+  paypalEnabled: boolean;
 }) {
   const router = useRouter();
   const {
@@ -141,11 +143,16 @@ export function CheckoutForm({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/orders", {
+      const response = await fetch(
+        paymentMethod === "paypal"
+          ? "/api/paypal/create-order"
+          : "/api/orders",
+        {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });
+        },
+      );
       const result = await response.json();
 
       if (!response.ok || !result.ok) {
@@ -154,6 +161,16 @@ export function CheckoutForm({
             ? result.errors.join(" ")
             : "Order submission failed.",
         );
+        return;
+      }
+
+      if (paymentMethod === "paypal") {
+        if (!result.approvalUrl) {
+          setError("PayPal did not return an approval link.");
+          return;
+        }
+
+        window.location.assign(result.approvalUrl);
         return;
       }
 
@@ -367,8 +384,10 @@ export function CheckoutForm({
                   },
                   {
                     value: "paypal" as PaymentMethod,
-                    title: "PayPal not active yet",
-                    text: "PayPal handoff will be enabled after credentials are approved.",
+                    title: paypalEnabled ? "Pay with PayPal" : "PayPal not active yet",
+                    text: paypalEnabled
+                      ? "You will be sent to PayPal, then returned here after payment approval."
+                      : "PayPal handoff will be enabled after sandbox/live credentials are approved.",
                   },
                   {
                     value: "whatsapp" as PaymentMethod,
@@ -393,7 +412,11 @@ export function CheckoutForm({
                       name="paymentMethod"
                       value={method.value}
                       checked={paymentMethod === method.value}
-                      onChange={() => setPaymentMethod(method.value)}
+                      onChange={() => {
+                        if (method.value === "paypal" && !paypalEnabled) return;
+                        setPaymentMethod(method.value);
+                      }}
+                      disabled={method.value === "paypal" && !paypalEnabled}
                       className="mr-2"
                     />
                     <span className="text-sm font-bold text-[var(--color-foreground-strong)]">

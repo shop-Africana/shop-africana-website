@@ -1,5 +1,5 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { BasketItem, BusinessType, FulfilmentType } from "@/types";
+import type { BasketItem, BusinessType, FulfilmentType, PaymentStatus } from "@/types";
 
 export type OrderConfirmationDetails = {
   reference: string;
@@ -8,6 +8,7 @@ export type OrderConfirmationDetails = {
   fulfilmentType: FulfilmentType;
   subtotal: number;
   total: number;
+  paymentStatus: PaymentStatus;
   items: Array<Pick<BasketItem, "name" | "quantity" | "unitPrice">>;
 };
 
@@ -18,6 +19,7 @@ type OrderConfirmationRow = {
   fulfilment_type: FulfilmentType;
   subtotal: number;
   total: number;
+  payment_status: PaymentStatus;
   order_items?: Array<{
     item_name_snapshot: string;
     unit_price_snapshot: number;
@@ -30,7 +32,7 @@ export async function getOrderConfirmationDetails(reference: string) {
   const { data, error } = await admin
     .from("orders")
     .select(
-      "order_reference,business_type,customer_name,fulfilment_type,subtotal,total,order_items(item_name_snapshot,unit_price_snapshot,quantity)",
+      "order_reference,business_type,customer_name,fulfilment_type,subtotal,total,payment_status,order_items(item_name_snapshot,unit_price_snapshot,quantity)",
     )
     .eq("order_reference", reference)
     .maybeSingle();
@@ -46,6 +48,7 @@ export async function getOrderConfirmationDetails(reference: string) {
     fulfilmentType: row.fulfilment_type,
     subtotal: row.subtotal,
     total: row.total,
+    paymentStatus: row.payment_status,
     items: (row.order_items ?? []).map((item) => ({
       name: item.item_name_snapshot,
       quantity: item.quantity,

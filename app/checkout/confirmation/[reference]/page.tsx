@@ -89,8 +89,11 @@ export default async function OrderConfirmationPage({
               </p>
             ) : null}
             <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
-              Your order has been created with payment status pending. Please
-              keep this reference for follow-up.
+              Your order has been created
+              {order?.paymentStatus === "paid"
+                ? " and PayPal payment is confirmed."
+                : " with payment status pending."}{" "}
+              Please keep this reference for follow-up.
               {settings.deliveryNote ? ` ${settings.deliveryNote}` : ""}
             </p>
             <p className="mt-6 rounded-[var(--radius-lg)] bg-[var(--color-shop-50)] px-4 py-3 text-lg font-extrabold text-[var(--color-shop-900)]">

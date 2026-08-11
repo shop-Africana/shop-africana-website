@@ -165,6 +165,7 @@ Optional launch variables, blank until configured:
 NEXT_PUBLIC_SITE_URL=
 PAYPAL_CLIENT_ID=
 PAYPAL_CLIENT_SECRET=
+PAYPAL_WEBHOOK_ID=
 PAYPAL_ENVIRONMENT=sandbox
 RESEND_API_KEY=
 OWNER_NOTIFICATION_EMAIL=
@@ -179,6 +180,8 @@ Apply manually in order:
 3. `supabase/migrations/0002_batch8_owner_menu_management.sql`
 4. `supabase/migrations/0003_batch8_shop_product_management.sql`
 5. `supabase/migrations/0004_final_launch_operations.sql`
+6. Continue applying later numbered migrations in order, including PayPal
+   reference fields before enabling PayPal payments.
 
 ## Owner Operations
 
