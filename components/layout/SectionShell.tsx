@@ -14,6 +14,7 @@ import {
   getBusinessSettingsFor,
 } from "@/lib/business-settings";
 import { RestaurantMobileBottomNavigation } from "@/components/layout/RestaurantMobileBottomNavigation";
+import { ShopMobileBottomNavigation } from "@/components/layout/ShopMobileBottomNavigation";
 
 type SectionShellProps = {
   children: ReactNode;
@@ -38,7 +39,7 @@ export async function SectionShell({
 
   return (
     <>
-      <TopBar settings={settings} />
+      {tone === "restaurant" ? <TopBar settings={settings} /> : null}
       <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-white/95 backdrop-blur">
         <Container className="max-w-[90rem]">
           {tone === "shop" ? (
@@ -49,7 +50,7 @@ export async function SectionShell({
                   {brand} {descriptor}
                 </p>
               </div>
-              <div className="order-3 w-full min-w-0 md:block lg:order-none lg:flex-1">
+              <div className="order-3 hidden w-full min-w-0 md:block lg:order-none lg:flex-1">
                 <SectionNavigation items={navItems} tone={tone} />
               </div>
               <HeaderActions />
@@ -74,7 +75,7 @@ export async function SectionShell({
         className={
           tone === "restaurant"
             ? "flex-1 bg-[var(--color-background)] pb-24 md:pb-0"
-            : "flex-1 bg-[var(--color-background)]"
+            : "flex-1 bg-[var(--color-background)] pb-24 md:pb-0"
         }
       >
         {children}
@@ -84,6 +85,7 @@ export async function SectionShell({
         shopSettings={allSettings.shop}
         restaurantSettings={allSettings.restaurant}
       />
+      {tone === "shop" ? <ShopMobileBottomNavigation /> : null}
       {tone === "restaurant" ? <RestaurantMobileBottomNavigation /> : null}
     </>
   );

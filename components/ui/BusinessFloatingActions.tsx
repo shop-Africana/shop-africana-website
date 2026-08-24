@@ -102,7 +102,7 @@ export function BusinessFloatingActions({
         className={cn(
           "fixed left-4 z-40 flex flex-col gap-3 sm:left-6 lg:left-8",
           isShop
-            ? "bottom-[calc(16px+env(safe-area-inset-bottom))] sm:bottom-[calc(24px+env(safe-area-inset-bottom))]"
+            ? "bottom-[calc(92px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))]"
             : "bottom-[calc(92px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))]",
         )}
       >
@@ -152,7 +152,7 @@ export function BusinessFloatingActions({
           className={cn(
             "fixed right-4 z-40 flex flex-col items-end gap-3 sm:right-6 lg:right-8",
             isShop
-              ? "bottom-[calc(16px+env(safe-area-inset-bottom))] sm:bottom-[calc(24px+env(safe-area-inset-bottom))]"
+              ? "bottom-[calc(92px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))]"
               : "bottom-[calc(92px+env(safe-area-inset-bottom))] md:bottom-[calc(24px+env(safe-area-inset-bottom))]",
           )}
         >
