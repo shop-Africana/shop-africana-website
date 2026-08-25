@@ -29,7 +29,6 @@ import {
   Wheat,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { ProductCardShell } from "@/components/commerce/ProductCardShell";
 import { ShopBasketSummary } from "@/components/commerce/ShopBasketSummary";
 import { Badge } from "@/components/ui/Badge";
 import { BusinessFloatingActions } from "@/components/ui/BusinessFloatingActions";
@@ -40,6 +39,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getGroceryCategoryArtwork, shopHeroArtwork } from "@/lib/artwork";
 import { getBusinessSettingsFor } from "@/lib/business-settings";
 import { getCatalogItems, getCategories } from "@/lib/catalog";
+import { formatMoney } from "@/lib/money";
 import type { CatalogCategory, CatalogItem } from "@/types";
 
 type ShopSearchParams = {
@@ -148,14 +148,49 @@ function getFeaturedCategories(
     .slice(0, 8);
 }
 
-function getHomepageProducts(products: CatalogItem[]) {
-  return [...products]
+function getHomepageProducts(products: CatalogItem[], limit = 9) {
+  const sortedProducts = products
+    .filter((product) => product.isAvailable)
     .sort((a, b) => {
       if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
-      if (a.isAvailable !== b.isAvailable) return a.isAvailable ? -1 : 1;
       return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
-    })
-    .slice(0, 6);
+    });
+
+  if (sortedProducts.length <= limit) return sortedProducts;
+
+  const imageBackedProducts = sortedProducts.filter((product) => product.imageUrl);
+  const fallbackProducts = sortedProducts.filter((product) => !product.imageUrl);
+  const dayOffset =
+    imageBackedProducts.length > 0
+      ? Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % imageBackedProducts.length
+      : 0;
+  const rotatedProducts = imageBackedProducts.length
+    ? [
+        ...imageBackedProducts.slice(dayOffset),
+        ...imageBackedProducts.slice(0, dayOffset),
+        ...fallbackProducts,
+      ]
+    : sortedProducts;
+  const selected: CatalogItem[] = [];
+  const selectedIds = new Set<string>();
+  const selectedCategories = new Set<string>();
+
+  rotatedProducts.forEach((product) => {
+    if (selected.length >= limit) return;
+    const categoryKey = product.categoryId ?? `uncategorised-${product.id}`;
+    if (selectedCategories.has(categoryKey)) return;
+
+    selected.push(product);
+    selectedIds.add(product.id);
+    selectedCategories.add(categoryKey);
+  });
+
+  rotatedProducts.forEach((product) => {
+    if (selected.length >= limit || selectedIds.has(product.id)) return;
+    selected.push(product);
+  });
+
+  return selected;
 }
 
 function activeFilterCount(filters: FilterState) {
@@ -288,6 +323,61 @@ function FeaturedCategoryTile({ category }: { category: CatalogCategory }) {
         />
       </div>
     </Link>
+  );
+}
+
+function HomepageProductDiscoveryCard({
+  product,
+  categoryName,
+}: {
+  product: CatalogItem;
+  categoryName: string;
+}) {
+  return (
+    <article className="group flex h-[14rem] min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[rgba(21,128,61,0.18)] bg-white shadow-[0_12px_28px_rgba(5,94,45,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-[var(--color-shop-300)] hover:shadow-[var(--shadow-card)] sm:h-[14.25rem] lg:h-[15.5rem] 2xl:h-[15.75rem]">
+      <Link
+        href="/shop/products"
+        className="relative h-[58%] overflow-hidden border-b border-[rgba(21,128,61,0.1)] bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--color-focus)] lg:h-[50%]"
+        aria-label={`Browse ${product.name}`}
+      >
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={`${product.name} product image`}
+            fill
+            sizes="(min-width: 1536px) 12vw, (min-width: 1024px) 18vw, (min-width: 640px) 30vw, 50vw"
+            className="object-contain p-1 transition duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-[var(--color-shop-700)]">
+            <Package aria-hidden="true" size={32} />
+          </div>
+        )}
+      </Link>
+      <div className="flex min-h-0 flex-1 flex-col px-2.5 py-2 lg:py-2.5">
+        <p className="truncate text-[9px] font-extrabold uppercase tracking-[0.08em] text-[var(--color-shop-700)]">
+          {categoryName}
+        </p>
+        <h3 className="mt-0.5 line-clamp-2 text-[12px] font-extrabold leading-[1.05rem] text-[var(--color-shop-900)] sm:text-[13px]">
+          {product.name}
+        </h3>
+        <div className="mt-auto flex items-end justify-between gap-2 pt-1">
+          <p className="min-w-0 truncate text-[10px] font-semibold text-[var(--color-muted)]">
+            {product.unitLabel ?? "Grocery item"}
+          </p>
+          <p className="shrink-0 text-xs font-extrabold text-[var(--color-shop-900)] sm:text-[13px]">
+            {formatMoney(product.price)}
+          </p>
+        </div>
+        <Link
+          href="/shop/products"
+          className="mt-1 inline-flex w-fit items-center gap-1 text-[10px] font-extrabold text-[var(--color-shop-700)] transition hover:text-[var(--color-orange-600)] focus-visible:rounded-[var(--radius-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)] sm:text-[11px]"
+        >
+          Browse Product
+          <ArrowRight aria-hidden="true" size={13} />
+        </Link>
+      </div>
+    </article>
   );
 }
 
@@ -528,8 +618,9 @@ export default async function ShopPage({
 
   const filteredProducts = filterProducts(groceryProducts, categories, filters);
   const discoveryProducts = getHomepageProducts(filteredProducts);
-  const mobileDiscoveryProducts = discoveryProducts.slice(0, 4);
+  const mobileDiscoveryProducts = discoveryProducts.slice(0, 8);
   const featuredCategories = getFeaturedCategories(categories, groceryProducts);
+  const categoryById = new Map(categories.map((category) => [category.id, category]));
   const origins = Array.from(
     new Set(groceryProducts.map((product) => product.originRegion).filter(Boolean)),
   ).sort() as string[];
@@ -566,10 +657,10 @@ export default async function ShopPage({
         >
           <Container className="relative z-10 flex min-h-[32.5rem] items-center py-6 sm:min-h-[34rem] lg:min-h-[35rem]">
             <div className="max-w-2xl p-5 sm:p-7 lg:p-0">
-              <h1 className="text-4xl font-extrabold text-[var(--color-shop-900)] [text-shadow:0_2px_10px_rgba(255,255,255,0.88)] sm:text-5xl">
+              <h1 className="text-4xl font-extrabold text-white [text-shadow:0_3px_16px_rgba(4,54,26,0.78)] sm:text-5xl">
                 Shop Africana
               </h1>
-              <p className="mt-3 max-w-xl text-base leading-8 text-[var(--color-muted)] [text-shadow:0_1px_8px_rgba(255,255,255,0.92)]">
+              <p className="mt-3 max-w-xl text-base font-semibold leading-8 text-white [text-shadow:0_2px_12px_rgba(4,54,26,0.72)]">
                 Afro-Caribbean grocery browsing for Dundee.
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -619,10 +710,20 @@ export default async function ShopPage({
               </Badge>
             </div>
             {mobileDiscoveryProducts.length > 0 ? (
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                {mobileDiscoveryProducts.map((product) => (
-                  <ProductCardShell key={product.id} product={product} compact />
-                ))}
+              <div className="mt-5 max-h-[700px] overflow-y-auto pr-1 [scrollbar-color:var(--color-shop-700)_var(--color-shop-50)] [scrollbar-width:thin] sm:max-h-[720px]">
+                <div className="grid grid-cols-2 gap-3">
+                  {mobileDiscoveryProducts.map((product) => (
+                    <HomepageProductDiscoveryCard
+                      key={product.id}
+                      product={product}
+                      categoryName={
+                        product.categoryId
+                          ? categoryById.get(product.categoryId)?.name ?? "Grocery"
+                          : "Grocery"
+                      }
+                    />
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="mt-5 rounded-[var(--radius-xl)] border border-dashed border-[var(--color-shop-200)] bg-white p-5 shadow-[var(--shadow-input)]">
@@ -682,14 +783,18 @@ export default async function ShopPage({
                 </div>
                 {discoveryProducts.length > 0 ? (
                   <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1 [scrollbar-color:var(--color-shop-700)_var(--color-shop-50)] [scrollbar-width:thin]">
-                    <div className="grid grid-cols-2 gap-4">
-                    {discoveryProducts.map((product) => (
-                      <ProductCardShell
-                        key={product.id}
-                        product={product}
-                        compact
-                      />
-                    ))}
+                    <div className="grid grid-cols-3 gap-3 xl:grid-cols-3 2xl:grid-cols-3">
+                      {discoveryProducts.map((product) => (
+                        <HomepageProductDiscoveryCard
+                          key={product.id}
+                          product={product}
+                          categoryName={
+                            product.categoryId
+                              ? categoryById.get(product.categoryId)?.name ?? "Grocery"
+                              : "Grocery"
+                          }
+                        />
+                      ))}
                     </div>
                   </div>
                 ) : (

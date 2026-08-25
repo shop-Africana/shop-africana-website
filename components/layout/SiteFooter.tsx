@@ -9,7 +9,7 @@ import {
 } from "@/components/icons/SocialIcons";
 import { Container } from "@/components/ui/Container";
 import { getBusinessContact } from "@/lib/business-contacts";
-import type { BusinessSettings } from "@/lib/business-settings";
+import { formatAddress, type BusinessSettings } from "@/lib/business-settings";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const quickLinks = [
@@ -68,6 +68,8 @@ export function SiteFooter({
     restaurantContact.whatsappNumber,
     "Hello, I would like help with Pride of Scotland.",
   );
+  const shopAddress = formatAddress(shopSettings);
+  const restaurantAddress = formatAddress(restaurantSettings);
 
   return (
     <footer className="border-t border-[var(--color-border)] bg-[linear-gradient(135deg,var(--color-shop-900),#06381b)] pb-24 pt-10 text-white md:pb-12">
@@ -89,8 +91,12 @@ export function SiteFooter({
 
         <div>
           <FooterNav title="Shop Africana" links={shopLinks} />
-          <ContactLines
+          <AddressBlock
             className="mt-5"
+            label={shopAddress || "Shop Africana, Dundee"}
+          />
+          <ContactLines
+            className="mt-3"
             phoneLabel={shopContact.displayPhone}
             telHref={shopContact.telHref}
             whatsappHref={shopWhatsappHref}
@@ -100,32 +106,10 @@ export function SiteFooter({
 
         <div>
           <FooterNav title="Pride of Scotland" links={restaurantLinks} />
-          <div className="mt-5 space-y-3 text-sm text-white/75">
-            <p className="flex items-start gap-2">
-              <MapPin aria-hidden="true" size={16} className="mt-0.5 shrink-0" />
-              <span>
-                {restaurantSettings.addressLine1 ?? "Pride of Scotland, Dundee"}
-                {restaurantSettings.addressLine2 ? (
-                  <>
-                    <br />
-                    {restaurantSettings.addressLine2}
-                  </>
-                ) : null}
-                {restaurantSettings.city ? (
-                  <>
-                    <br />
-                    {restaurantSettings.city}
-                  </>
-                ) : null}
-                {restaurantSettings.postcode ? (
-                  <>
-                    <br />
-                    {restaurantSettings.postcode}
-                  </>
-                ) : null}
-              </span>
-            </p>
-          </div>
+          <AddressBlock
+            className="mt-5"
+            label={restaurantAddress || "Pride of Scotland, Dundee"}
+          />
           <ContactLines
             className="mt-3"
             phoneLabel={restaurantContact.displayPhone}
@@ -178,6 +162,23 @@ export function SiteFooter({
         </div>
       </Container>
     </footer>
+  );
+}
+
+function AddressBlock({
+  className,
+  label,
+}: {
+  className?: string;
+  label: string;
+}) {
+  return (
+    <div className={`space-y-3 text-sm text-white/75 ${className ?? ""}`}>
+      <p className="flex items-start gap-2">
+        <MapPin aria-hidden="true" size={16} className="mt-0.5 shrink-0" />
+        <span>{label}</span>
+      </p>
+    </div>
   );
 }
 
